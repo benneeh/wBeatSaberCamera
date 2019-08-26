@@ -1,0 +1,185 @@
+﻿<UserControl x:Class="wBeatSaberCamera.Views.TwitchBotConfigView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:wBeatSaberCamera.Views"
+             xmlns:models="clr-namespace:wBeatSaberCamera.Models"
+             xmlns:utils="clr-namespace:wBeatSaberCamera.Utils"
+             mc:Ignorable="d" 
+             d:DesignHeight="250" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Ressource/Style.xaml" />
+                <ResourceDictionary Source="../Ressource/Brush.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Border Background="DarkOrange" Visibility="{Binding IsRaidNotificationSuddenlyWorking, Converter={StaticResource BoolTrueIsVisibleConverter}}">
+            <TextBlock Text="WTF!?!?!" FontSize="90" />
+        </Border>
+        <utils:DirtyBackground />
+        <StackPanel Grid.IsSharedSizeScope="True">
+            <Button Content="Login with twitch!" Grid.Column="3" Margin="2" Padding="0" Click="Button_Click_1" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" Text="Username" />
+                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" Text="OAuth token" />
+                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding AccessToken, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Effect>
+                        <BlurEffect Radius="10" />
+                    </TextBox.Effect>
+                </TextBox>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" Text="Join channel" />
+                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding Channel, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Announce new follows" IsChecked="{Binding IsFollowerAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" AcceptsReturn="True" Padding="0" Text="{Binding FollowerAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.FollowKeys, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Announce new Subscribers" IsChecked="{Binding IsSubscriberAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding SubscriberAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.SubscribeKeys, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Announce hosts" IsChecked="{Binding IsHostAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding HostAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.HostKeys, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Announce raids" IsChecked="{Binding IsRaidAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding RaidAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.RaidKeys, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Enable TTS" IsChecked="{Binding ChatConfigModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" Margin="1,2,3,2" />
+            </Grid>
+        </StackPanel>
+        <StackPanel Grid.Row="1">
+            <Button Content="Connect!" IsEnabled="{Binding Path=TwitchBot.IsConnected, Source={StaticResource MainViewModel}, Converter={StaticResource BooleanToInvertedBooleanConverter}}" Click="Button_Click"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

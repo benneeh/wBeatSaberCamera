@@ -1,0 +1,256 @@
+﻿<Window x:Class="wBeatSaberCamera.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:wBeatSaberCamera.Views"
+        xmlns:utils="clr-namespace:wBeatSaberCamera.Utils"
+        xmlns:converter="clr-namespace:wBeatSaberCamera.Converter"
+        mc:Ignorable="d"
+        Title="Beat Saber Camera" Height="450" MinHeight="150" Width="800" MinWidth="200" Loaded="Window_Loaded" Closing="Window_Closing">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Ressource/Style.xaml" />
+                <ResourceDictionary Source="/Ressource/Brush.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converter:BooleanOrConverter x:Key="BooleanOrConverter" />
+
+            <ControlTemplate x:Key="TabsLeftTabControlTemplate" TargetType="{x:Type TabControl}">
+                <Grid ClipToBounds="True" SnapsToDevicePixels="True" KeyboardNavigation.TabNavigation="Local">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="ColumnDefinition0"/>
+                        <ColumnDefinition x:Name="ColumnDefinition1" Width="0"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition x:Name="RowDefinition0" Height="Auto"/>
+                        <RowDefinition x:Name="RowDefinition1" Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border x:Name="HeaderBorder" Grid.Column="0" Grid.Row="0" Background="White" BorderBrush="#44000000" BorderThickness="1">
+                        <TabPanel x:Name="HeaderPanel" IsItemsHost="True" Margin="2,2,2,0" KeyboardNavigation.TabIndex="1" Panel.ZIndex="1" />
+                    </Border>
+                    <Border x:Name="ContentPanel" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Grid.Column="0" KeyboardNavigation.DirectionalNavigation="Contained" Grid.Row="1" KeyboardNavigation.TabIndex="2" KeyboardNavigation.TabNavigation="Local">
+                        <ContentPresenter Grid.Row="1" x:Name="PART_SelectedContentHost" ContentTemplate="{TemplateBinding SelectedContentTemplate}" Content="{TemplateBinding SelectedContent}" ContentStringFormat="{TemplateBinding SelectedContentStringFormat}" ContentSource="SelectedContent" Margin="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                    </Border>
+                </Grid>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="TabStripPlacement" Value="Bottom">
+                        <Setter Property="Grid.Row" TargetName="HeaderBorder" Value="1"/>
+                        <Setter Property="Grid.Row" TargetName="ContentPanel" Value="0"/>
+                        <Setter Property="Height" TargetName="RowDefinition0" Value="*"/>
+                        <Setter Property="Height" TargetName="RowDefinition1" Value="Auto"/>
+                        <Setter Property="Margin" TargetName="HeaderPanel" Value="2,0,2,2"/>
+                    </Trigger>
+                    <Trigger Property="TabStripPlacement" Value="Left">
+                        <Setter Property="Grid.Row" TargetName="HeaderBorder" Value="0"/>
+                        <Setter Property="Grid.Row" TargetName="ContentPanel" Value="0"/>
+                        <Setter Property="Grid.Column" TargetName="HeaderPanel" Value="0"/>
+                        <Setter Property="Grid.Column" TargetName="ContentPanel" Value="1"/>
+                        <Setter Property="Width" TargetName="ColumnDefinition0" Value="Auto"/>
+                        <Setter Property="MinWidth" TargetName="ColumnDefinition0" Value="100"/>
+                        <Setter Property="Width" TargetName="ColumnDefinition1" Value="*"/>
+                        <Setter Property="Height" TargetName="RowDefinition0" Value="*"/>
+                        <Setter Property="Height" TargetName="RowDefinition1" Value="0"/>
+                        <Setter Property="Margin" TargetName="HeaderPanel" Value="2"/>
+                    </Trigger>
+                    <Trigger Property="TabStripPlacement" Value="Right">
+                        <Setter Property="Grid.Row" TargetName="HeaderBorder" Value="0"/>
+                        <Setter Property="Grid.Row" TargetName="ContentPanel" Value="0"/>
+                        <Setter Property="Grid.Column" TargetName="HeaderPanel" Value="1"/>
+                        <Setter Property="Grid.Column" TargetName="ContentPanel" Value="0"/>
+                        <Setter Property="Width" TargetName="ColumnDefinition0" Value="*"/>
+                        <Setter Property="Width" TargetName="ColumnDefinition1" Value="Auto"/>
+                        <Setter Property="Height" TargetName="RowDefinition0" Value="*"/>
+                        <Setter Property="Height" TargetName="RowDefinition1" Value="0"/>
+                        <Setter Property="Margin" TargetName="HeaderPanel" Value="0,2,2,2"/>
+                    </Trigger>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+            <Style x:Key="ConfigurationTabItemStyle" TargetType="{x:Type TabItem}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TabItem}">
+                            <Grid Margin="0">
+                                <utils:DirtyBackground />
+
+                                <Border x:Name="hoverborder" BorderThickness="1" CornerRadius="3" Margin="2">
+                                    <Border x:Name="bordoor" Padding="2" BorderThickness="1" CornerRadius="3">
+                                        <Grid Margin="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="2" />
+                                                <ColumnDefinition />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Visibility="{Binding IsDirty, Converter={StaticResource BoolTrueIsVisibleConverter}}" Margin="0">
+                                                <Ellipse Fill="#ff0000" Stroke="#880000" Width="11" Height="11" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="Red when config changes were noticed"/>
+                                            </Grid>
+                                            <ContentPresenter Grid.Column="2" Margin="0 0 0 1" x:Name="Header" ContentSource="Header" VerticalAlignment="Center" />
+                                        </Grid>
+                                        <!--<TextBlock x:Name="Header" Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}}" FontFamily="{TemplateBinding FontFamily}"
+        								    Foreground="{TemplateBinding Foreground}" >
+                                            <TextBlock.Effect>
+                                                <DropShadowEffect ShadowDepth="2" Opacity=".2" BlurRadius="10" Direction="-90" />
+                                            </TextBlock.Effect>
+                                        </TextBlock>-->
+                                    </Border>
+                                </Border>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" TargetName="bordoor" >
+                                        <Setter.Value>
+                                            <RadialGradientBrush Center="0 0" RadiusX="20" RadiusY="1">
+                                                <GradientStop Color="#ffffff" Offset="0"/>
+                                                <GradientStop Color="#ffffff" Offset="1"/>
+                                            </RadialGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="BorderBrush" Value="#888" TargetName="hoverborder" />
+                                    <!--<Setter Property="Opacity" Value="0.1" TargetName="shaydoo" />-->
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" TargetName="hoverborder" >
+                                        <Setter.Value>
+                                            <RadialGradientBrush Center="0 0" RadiusX="20" RadiusY="1">
+                                                <GradientStop Color="#e4e4e4" Offset="0"/>
+                                                <GradientStop Color="#ffffff" Offset="1"/>
+                                            </RadialGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="BorderBrush" Value="#bbb" TargetName="hoverborder" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="{x:Static SystemColors.GrayTextBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <ControlTemplate x:Key="HeaderTextBlockTemplate" TargetType="{x:Type HeaderedContentControl}">
+                <Border Background="{x:Static SystemColors.HighlightBrush}" BorderThickness="1" CornerRadius="2"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0" BorderBrush="{x:Static SystemColors.HighlightTextBrush}">
+                    <Grid VerticalAlignment="Top">
+                        <ContentPresenter ContentSource="Header" Margin="5"
+                                       TextBlock.FontSize="16" TextBlock.Foreground="{x:Static SystemColors.HighlightTextBrush}">
+                        </ContentPresenter>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+            <RoutedUICommand x:Key="CancelCommand" Text="Cancel" />
+            <RoutedUICommand x:Key="ApplyCommand" Text="Apply" />
+            <RoutedUICommand x:Key="ResetCommand" Text="Reset" />
+            <RoutedUICommand x:Key="LoadConfigurationCommand" Text="" />
+            <DataTemplate x:Key="TabItemContentTemplate">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <ContentPresenter Grid.Row="1" Content="{Binding}"/>
+                </Grid>
+            </DataTemplate>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Window.CommandBindings>
+        <CommandBinding Command="Save" Executed="SaveCommand_OnExecuted" />
+        <CommandBinding Command="{StaticResource LoadConfigurationCommand}" Executed="LoadConfigurationCommand_OnExecuted" />
+    </Window.CommandBindings>
+    <Grid DataContext="{StaticResource MainViewModel}">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TabControl TabStripPlacement="Left" Template="{DynamicResource TabsLeftTabControlTemplate}" >
+            <TabControl.Resources>
+                <Style TargetType="TabItem" BasedOn="{StaticResource ConfigurationTabItemStyle}"/>
+            </TabControl.Resources>
+            <TabItem Header="App config" DataContext="{Binding AppConfigModel}" ContentTemplate="{DynamicResource TabItemContentTemplate}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <HeaderedContentControl Header="App config" Template="{StaticResource HeaderTextBlockTemplate}" />
+                    <utils:DirtyBackground Grid.Row="1" />
+                    <Grid Grid.Row="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Button HorizontalContentAlignment="Stretch" Grid.Column="1" Style="{StaticResource CoolOpenFolderTemplate}" Padding="10 2 2 2" Click="Button_Click" >
+                                <Button.Content>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock VerticalAlignment="Center" Text="CameraPlus.cfg location: " />
+                                        <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding CameraPlusConfig, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </Grid>
+                                </Button.Content>
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Twitch bot config" DataContext="{Binding TwitchBotConfigModel}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <HeaderedContentControl Header="Twitch bot config" Template="{StaticResource HeaderTextBlockTemplate}" />
+                    <views:TwitchBotConfigView Grid.Row="1"/>
+                </Grid>
+            </TabItem>
+            <TabItem DataContext="{Binding ChatConfigModel}" Header="Chat config">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <HeaderedContentControl Header="{Binding Header, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TabItem}}}" Template="{StaticResource HeaderTextBlockTemplate}" />
+                    <views:ChatConfig Grid.Row="1" />
+                </Grid>
+            </TabItem>
+            <TabItem DataContext="{Binding CameraConfigModel}" Header="Camera config">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <HeaderedContentControl Header="{Binding Header, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TabItem}}}" Template="{StaticResource HeaderTextBlockTemplate}" />
+                    <views:CameraSettings Grid.Row="1" />
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <Border HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <Border.IsEnabled>
+                <MultiBinding>
+                    <MultiBinding.Converter>
+                        <converter:ChainedMultiConverter Converter="{StaticResource BooleanOrConverter}" />
+                    </MultiBinding.Converter>
+                    <Binding Path="AppConfigModel.IsDirty" />
+                    <Binding Path="CameraConfigModel.IsDirty" />
+                    <Binding Path="TwitchBotConfigModel.IsDirty" />
+                    <Binding Path="ChatConfigModel.IsDirty" />
+                </MultiBinding>
+            </Border.IsEnabled>
+            <StackPanel>
+                <Button Content="Save configuration" Command="Save" />
+                <Button Content="Load configuration" Command="{StaticResource LoadConfigurationCommand}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
