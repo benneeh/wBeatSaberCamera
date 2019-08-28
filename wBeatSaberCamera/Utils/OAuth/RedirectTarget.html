@@ -1,13 +1,15 @@
 ﻿<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+</head>
 <body>
-    <script>
-        if (document.location.hash && document.location.hash !== "") {
-            document.write("Redirecting...");
-            document.location = "?" + document.location.hash.substring(1);
-        }
-        else {
-            document.write("You can now close this page");
-        }
-    </script>
+<script>
+    if (document.location.hash && document.location.hash !== "") {
+        document.write("Redirecting...");
+        document.location = "?" + document.location.hash.substring(1);
+    } else {
+        document.write("You can now close this page");
+    }
+</script>
 </body>
 </html>

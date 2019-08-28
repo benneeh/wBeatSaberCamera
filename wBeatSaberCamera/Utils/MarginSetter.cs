@@ -32,7 +32,7 @@ namespace wBeatSaberCamera.Utils
                 return;
             }
 
-            panel.Loaded += new RoutedEventHandler(panel_Loaded);
+            panel.Loaded += panel_Loaded;
         }
 
         private static void panel_Loaded(object sender, RoutedEventArgs e)
@@ -52,7 +52,7 @@ namespace wBeatSaberCamera.Utils
                     continue;
                 }
 
-                fe.Margin = MarginSetter.GetMargin(panel);
+                fe.Margin = GetMargin(panel);
             }
         }
     }

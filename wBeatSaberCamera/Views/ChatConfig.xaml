@@ -24,7 +24,7 @@
             <ColumnDefinition Width="Auto" MinWidth="200" />
         </Grid.ColumnDefinitions>
         <CheckBox Content="Enable TTS for chatters" IsChecked="{Binding ChatConfigModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBox Name="tbText" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" VerticalAlignment="Stretch" />
+        <TextBox Name="TbText" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" VerticalAlignment="Stretch" />
         <Button Content="Read" Grid.Row="2" Click="Button_Click" />
         <GroupBox Header="Chatters" Grid.Column="1" Grid.RowSpan="3">
             <ItemsControl ItemsSource="{Binding ChatConfigModel.Chatters}">

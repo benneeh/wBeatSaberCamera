@@ -168,7 +168,7 @@ namespace wBeatSaberCamera.Twitch
             _configModel.PropertyChanged += ConfigModelPropertyChanged;
             _twitchClient = new TwitchClient(logger: new TwitchBotLogger<TwitchClient>());
             _twitchClient.Initialize(new ConnectionCredentials(_configModel.UserName, $"oauth:{_configModel.AccessToken}"), _configModel.Channel);
-            _twitchClient.OnMessageReceived += async (s, e) =>
+            _twitchClient.OnMessageReceived += (s, e) =>
             {
                 if (_chatConfigModel.IsTextToSpeechEnabled && !_configModel.CommandIdentifiers.Contains(e.ChatMessage.Message.FirstOrDefault()))
                 {
@@ -439,6 +439,7 @@ namespace wBeatSaberCamera.Twitch
                     systemMsg,
                     systemMsgParsed,
                     tmiSentTs,
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     turbo,
                     userType)
             };
@@ -573,7 +574,6 @@ namespace wBeatSaberCamera.Twitch
 
         public async Task SendMessage(string channel, string message)
         {
-            return;
             var rs = new RetryPolicy();
             await rs.ExecuteAsync(() =>
             {

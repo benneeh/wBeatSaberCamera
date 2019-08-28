@@ -161,7 +161,7 @@
                             </Grid.ColumnDefinitions>
 
                             <Border Padding="{TemplateBinding Padding}">
-                                <ContentPresenter Grid.Column="0" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                             </Border>
                             <Grid Grid.Column="1" Margin="2 1 5 0" Width="15" Height="15">
                                 <Grid.RowDefinitions>

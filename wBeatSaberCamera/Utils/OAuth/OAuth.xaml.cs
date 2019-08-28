@@ -234,7 +234,7 @@ namespace wBeatSaberCamera.Utils.OAuth
         /// <param name="output">string to be appended</param>
         private void Output(string output)
         {
-            Dispatcher.Invoke(() => textBoxOutput.AppendText(output + Environment.NewLine));
+            Dispatcher?.Invoke(() => TextBoxOutput.AppendText(output + Environment.NewLine));
             Console.WriteLine(output);
         }
 

@@ -522,13 +522,14 @@ namespace wBeatSaberCamera.DataType
                         {
                             continue;
                         }
+
                         if (propertyInfo.PropertyType == typeof(string))
                         {
-                            sw.WriteLine($"{dma?.Name ?? propertyInfo.Name}=\"{propertyInfo.GetValue(this)}\"");
+                            sw.WriteLine($"{dma.Name ?? propertyInfo.Name}=\"{propertyInfo.GetValue(this)}\"");
                         }
                         else
                         {
-                            sw.WriteLine($"{dma?.Name ?? propertyInfo.Name}={propertyInfo.GetValue(this)}");
+                            sw.WriteLine($"{dma.Name ?? propertyInfo.Name}={propertyInfo.GetValue(this)}");
                         }
                     }
                 }

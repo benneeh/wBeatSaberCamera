@@ -150,8 +150,6 @@ namespace wBeatSaberCamera.Models
             _audioListener = new AudioListener();
         }
 
-        private Stopwatch sw = Stopwatch.StartNew();
-
         private (Vector3 Position, Quaternion Rotation, Vector3 Velocity, Vector3 Omega) GetHmdPositioning()
         {
             //return (
