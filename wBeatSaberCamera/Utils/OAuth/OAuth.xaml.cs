@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -8,7 +9,6 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows;
-using Newtonsoft.Json;
 using wBeatSaberCamera.Annotations;
 
 namespace wBeatSaberCamera.Utils.OAuth
@@ -20,6 +20,7 @@ namespace wBeatSaberCamera.Utils.OAuth
     {
         // client configuration
         private const string ClientId = "ijyc8kmvhaoa1wtfz9ys90a37u3wr2";
+
         private const string AuthorizationEndpoint = "https://id.twitch.tv/oauth2/authorize";
         private const string UserInfoEndpoint = "https://id.twitch.tv/oauth2/validate";
 

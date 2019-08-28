@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using System;
 
 namespace wBeatSaberCamera.Twitch
 {
@@ -12,24 +12,31 @@ namespace wBeatSaberCamera.Twitch
                 case LogLevel.Trace:
                     Utils.Log.Debug(formatter(state, exception));
                     break;
+
                 case LogLevel.Debug:
                     Utils.Log.Debug(formatter(state, exception));
                     break;
+
                 case LogLevel.Information:
                     Utils.Log.Debug(formatter(state, exception));
                     break;
+
                 case LogLevel.Warning:
                     Utils.Log.Warn(formatter(state, exception));
                     break;
+
                 case LogLevel.Error:
                     Utils.Log.Error(formatter(state, exception));
                     break;
+
                 case LogLevel.Critical:
                     Utils.Log.Error(formatter(state, exception));
                     break;
+
                 case LogLevel.None:
                     Utils.Log.Debug(formatter(state, exception));
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
             }

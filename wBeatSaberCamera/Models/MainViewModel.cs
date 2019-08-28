@@ -17,7 +17,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (Equals(value, _chatConfigModel))
+                {
                     return;
+                }
 
                 _chatConfigModel = value;
                 OnPropertyChanged();
@@ -75,7 +77,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (Equals(value, _twitchBot))
+                {
                     return;
+                }
 
                 _twitchBot = value;
                 OnPropertyChanged();

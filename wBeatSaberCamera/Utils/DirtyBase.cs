@@ -25,7 +25,6 @@ namespace wBeatSaberCamera.Utils
 
         protected virtual bool ShouldBeDirty(string propertyName) => true;
 
-
         private bool _isDirty;
 
         public bool IsDirty

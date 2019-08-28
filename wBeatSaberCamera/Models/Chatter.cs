@@ -21,7 +21,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value == _name)
+                {
                     return;
+                }
 
                 _name = value;
                 OnPropertyChanged();
@@ -35,7 +37,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value.Equals(_position))
+                {
                     return;
+                }
 
                 _position = value;
                 OnPropertyChanged();
@@ -49,7 +53,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value.Equals(_pitch))
+                {
                     return;
+                }
 
                 _pitch = value;
                 OnPropertyChanged();
@@ -63,7 +69,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value.Equals(_trembleBegin))
+                {
                     return;
+                }
 
                 _trembleBegin = value;
                 OnPropertyChanged();
@@ -77,7 +85,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value.Equals(_trembleSpeed))
+                {
                     return;
+                }
 
                 _trembleSpeed = value;
                 OnPropertyChanged();
@@ -91,7 +101,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value.Equals(_trembleFactor))
+                {
                     return;
+                }
 
                 _trembleFactor = value;
                 OnPropertyChanged();
@@ -105,7 +117,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value == _voiceName)
+                {
                     return;
+                }
 
                 UnsubscribeDirtyCollection(_voiceName);
                 _voiceName = value;

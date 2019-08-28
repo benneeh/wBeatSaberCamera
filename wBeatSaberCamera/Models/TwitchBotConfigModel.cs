@@ -119,7 +119,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value == _isSubscriberAnnouncementsEnabled)
+                {
                     return;
+                }
 
                 _isSubscriberAnnouncementsEnabled = value;
                 OnPropertyChanged();
@@ -213,7 +215,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value == _subscriberAnnouncementTemplate)
+                {
                     return;
+                }
 
                 _subscriberAnnouncementTemplate = value;
                 OnPropertyChanged();
@@ -242,7 +246,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value == _isRaidNotificationSuddenlyWorking)
+                {
                     return;
+                }
 
                 _isRaidNotificationSuddenlyWorking = value;
                 OnPropertyChanged();

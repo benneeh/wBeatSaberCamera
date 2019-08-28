@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Speech.Synthesis;
 using System.Windows;
 using System.Windows.Controls;
 using wBeatSaberCamera.Models;
@@ -156,7 +155,7 @@ namespace wBeatSaberCamera.Views
                     MainViewModel.TwitchBotConfigModel.Channel = oauth.UserName;
                 }
             }
-            (this.Parent as Window)?.Activate();
+            (Parent as Window)?.Activate();
         }
     }
 }

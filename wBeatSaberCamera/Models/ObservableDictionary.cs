@@ -35,7 +35,9 @@ namespace wBeatSaberCamera.Models
             KeyedEntryCollection = new KeyedDictionaryEntryCollection<TKey>();
 
             foreach (KeyValuePair<TKey, TValue> entry in dictionary)
+            {
                 DoAddEntry(entry.Key, entry.Value);
+            }
         }
 
         [PublicAPI]
@@ -50,7 +52,9 @@ namespace wBeatSaberCamera.Models
             KeyedEntryCollection = new KeyedDictionaryEntryCollection<TKey>(comparer);
 
             foreach (KeyValuePair<TKey, TValue> entry in dictionary)
+            {
                 DoAddEntry(entry.Key, entry.Value);
+            }
         }
 
         #endregion public
@@ -108,7 +112,10 @@ namespace wBeatSaberCamera.Models
                 {
                     _dictionaryCache.Clear();
                     foreach (DictionaryEntry entry in KeyedEntryCollection)
+                    {
                         _dictionaryCache.Add((TKey)entry.Key, (TValue)entry.Value);
+                    }
+
                     _dictionaryCacheVersion = _version;
                 }
                 return _dictionaryCache;
@@ -216,11 +223,15 @@ namespace wBeatSaberCamera.Models
 
             // if identical key/value pair already exists, nothing to do
             if (keyExists && value.Equals((TValue)KeyedEntryCollection[key].Value))
+            {
                 return false;
+            }
 
             // otherwise, remove the existing entry
             if (keyExists)
+            {
                 KeyedEntryCollection.Remove(key);
+            }
 
             // add the new entry
             KeyedEntryCollection.Add(new DictionaryEntry(key, value));
@@ -238,8 +249,7 @@ namespace wBeatSaberCamera.Models
             {
                 _version++;
 
-                DictionaryEntry entry;
-                int index = GetIndexAndEntryForKey(key, out entry);
+                int index = GetIndexAndEntryForKey(key, out DictionaryEntry entry);
                 FireEntryAddedNotifications(entry, index);
             }
         }
@@ -255,15 +265,16 @@ namespace wBeatSaberCamera.Models
 
         private bool DoRemoveEntry(TKey key)
         {
-            DictionaryEntry entry;
-            int index = GetIndexAndEntryForKey(key, out entry);
+            int index = GetIndexAndEntryForKey(key, out DictionaryEntry entry);
 
             bool result = RemoveEntry(key);
             if (result)
             {
                 _version++;
                 if (index > -1)
+                {
                     FireEntryRemovedNotifications(entry, index);
+                }
             }
 
             return result;
@@ -271,8 +282,7 @@ namespace wBeatSaberCamera.Models
 
         private void DoSetEntry(TKey key, TValue value)
         {
-            DictionaryEntry entry;
-            int index = GetIndexAndEntryForKey(key, out entry);
+            int index = GetIndexAndEntryForKey(key, out DictionaryEntry entry);
 
             if (SetEntry(key, value))
             {
@@ -300,9 +310,13 @@ namespace wBeatSaberCamera.Models
 
             // fire CollectionChanged notification
             if (index > -1)
+            {
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new KeyValuePair<TKey, TValue>((TKey)entry.Key, (TValue)entry.Value), index));
+            }
             else
+            {
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            }
         }
 
         private void FireEntryRemovedNotifications(DictionaryEntry entry, int index)
@@ -312,9 +326,13 @@ namespace wBeatSaberCamera.Models
 
             // fire CollectionChanged notification
             if (index > -1)
+            {
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new KeyValuePair<TKey, TValue>((TKey)entry.Key, (TValue)entry.Value), index));
+            }
             else
+            {
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            }
         }
 
         private void FirePropertyChangedNotifications()
@@ -474,7 +492,9 @@ namespace wBeatSaberCamera.Models
             }
 
             foreach (DictionaryEntry entry in KeyedEntryCollection)
+            {
                 array[index++] = new KeyValuePair<TKey, TValue>((TKey)entry.Key, (TValue)entry.Value);
+            }
         }
 
         int ICollection<KeyValuePair<TKey, TValue>>.Count
@@ -547,7 +567,10 @@ namespace wBeatSaberCamera.Models
 
             Collection<DictionaryEntry> entries = new Collection<DictionaryEntry>();
             foreach (DictionaryEntry entry in KeyedEntryCollection)
+            {
                 entries.Add(entry);
+            }
+
             info.AddValue("entries", entries);
         }
 
@@ -562,7 +585,9 @@ namespace wBeatSaberCamera.Models
                 Collection<DictionaryEntry> entries = (Collection<DictionaryEntry>)
                     _serializationInfo.GetValue("entries", typeof(Collection<DictionaryEntry>));
                 foreach (DictionaryEntry entry in entries)
+                {
                     AddEntry((TKey)entry.Key, (TValue)entry.Value);
+                }
             }
         }
 
@@ -599,6 +624,7 @@ namespace wBeatSaberCamera.Models
         #region KeyedDictionaryEntryCollection<TKey>
 
 #pragma warning disable 693
+
         protected class KeyedDictionaryEntryCollection<TKey> : KeyedCollection<TKey, DictionaryEntry>
 #pragma warning restore 693
         {
@@ -606,9 +632,13 @@ namespace wBeatSaberCamera.Models
 
             #region public
 
-            public KeyedDictionaryEntryCollection() { }
+            public KeyedDictionaryEntryCollection()
+            {
+            }
 
-            public KeyedDictionaryEntryCollection(IEqualityComparer<TKey> comparer) : base(comparer) { }
+            public KeyedDictionaryEntryCollection(IEqualityComparer<TKey> comparer) : base(comparer)
+            {
+            }
 
             #endregion public
 
@@ -743,7 +773,7 @@ namespace wBeatSaberCamera.Models
                 _current = new KeyValuePair<TKey, TValue>();
             }
 
-            #endregion IEnumerator implemenation
+            #endregion IEnumerator implementation
 
             #region IDictionaryEnumerator implemenation
 
@@ -755,6 +785,7 @@ namespace wBeatSaberCamera.Models
                     return new DictionaryEntry(_current.Key, _current.Value);
                 }
             }
+
             object IDictionaryEnumerator.Key
             {
                 get
@@ -763,6 +794,7 @@ namespace wBeatSaberCamera.Models
                     return _current.Key;
                 }
             }
+
             object IDictionaryEnumerator.Value
             {
                 get
@@ -772,7 +804,7 @@ namespace wBeatSaberCamera.Models
                 }
             }
 
-            #endregion
+            #endregion IDictionaryEnumerator implemenation
 
             #region fields
 

@@ -15,7 +15,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value == _cameraPlusConfig)
+                {
                     return;
+                }
 
                 _cameraPlusConfig = value;
                 OnPropertyChanged();

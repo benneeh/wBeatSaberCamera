@@ -27,7 +27,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value == _name)
+                {
                     return;
+                }
 
                 _name = value;
                 OnPropertyChanged();
@@ -41,7 +43,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value == _isReadOnly)
+                {
                     return;
+                }
 
                 _isReadOnly = value;
                 OnPropertyChanged();
@@ -55,7 +59,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value == _isChoosableByViewers)
+                {
                     return;
+                }
 
                 _isChoosableByViewers = value;
                 OnPropertyChanged();
@@ -69,7 +75,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (Equals(value, _cameraPlusConfig))
+                {
                     return;
+                }
 
                 UnsubscribeDirtyChild(_cameraPlusConfig);
                 _cameraPlusConfig = value;
@@ -85,7 +93,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (Equals(value, _aliases))
+                {
                     return;
+                }
 
                 UnsubscribeDirtyCollection(_aliases);
                 _aliases = value;
@@ -127,7 +137,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value == _alias)
+                {
                     return;
+                }
 
                 _alias = value;
                 OnPropertyChanged();

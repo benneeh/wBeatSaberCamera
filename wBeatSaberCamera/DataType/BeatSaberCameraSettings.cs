@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.IO;
 using System.Runtime.Serialization;
-using Newtonsoft.Json;
 using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Models;
 

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Audio;
+using NTextCat;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -10,13 +12,11 @@ using System.Runtime.Serialization;
 using System.Speech.Synthesis;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using Microsoft.Xna.Framework.Audio;
-using NTextCat;
 using TwitchLib.Client.Models;
 using Valve.VR;
 using wBeatSaberCamera.Utils;
-using Vector3 = Microsoft.Xna.Framework.Vector3;
 using Quaternion = Microsoft.Xna.Framework.Quaternion;
+using Vector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace wBeatSaberCamera.Models
 {
@@ -38,7 +38,6 @@ namespace wBeatSaberCamera.Models
                 _taskQueue.Add(key, newQueue);
                 RunQueueProcessors(key, newQueue);
             }
-
         }
 
         private void RunQueueProcessors(string key, Queue<Func<Task>> queue)
@@ -85,8 +84,10 @@ namespace wBeatSaberCamera.Models
 
         private readonly TaskSerializer _taskSerializer = new TaskSerializer();
 
-        #endregion
+        #endregion private fields
+
         #region properties
+
         [DataMember]
         public ObservableDictionary<string, Chatter> Chatters
         {
@@ -94,7 +95,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (Equals(value, _chatters))
+                {
                     return;
+                }
 
                 UnsubscribeDirtyCollection(_chatters);
                 _chatters = value;
@@ -111,7 +114,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value == _isTextToSpeechEnabled)
+                {
                     return;
+                }
 
                 _isTextToSpeechEnabled = value;
                 OnPropertyChanged();
@@ -125,13 +130,16 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (value.Equals(_maxPitchFactor))
+                {
                     return;
+                }
 
                 _maxPitchFactor = value;
                 OnPropertyChanged();
             }
         }
-        #endregion
+
+        #endregion properties
 
         public ChatConfigModel()
         {
@@ -233,7 +241,7 @@ namespace wBeatSaberCamera.Models
             return matrix;
         }
 
-        CultureInfo GetLanguageFromText(string text)
+        private CultureInfo GetLanguageFromText(string text)
         {
             if (_lazyLanguagesIdentifier == null)
             {
@@ -424,25 +432,18 @@ namespace wBeatSaberCamera.Models
     //        return ToQuaternion(v.Y, v.X, v.Z);
     //    }
 
-    //    public static Quaternion ToQuaternion(float yaw, float pitch, float roll)
-    //    {
-    //        yaw *= Mathf.Deg2Rad;
-    //        pitch *= Mathf.Deg2Rad;
-    //        roll *= Mathf.Deg2Rad;
-    //        float rollOver2 = roll * 0.5f;
-    //        float sinRollOver2 = (float)Math.Sin((double)rollOver2);
-    //        float cosRollOver2 = (float)Math.Cos((double)rollOver2);
-    //        float pitchOver2 = pitch * 0.5f;
-    //        float sinPitchOver2 = (float)Math.Sin((double)pitchOver2);
-    //        float cosPitchOver2 = (float)Math.Cos((double)pitchOver2);
-    //        float yawOver2 = yaw * 0.5f;
-    //        float sinYawOver2 = (float)Math.Sin((double)yawOver2);
-    //        float cosYawOver2 = (float)Math.Cos((double)yawOver2);
-    //        Quaternion result;
-    //        result.w = cosYawOver2 * cosPitchOver2 * cosRollOver2 + sinYawOver2 * sinPitchOver2 * sinRollOver2;
-    //        result.x = cosYawOver2 * sinPitchOver2 * cosRollOver2 + sinYawOver2 * cosPitchOver2 * sinRollOver2;
-    //        result.y = sinYawOver2 * cosPitchOver2 * cosRollOver2 - cosYawOver2 * sinPitchOver2 * sinRollOver2;
-    //        result.z = cosYawOver2 * cosPitchOver2 * sinRollOver2 - sinYawOver2 * sinPitchOver2 * cosRollOver2;
+    // public static Quaternion ToQuaternion(float yaw, float pitch, float roll) { yaw *=
+    // Mathf.Deg2Rad; pitch *= Mathf.Deg2Rad; roll *= Mathf.Deg2Rad; float rollOver2 = roll * 0.5f;
+    // float sinRollOver2 = (float)Math.Sin((double)rollOver2); float cosRollOver2 =
+    // (float)Math.Cos((double)rollOver2); float pitchOver2 = pitch * 0.5f; float sinPitchOver2 =
+    // (float)Math.Sin((double)pitchOver2); float cosPitchOver2 =
+    // (float)Math.Cos((double)pitchOver2); float yawOver2 = yaw * 0.5f; float sinYawOver2 =
+    // (float)Math.Sin((double)yawOver2); float cosYawOver2 = (float)Math.Cos((double)yawOver2);
+    // Quaternion result; result.w = cosYawOver2 * cosPitchOver2 * cosRollOver2 + sinYawOver2 *
+    // sinPitchOver2 * sinRollOver2; result.x = cosYawOver2 * sinPitchOver2 * cosRollOver2 +
+    // sinYawOver2 * cosPitchOver2 * sinRollOver2; result.y = sinYawOver2 * cosPitchOver2 *
+    // cosRollOver2 - cosYawOver2 * sinPitchOver2 * sinRollOver2; result.z = cosYawOver2 *
+    // cosPitchOver2 * sinRollOver2 - sinYawOver2 * sinPitchOver2 * cosRollOver2;
 
     //        return result;
     //    }

@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Win32;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
-using Microsoft.Win32;
 using wBeatSaberCamera.DataType;
 using wBeatSaberCamera.Models;
 

@@ -1,7 +1,7 @@
-﻿using System.Windows;
+﻿using Newtonsoft.Json;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Newtonsoft.Json;
 using wBeatSaberCamera.DataType;
 using wBeatSaberCamera.Models;
 

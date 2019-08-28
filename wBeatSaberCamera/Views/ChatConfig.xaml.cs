@@ -16,7 +16,8 @@ namespace wBeatSaberCamera.Views
         public ChatConfig()
         {
             InitializeComponent();
-            MainViewModel.TwitchBotConfigModel.Commands.Add(new TwitchChatCommand("rv", "Creates a new voice for the requester", (bot, msg) => {
+            MainViewModel.TwitchBotConfigModel.Commands.Add(new TwitchChatCommand("rv", "Creates a new voice for the requester", (bot, msg) =>
+            {
                 MainViewModel.ChatConfigModel.Chatters.Remove(msg.ChatMessage.Username);
             }));
         }

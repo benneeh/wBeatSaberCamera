@@ -1,5 +1,5 @@
-﻿using System.IO;
-using Microsoft.WindowsAPICodePack.Dialogs;
+﻿using Microsoft.WindowsAPICodePack.Dialogs;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using wBeatSaberCamera.DataType;

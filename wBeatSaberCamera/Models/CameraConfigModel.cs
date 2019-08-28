@@ -23,7 +23,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (Equals(value, _profiles))
+                {
                     return;
+                }
 
                 UnsubscribeDirtyCollection(_profiles);
                 _profiles = value;
@@ -39,7 +41,9 @@ namespace wBeatSaberCamera.Models
             set
             {
                 if (Equals(value, _currentCameraProfile))
+                {
                     return;
+                }
 
                 _currentCameraProfile = value;
                 OnPropertyChanged();
