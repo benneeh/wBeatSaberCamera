@@ -114,6 +114,7 @@
                             <Grid>
                                 <utils:DirtyBackground Margin="-6 -2" />
                                 
+                                <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
                                 <Label Content="{Binding Name}" />
                             </Grid>
                         </DataTemplate>
@@ -163,6 +164,7 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Grid>
+                                                <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
                                                 <TextBox Text="{Binding Alias}" Padding="0 0 8 0" />
                                                 <Button Command="{StaticResource RemoveAliasCommand}" HorizontalAlignment="Right" Content="X" FontSize="7" Margin="0 0 4 0" Style="{DynamicResource MiniDeleteButtonStyle}" VerticalAlignment="Center">
                                                     <Button.CommandParameter>

@@ -35,6 +35,7 @@
                 <Setter Property="FocusVisualStyle">
                     <Setter.Value>
                         <Style>
+                            <!-- ReSharper disable once Xaml.RedundantPropertyTypeQualifier -->
                             <Setter Property="Control.Template">
                                 <Setter.Value>
                                     <ControlTemplate>
@@ -252,6 +253,7 @@
         <Setter Property="FocusVisualStyle">
             <Setter.Value>
                 <Style>
+                    <!-- ReSharper disable once Xaml.RedundantPropertyTypeQualifier -->
                     <Setter Property="Control.Template">
                         <Setter.Value>
                             <ControlTemplate>
