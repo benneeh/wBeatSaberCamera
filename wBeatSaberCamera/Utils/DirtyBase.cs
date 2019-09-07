@@ -98,7 +98,7 @@ namespace wBeatSaberCamera.Utils
             {
                 return;
             }
-            Console.WriteLine($"[{GetType().Name}] Subscribing to PropertyChanged event on " + dirtyChild.GetType().Name);
+            //Console.WriteLine($"[{GetType().Name}] Subscribing to PropertyChanged event on " + dirtyChild.GetType().Name);
             dirtyChild.PropertyChanged += DirtyCollectionItem_PropertyChanged;
         }
 
@@ -108,7 +108,7 @@ namespace wBeatSaberCamera.Utils
             {
                 return;
             }
-            Console.WriteLine($"[{GetType().Name}] Unsubscribing from PropertyChanged event on " + dirtyChild.GetType().Name);
+            //Console.WriteLine($"[{GetType().Name}] Unsubscribing from PropertyChanged event on " + dirtyChild.GetType().Name);
             dirtyChild.PropertyChanged -= DirtyCollectionItem_PropertyChanged;
         }
 
