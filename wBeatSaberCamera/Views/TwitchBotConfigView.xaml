@@ -57,7 +57,7 @@
                     <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" Text="Join channel" />
-                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding Channel, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding Channel}" />
             </Grid>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -176,10 +176,28 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" />
                 <CheckBox Content="Enable TTS" IsChecked="{Binding ChatConfigModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" Margin="1,2,3,2" />
+                <CheckBox Content="Read own(streamer) messages" Grid.Column="1" IsChecked="{Binding ChatConfigModel.IsReadingStreamerMessagesEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" Margin="1,2,3,2" />
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Enable Message Sending" IsChecked="{Binding ChatConfigModel.IsSendMessagesEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" Margin="1,2,3,2" />
             </Grid>
         </StackPanel>
         <StackPanel Grid.Row="1">
-            <Button Content="Connect!" IsEnabled="{Binding Path=TwitchBot.IsConnected, Source={StaticResource MainViewModel}, Converter={StaticResource BooleanToInvertedBooleanConverter}}" Click="Button_Click"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button Content="Connect!" IsEnabled="{Binding Path=TwitchBot.IsConnected, Source={StaticResource MainViewModel}, Converter={StaticResource BooleanToInvertedBooleanConverter}}" Click="Button_Click"/>
+                <Button Content="Disconnect!" Grid.Column="2" IsEnabled="{Binding Path=TwitchBot.IsConnected, Source={StaticResource MainViewModel}}" Click="Button2_Click"/>
+            </Grid>
         </StackPanel>
     </Grid>
 </UserControl>

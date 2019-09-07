@@ -6,11 +6,20 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Speech.Synthesis;
+using System.Text.RegularExpressions;
+using System.Threading;
 using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Utils;
 
 namespace wBeatSaberCamera.Models
 {
+    public static class RandomProvider
+    {
+        private static readonly ThreadLocal<Random> s_random = new ThreadLocal<Random>(() => new Random());
+
+        public static Random Random => s_random.Value;
+    }
+
     [DataContract]
     public class Chatter : DirtyBase
     {
@@ -162,6 +171,9 @@ namespace wBeatSaberCamera.Models
             _lazySynthesizer = new Lazy<SpeechSynthesizer>(() => new SpeechSynthesizer());
         }
 
+        private static readonly Regex s_urlRegex = new Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", RegexOptions.Compiled);
+        private static readonly Regex s_ohReplacementRegex = new Regex("\\b(([a-zA-Z]{2,2})|([a-zA-Z)][aAeEiIoOuUöyYÖäÄüÜ]{2,2}))\\b", RegexOptions.Compiled);
+
         public void WriteSpeechToStream(CultureInfo language, string text, MemoryStream ms)
         {
             if (!VoiceName.ContainsKey(language))
@@ -182,9 +194,32 @@ namespace wBeatSaberCamera.Models
             }
 
             SelectVoice(VoiceName[language]);
+
+            text = s_urlRegex.Replace(text, "URL");
+
+            var templatedText = $@"
+<speak version=""1.0"" xmlns=""https://www.w3.org/2001/10/synthesis"" xml:lang=""en-US"">
+    <voice name=""{VoiceName[language]}"">
+        {s_ohReplacementRegex.Replace(text, (match) => $"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;0}%\" rate=\"{RandomProvider.Random.Next(50)}%\">{match.Value}</prosody>")}
+    </voice>
+</speak>";
+            //var ohTemplate = "<prosody pitch=\"+50%\" rate=\"1%\">{0}</prosody>"; // <prosody rate="10%" contour="(0%,+20Hz) (50%,+420Hz) (100%, +10Hz)">oh</prosody>
+
             lock (_lazySynthesizer)
             {
                 _lazySynthesizer.Value.SetOutputToWaveStream(ms);
+
+                try
+                {
+                    //new PromptBuilder().StartStyle(new PromptStyle()
+                    _lazySynthesizer.Value.SpeakSsml(templatedText);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    // ignored
+                }
+
                 _lazySynthesizer.Value.Speak(text);
             }
         }

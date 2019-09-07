@@ -172,7 +172,8 @@ namespace wBeatSaberCamera.Twitch
             {
                 if (_chatConfigModel.IsTextToSpeechEnabled && !_configModel.CommandIdentifiers.Contains(e.ChatMessage.Message.FirstOrDefault()))
                 {
-                    _chatConfigModel.Spek(e.ChatMessage);
+                    Task.Run(() =>
+                        _chatConfigModel.Spek(e.ChatMessage));
                 }
             };
             _twitchClient.OnWhisperReceived += (s, e) =>
@@ -197,22 +198,30 @@ namespace wBeatSaberCamera.Twitch
                 Console.WriteLine($"{e.DateTime} RAW(?): {e.BotUsername} - {e.Data}");
             };
 
-            _twitchApi = new TwitchAPI();
-            // ReSharper disable StringLiteralTypo
-            _twitchApi.Settings.ClientId = "ijyc8kmvhaoa1wtfz9ys90a37u3wr2";
-            // ReSharper restore StringLiteralTypo
-            _twitchApi.Settings.AccessToken = _configModel.AccessToken;
+            if (_twitchApi == null)
+            {
+                _twitchApi = new TwitchAPI();
+
+                // ReSharper disable StringLiteralTypo
+                _twitchApi.Settings.ClientId = "ijyc8kmvhaoa1wtfz9ys90a37u3wr2";
+
+                // ReSharper restore StringLiteralTypo
+                _twitchApi.Settings.AccessToken = _configModel.AccessToken;
+            }
 
             var channel = await GetChannelByName(_configModel.Channel);
 
-            _followerService = new FollowerService(_twitchApi);
-            _followerService.OnNewFollowersDetected += FollowerService_OnNewFollowersDetected;
-            _followerService.SetChannelsById(new List<string>()
+            if (_followerService == null)
             {
-                channel.Id
-            });
-            _followServiceInitializationDate = DateTime.UtcNow;
-            _followerService.Start();
+                _followerService = new FollowerService(_twitchApi);
+                _followerService.OnNewFollowersDetected += FollowerService_OnNewFollowersDetected;
+                _followerService.SetChannelsById(new List<string>()
+                {
+                    channel.Id
+                });
+                _followServiceInitializationDate = DateTime.UtcNow;
+                _followerService.Start();
+            }
 
             _configModel.CommandIdentifiers.CollectionChanged += (s, e) =>
             {
@@ -236,7 +245,7 @@ namespace wBeatSaberCamera.Twitch
             _twitchClient.OnJoinedChannel += (s, e) => { IsJoined = true; };
 
             _twitchClient.OnDisconnected += (s, e) => { OnPropertyChanged(nameof(IsConnected)); };
-            _twitchClient.OnConnected += (s, e) =>
+            _twitchClient.OnConnected += async (s, e) =>
             {
                 foreach (var identifier in _configModel.CommandIdentifiers)
                 {
@@ -244,6 +253,9 @@ namespace wBeatSaberCamera.Twitch
                 }
 
                 OnPropertyChanged(nameof(IsConnected));
+                IsConnecting = false;
+
+                await SendMessage(_configModel.Channel, "bot started");
                 //_twitchClient.JoinChannel("snaccyy");
             };
 
@@ -272,8 +284,20 @@ namespace wBeatSaberCamera.Twitch
 
             _twitchClient.Connect();
             IsConnecting = true;
+        }
 
-            await SendMessage(_configModel.Channel, "bot started");
+        public async Task Stop()
+        {
+            if (!IsConnected)
+            {
+                return;
+            }
+
+            await Task.WhenAll(_twitchClient.JoinedChannels.Select(channel => Task.Run(() => SendMessage(channel.Channel, $"'{_configModel.UserName}' stopping"))));
+
+            _twitchClient.Disconnect();
+            IsConnecting = false;
+            _twitchClient = null;
         }
 
         private OnRaidNotificationArgs GetRaidNotificationFromRawMessage(string rawMessage)
@@ -566,6 +590,11 @@ namespace wBeatSaberCamera.Twitch
         [PublicAPI]
         public void LeaveAllChannels()
         {
+            if (_twitchClient == null || !_twitchClient.IsConnected)
+            {
+                return;
+            }
+
             foreach (var channel in _twitchClient.JoinedChannels)
             {
                 _twitchClient.LeaveChannel(channel);
@@ -574,6 +603,11 @@ namespace wBeatSaberCamera.Twitch
 
         public async Task SendMessage(string channel, string message)
         {
+            if (!_chatConfigModel.IsSendMessagesEnabled)
+            {
+                return;
+            }
+
             var rs = new RetryPolicy();
             await rs.ExecuteAsync(() =>
             {
@@ -594,13 +628,7 @@ namespace wBeatSaberCamera.Twitch
 
         public void Dispose()
         {
-            if (IsConnected)
-            {
-                Task.WhenAll(_twitchClient.JoinedChannels.Select(channel => Task.Run(() => SendMessage(channel.Channel, $"'{_configModel.UserName}' stopping")))).Wait();
-                _twitchClient.Disconnect();
-                IsConnecting = false;
-                _twitchClient = null;
-            }
+            Stop().Wait();
         }
     }
 }

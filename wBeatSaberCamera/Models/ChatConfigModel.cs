@@ -83,6 +83,8 @@ namespace wBeatSaberCamera.Models
         private static readonly Random s_random = new Random();
 
         private readonly TaskSerializer _taskSerializer = new TaskSerializer();
+        private bool _isSendMessagesEnabled;
+        private bool _isReadingStreamerMessagesEnabled;
 
         #endregion private fields
 
@@ -135,6 +137,34 @@ namespace wBeatSaberCamera.Models
                 }
 
                 _maxPitchFactor = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember]
+        public bool IsSendMessagesEnabled
+        {
+            get => _isSendMessagesEnabled;
+            set
+            {
+                if (value == _isSendMessagesEnabled)
+                    return;
+
+                _isSendMessagesEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember]
+        public bool IsReadingStreamerMessagesEnabled
+        {
+            get => _isReadingStreamerMessagesEnabled;
+            set
+            {
+                if (value == _isReadingStreamerMessagesEnabled)
+                    return;
+
+                _isReadingStreamerMessagesEnabled = value;
                 OnPropertyChanged();
             }
         }
@@ -408,7 +438,7 @@ namespace wBeatSaberCamera.Models
 
         public void Spek(ChatMessage chatMessage)
         {
-            if (chatMessage.IsBroadcaster)
+            if (!IsReadingStreamerMessagesEnabled && chatMessage.IsBroadcaster)
             {
                 return;
             }

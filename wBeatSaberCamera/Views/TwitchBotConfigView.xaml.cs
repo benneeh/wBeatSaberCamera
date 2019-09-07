@@ -157,5 +157,10 @@ namespace wBeatSaberCamera.Views
             }
             (Parent as Window)?.Activate();
         }
+
+        private async void Button2_Click(object sender, RoutedEventArgs e)
+        {
+            await MainViewModel.TwitchBot.Stop();
+        }
     }
 }
