@@ -123,14 +123,14 @@ namespace wBeatSaberCamera.Twitch
             OnBeingHostedParameters["ViewerCount"] = _ => _.BeingHostedNotification.Viewers;
 
             OnRaidNotificationParameters = new PublicPropertyAccessorCache<OnRaidNotificationArgs>();
-            OnRaidNotificationParameters["Raider.Id"] = _ => _.RaidNotificaiton.UserId;
-            OnRaidNotificationParameters["Raider.Name"] = _ => _.RaidNotificaiton.DisplayName;
-            OnRaidNotificationParameters["Raider.Type"] = _ => _.RaidNotificaiton.UserType;
-            OnRaidNotificationParameters["Raider.IsSubscriber"] = _ => _.RaidNotificaiton.Subscriber;
-            OnRaidNotificationParameters["Raider.IsModerator"] = _ => _.RaidNotificaiton.Moderator;
-            OnRaidNotificationParameters["Raider.IsTurbo"] = _ => _.RaidNotificaiton.Turbo;
-            OnRaidNotificationParameters["Raider.Login"] = _ => _.RaidNotificaiton.Login;
-            OnRaidNotificationParameters["ViewerCount"] = _ => _.RaidNotificaiton.MsgParamViewerCount;
+            OnRaidNotificationParameters["Raider.Id"] = _ => _.RaidNotification.UserId;
+            OnRaidNotificationParameters["Raider.Name"] = _ => _.RaidNotification.DisplayName;
+            OnRaidNotificationParameters["Raider.Type"] = _ => _.RaidNotification.UserType;
+            OnRaidNotificationParameters["Raider.IsSubscriber"] = _ => _.RaidNotification.Subscriber;
+            OnRaidNotificationParameters["Raider.IsModerator"] = _ => _.RaidNotification.Moderator;
+            OnRaidNotificationParameters["Raider.IsTurbo"] = _ => _.RaidNotification.Turbo;
+            OnRaidNotificationParameters["Raider.Login"] = _ => _.RaidNotification.Login;
+            OnRaidNotificationParameters["ViewerCount"] = _ => _.RaidNotification.MsgParamViewerCount;
             // ReSharper restore UseObjectOrCollectionInitializer
         }
 
@@ -243,7 +243,7 @@ namespace wBeatSaberCamera.Twitch
             };
 
             _twitchClient.OnJoinedChannel += (s, e) => { IsJoined = true; };
-
+            _twitchClient.OnConnectionError += (s, e) => { OnPropertyChanged(nameof(IsConnected)); };
             _twitchClient.OnDisconnected += (s, e) => { OnPropertyChanged(nameof(IsConnected)); };
             _twitchClient.OnConnected += async (s, e) =>
             {
@@ -330,7 +330,8 @@ namespace wBeatSaberCamera.Twitch
 
             var splitMessage = rawMessage.Split(';');
 
-            string badges = "";
+            List<KeyValuePair<string, string>> badges = new List<KeyValuePair<string, string>>();
+            List<KeyValuePair<string, string>> badgeInfo = new List<KeyValuePair<string, string>>();
             string color = "";
             string displayName = "";
             string emotes = "";
@@ -351,7 +352,7 @@ namespace wBeatSaberCamera.Twitch
             //string badgeInfo = "";
             //string flags = "";
             //string msgParamProfileImageUrl = "";
-            //string userId = "";
+            string userId = "";
 
             foreach (var messageParam in splitMessage)
             {
@@ -362,9 +363,9 @@ namespace wBeatSaberCamera.Twitch
                 // oof
                 switch (leftPart)
                 {
-                    //case "@badge-info":
-                    //    badgeInfo = rightPart;
-                    //    break;
+                    case "@badge-info":
+                        //badgeInfo = rightPart;
+                        break;
                     //case "flags":
                     //    // what are those?
                     //    flags = rightPart;
@@ -372,11 +373,11 @@ namespace wBeatSaberCamera.Twitch
                     //case "msg-param-profileImageURL":
                     //    msgParamProfileImageUrl = rightPart;
                     //    break;
-                    //case "user-id":
-                    //    userId = rightPart;
-                    //    break;
+                    case "user-id":
+                        userId = rightPart;
+                        break;
                     case "badges":
-                        badges = rightPart;
+                        //badges = rightPart;
                         break;
 
                     case "color":
@@ -446,8 +447,9 @@ namespace wBeatSaberCamera.Twitch
             return new OnRaidNotificationArgs()
             {
                 Channel = roomId,
-                RaidNotificaiton = new RaidNotification(
+                RaidNotification = new RaidNotification(
                     badges,
+                    badgeInfo,
                     color,
                     displayName,
                     emotes,
@@ -465,7 +467,8 @@ namespace wBeatSaberCamera.Twitch
                     tmiSentTs,
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     turbo,
-                    userType)
+                    userType,
+                    userId)
             };
         }
 
@@ -499,8 +502,15 @@ namespace wBeatSaberCamera.Twitch
 
         private async void _twitchClient_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
         {
-            var channel = await GetChannelById(e.Channel);
-            await HandleMessageThing(channel, _configModel.IsSubscriberAnnouncementsEnabled, _configModel.SubscriberAnnouncementTemplate, e, OnNewSubscriberParameters);
+            try
+            {
+                var channel = await GetChannelById(e.Channel);
+                await HandleMessageThing(channel, _configModel.IsSubscriberAnnouncementsEnabled, _configModel.SubscriberAnnouncementTemplate, e, OnNewSubscriberParameters);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
         }
 
         private async Task<Channel> GetChannelById(string channelId)
