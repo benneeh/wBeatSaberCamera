@@ -322,7 +322,7 @@ namespace wBeatSaberCamera.Models
                         chatter.TrembleBegin = s_random.NextDouble() * Math.PI * 2;
                         chatter.TrembleSpeed = s_random.NextDouble();
                         var factorMultMax = .3;
-                        if (chatter.TrembleSpeed < .1)
+                        if (chatter.TrembleSpeed < .02)
                         {
                             factorMultMax = 2;
                         }
