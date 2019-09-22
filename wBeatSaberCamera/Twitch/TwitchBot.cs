@@ -284,12 +284,30 @@ namespace wBeatSaberCamera.Twitch
                 }
             };
 
+            _twitchClient.OnReSubscriber += TwitchClientOnOnReSubscriber;
+            _twitchClient.OnGiftedSubscription += TwitchClientOnOnGiftedSubscription;
+            _twitchClient.OnAnonGiftedSubscription += TwitchClientOnOnAnonGiftedSubscription;
             _twitchClient.OnBeingHosted += _twitchClient_OnBeingHosted;
             _twitchClient.OnRaidNotification += _twitchClient_OnRaidNotification;
             _twitchClient.OnNewSubscriber += _twitchClient_OnNewSubscriber;
 
             _twitchClient.Connect();
             IsConnecting = true;
+        }
+
+        private void TwitchClientOnOnReSubscriber(object sender, OnReSubscriberArgs e)
+        {
+            // TBD
+        }
+
+        private void TwitchClientOnOnGiftedSubscription(object sender, OnGiftedSubscriptionArgs e)
+        {
+            // TBD
+        }
+
+        private void TwitchClientOnOnAnonGiftedSubscription(object sender, OnAnonGiftedSubscriptionArgs e)
+        {
+            // TBD
         }
 
         public async Task Stop()
