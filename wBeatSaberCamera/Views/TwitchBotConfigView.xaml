@@ -172,8 +172,8 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" />
-                <CheckBox Content="Enable TTS" IsChecked="{Binding ChatConfigModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" Margin="1,2,3,2" />
-                <CheckBox Content="Read own(streamer) messages" Grid.Column="1" IsChecked="{Binding ChatConfigModel.IsReadingStreamerMessagesEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" Margin="1,2,3,2" />
+                <CheckBox Content="Enable TTS" IsChecked="{Binding ChatConfigModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
+                <CheckBox Content="Enable Speech to Text (emotes)" IsEnabled="{Binding Path=TwitchBot.SpeechToTextModule.IsBusy, Source={StaticResource MainViewModel}, Converter={StaticResource BooleanToInvertedBooleanConverter}}" Grid.Column="1" IsChecked="{Binding ChatConfigModel.IsSpeechToTextEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
             </Grid>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -183,7 +183,8 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" />
-                <CheckBox Content="Enable Message Sending" IsChecked="{Binding ChatConfigModel.IsSendMessagesEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" Margin="1,2,3,2" />
+                <CheckBox Content="Enable Message Sending" IsChecked="{Binding ChatConfigModel.IsSendMessagesEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
+                <CheckBox Content="Read own(streamer) messages" Grid.Column="1" IsChecked="{Binding ChatConfigModel.IsReadingStreamerMessagesEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
             </Grid>
         </StackPanel>
         <StackPanel Grid.Row="1">

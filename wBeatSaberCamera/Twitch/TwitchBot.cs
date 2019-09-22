@@ -10,7 +10,6 @@ using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events.FollowerService;
 using TwitchLib.Api.V5.Models.Channels;
 using TwitchLib.Client;
-using TwitchLib.Client.Enums;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using wBeatSaberCamera.Annotations;
@@ -77,6 +76,9 @@ namespace wBeatSaberCamera.Twitch
             _chatConfigModel = chatConfigModel;
             _configModel = configModel;
 
+            SpeechToTextModule = new SpeechToTextModule(chatConfigModel, configModel);
+            SpeechToTextModule.SpeechRecognized += _speechToTextModule_SpeechRecognized;
+
             // ReSharper disable UseObjectOrCollectionInitializer
             FollowParameters = new PublicPropertyAccessorCache<Follow>();
             FollowParameters["FollowedAt"] = _ => _.FollowedAt;
@@ -134,6 +136,17 @@ namespace wBeatSaberCamera.Twitch
             // ReSharper restore UseObjectOrCollectionInitializer
         }
 
+        private async void _speechToTextModule_SpeechRecognized(object sender, System.Speech.Recognition.SpeechRecognizedEventArgs e)
+        {
+            if (!IsConnected)
+            {
+                return;
+            }
+            //Console.WriteLine($"Recognized '{e.Result.Text}' with a confidence of {e.Result.Confidence:P}");
+
+            await SendMessage(_configModel.Channel, $"{e.Result.Text} ({e.Result.Confidence:P})");
+        }
+
         [PublicAPI]
         public PublicPropertyAccessorCache<Channel> ChannelParameters { get; }
 
@@ -156,6 +169,7 @@ namespace wBeatSaberCamera.Twitch
         private readonly Dictionary<string, Channel> _channelIdToChannelCache = new Dictionary<string, Channel>();
         private readonly Dictionary<string, Channel> _channelNameToChannelCache = new Dictionary<string, Channel>();
         private TwitchAPI _twitchApi;
+        public SpeechToTextModule SpeechToTextModule { get; }
 
         public async void Start()
         {
@@ -178,9 +192,11 @@ namespace wBeatSaberCamera.Twitch
             };
             _twitchClient.OnWhisperReceived += (s, e) =>
             {
+                // TBD
             };
             _twitchClient.OnWhisperCommandReceived += (s, e) =>
             {
+                // TBD
             };
 
             _twitchClient.OnLog += (s, e) =>

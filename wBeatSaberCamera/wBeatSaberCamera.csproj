@@ -232,6 +232,7 @@
     <Compile Include="Utils\MarginSetter.cs" />
     <Compile Include="DataType\BeatSaberCameraSettings.cs" />
     <Compile Include="Utils\ObservableSet.cs" />
+    <Compile Include="Utils\SpeechToTextModule.cs" />
     <Compile Include="Views\ChatConfig.xaml.cs">
       <DependentUpon>ChatConfig.xaml</DependentUpon>
     </Compile>

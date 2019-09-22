@@ -85,6 +85,7 @@ namespace wBeatSaberCamera.Models
         private readonly TaskSerializer _taskSerializer = new TaskSerializer();
         private bool _isSendMessagesEnabled;
         private bool _isReadingStreamerMessagesEnabled;
+        private bool _isSpeechToTextEnabled;
 
         #endregion private fields
 
@@ -165,6 +166,20 @@ namespace wBeatSaberCamera.Models
                     return;
 
                 _isReadingStreamerMessagesEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember]
+        public bool IsSpeechToTextEnabled
+        {
+            get => _isSpeechToTextEnabled;
+            set
+            {
+                if (value == _isSpeechToTextEnabled)
+                    return;
+
+                _isSpeechToTextEnabled = value;
                 OnPropertyChanged();
             }
         }
