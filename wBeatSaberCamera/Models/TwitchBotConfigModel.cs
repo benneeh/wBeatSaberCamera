@@ -26,7 +26,6 @@ namespace wBeatSaberCamera.Models
         private bool _isRaidAnnouncementsEnabled;
         private bool _isHostAnnouncementsEnabled;
         private bool _isSubscriberAnnouncementsEnabled;
-        private bool _isRaidNotificationSuddenlyWorking;
 
         public ObservableCollection<TwitchChatCommand> Commands
         {
@@ -236,21 +235,6 @@ namespace wBeatSaberCamera.Models
                 }
 
                 _commandIdentifiers = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public bool IsRaidNotificationSuddenlyWorking
-        {
-            get => _isRaidNotificationSuddenlyWorking;
-            set
-            {
-                if (value == _isRaidNotificationSuddenlyWorking)
-                {
-                    return;
-                }
-
-                _isRaidNotificationSuddenlyWorking = value;
                 OnPropertyChanged();
             }
         }

@@ -7,7 +7,7 @@
              xmlns:models="clr-namespace:wBeatSaberCamera.Models"
              xmlns:utils="clr-namespace:wBeatSaberCamera.Utils"
              mc:Ignorable="d" 
-             d:DesignHeight="250" d:DesignWidth="800">
+             d:DesignHeight="350" d:DesignWidth="800">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -21,9 +21,6 @@
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Border Background="DarkOrange" Visibility="{Binding IsRaidNotificationSuddenlyWorking, Converter={StaticResource BoolTrueIsVisibleConverter}}">
-            <TextBlock Text="WTF!?!?!" FontSize="90" />
-        </Border>
         <utils:DirtyBackground />
         <StackPanel Grid.IsSharedSizeScope="True">
             <Button Content="Login with twitch!" Margin="2" Padding="0" Click="Button_Click_1" />
@@ -94,7 +91,7 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" />
-                <CheckBox Content="Announce new Subscribers" IsChecked="{Binding IsSubscriberAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <CheckBox Content="Announce Subscribers" IsChecked="{Binding IsSubscriberAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding SubscriberAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}" />
                 <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
                     <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"

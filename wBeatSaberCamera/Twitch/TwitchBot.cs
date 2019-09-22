@@ -190,11 +190,6 @@ namespace wBeatSaberCamera.Twitch
                     return;
                 }
 
-                var raidNotification = GetRaidNotificationFromRawMessage(e.Data.Substring(10));
-
-                // muahahaha
-                _twitchClient_OnRaidNotification(raidNotification);
-
                 Console.WriteLine($"{e.DateTime} RAW(?): {e.BotUsername} - {e.Data}");
             };
 
@@ -256,7 +251,6 @@ namespace wBeatSaberCamera.Twitch
                 IsConnecting = false;
 
                 await SendMessage(_configModel.Channel, "bot started");
-                //_twitchClient.JoinChannel("snaccyy");
             };
 
             _twitchClient.OnChatCommandReceived += async (s, e) =>
@@ -275,11 +269,7 @@ namespace wBeatSaberCamera.Twitch
             };
 
             _twitchClient.OnBeingHosted += _twitchClient_OnBeingHosted;
-            _twitchClient.OnRaidNotification += (s, e) =>
-            {
-                _configModel.IsRaidNotificationSuddenlyWorking = true;
-                //_twitchClient_OnRaidNotification(s, e);
-            };
+            _twitchClient.OnRaidNotification += _twitchClient_OnRaidNotification;
             _twitchClient.OnNewSubscriber += _twitchClient_OnNewSubscriber;
 
             _twitchClient.Connect();
@@ -298,178 +288,6 @@ namespace wBeatSaberCamera.Twitch
             _twitchClient.Disconnect();
             IsConnecting = false;
             _twitchClient = null;
-        }
-
-        private OnRaidNotificationArgs GetRaidNotificationFromRawMessage(string rawMessage)
-        {
-            // workaround for broken raid event:
-            // ReSharper disable CommentTypo
-            /*28.05.2019 00:48:48 RAW(?): benneeeh - Received:
-             @badge-info=;
-             badges=;
-             color=#FF0000;
-             display-name=InfiniteThoughts;
-             emotes=;
-             flags=;
-             id=07c86c98-e15f-4944-b720-8f8ac7fef946;
-             login=infinitethoughts;
-             mod=0;
-             msg-id=raid;
-             msg-param-displayName=InfiniteThoughts;
-             msg-param-login=infinitethoughts;
-             msg-param-profileImageURL=https://static-cdn.jtvnw.net/jtv_user_pictures/infinitethoughts-profile_image-3b455f9760ac38d6-70x70.jpeg;
-             msg-param-viewerCount=3;
-             room-id=41692643;
-             subscriber=0;
-             system-msg=3\sraiders\sfrom\sInfiniteThoughts\shave\sjoined!;
-             tmi-sent-ts=1559004532733;
-             user-id=39462410;
-             user-type= :tmi.twitch.tv USERNOTICE #benneeeh
-            */
-            // ReSharper restore CommentTypo
-
-            var splitMessage = rawMessage.Split(';');
-
-            List<KeyValuePair<string, string>> badges = new List<KeyValuePair<string, string>>();
-            List<KeyValuePair<string, string>> badgeInfo = new List<KeyValuePair<string, string>>();
-            string color = "";
-            string displayName = "";
-            string emotes = "";
-            string id = "";
-            string login = "";
-            bool moderator = false;
-            string msgId = "";
-            string msgParamDisplayName = "";
-            string msgParamLogin = "";
-            string msgParamViewerCount = "";
-            string roomId = "";
-            bool subscriber = false;
-            string systemMsg = "";
-            string systemMsgParsed = "";
-            string tmiSentTs = "";
-            bool turbo = false;
-            UserType userType = 0;
-            //string badgeInfo = "";
-            //string flags = "";
-            //string msgParamProfileImageUrl = "";
-            string userId = "";
-
-            foreach (var messageParam in splitMessage)
-            {
-                var splitParam = messageParam.Split('=');
-                var leftPart = splitParam[0];
-                var rightPart = splitParam[1];
-
-                // oof
-                switch (leftPart)
-                {
-                    case "@badge-info":
-                        //badgeInfo = rightPart;
-                        break;
-                    //case "flags":
-                    //    // what are those?
-                    //    flags = rightPart;
-                    //    break;
-                    //case "msg-param-profileImageURL":
-                    //    msgParamProfileImageUrl = rightPart;
-                    //    break;
-                    case "user-id":
-                        userId = rightPart;
-                        break;
-                    case "badges":
-                        //badges = rightPart;
-                        break;
-
-                    case "color":
-                        color = rightPart;
-                        break;
-
-                    case "display-name":
-                        displayName = rightPart;
-                        break;
-
-                    case "emotes":
-                        emotes = rightPart;
-                        break;
-
-                    case "id":
-                        // message id?
-                        id = rightPart;
-                        break;
-
-                    case "login":
-                        login = rightPart;
-                        break;
-
-                    case "mod":
-                        moderator = rightPart != "0";
-                        break;
-
-                    case "msg-id":
-                        // type, -> raid in this case (WTF TWITCH, NAMING!!!!)
-                        msgId = rightPart;
-                        break;
-
-                    case "msg-param-displayName":
-                        msgParamDisplayName = rightPart;
-                        break;
-
-                    case "msg-param-login":
-                        msgParamLogin = rightPart;
-                        break;
-
-                    case "msg-param-viewerCount":
-                        msgParamViewerCount = rightPart;
-                        break;
-
-                    case "room-id":
-                        roomId = rightPart;
-                        break;
-
-                    case "subscriber":
-                        subscriber = rightPart != "0";
-                        break;
-
-                    case "system-msg":
-                        systemMsg = rightPart;
-                        break;
-
-                    case "tmi-sent-ts":
-                        tmiSentTs = rightPart;
-                        break;
-
-                    case "user-type":
-                        Enum.TryParse(rightPart.Split(':')[0], true, out userType);
-                        break;
-                }
-            }
-
-            return new OnRaidNotificationArgs()
-            {
-                Channel = roomId,
-                RaidNotification = new RaidNotification(
-                    badges,
-                    badgeInfo,
-                    color,
-                    displayName,
-                    emotes,
-                    id,
-                    login,
-                    moderator,
-                    msgId,
-                    msgParamDisplayName,
-                    msgParamLogin,
-                    msgParamViewerCount,
-                    roomId,
-                    subscriber,
-                    systemMsg,
-                    systemMsgParsed,
-                    tmiSentTs,
-                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                    turbo,
-                    userType,
-                    userId)
-            };
         }
 
         private async void FollowerService_OnNewFollowersDetected(object sender, OnNewFollowersDetectedArgs e)
@@ -544,10 +362,10 @@ namespace wBeatSaberCamera.Twitch
             return channel;
         }
 
-        private async void _twitchClient_OnRaidNotification(OnRaidNotificationArgs e)
+        private async void _twitchClient_OnRaidNotification(object sender, OnRaidNotificationArgs onRaidNotificationArgs)
         {
-            var channel = await GetChannelById(e.Channel);
-            await HandleMessageThing(channel, _configModel.IsRaidAnnouncementsEnabled, _configModel.RaidAnnouncementTemplate, e, OnRaidNotificationParameters);
+            var channel = await GetChannelById(onRaidNotificationArgs.Channel);
+            await HandleMessageThing(channel, _configModel.IsRaidAnnouncementsEnabled, _configModel.RaidAnnouncementTemplate, onRaidNotificationArgs, OnRaidNotificationParameters);
         }
 
         private async void _twitchClient_OnBeingHosted(object sender, OnBeingHostedArgs e)
