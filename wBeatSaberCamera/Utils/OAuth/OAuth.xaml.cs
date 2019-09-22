@@ -18,8 +18,10 @@ namespace wBeatSaberCamera.Utils.OAuth
     /// </summary>
     public partial class OAuth : Window
     {
+        private HttpListener _httpListener;
+
         // client configuration
-        private const string ClientId = "ijyc8kmvhaoa1wtfz9ys90a37u3wr2";
+        public const string ClientId = "ijyc8kmvhaoa1wtfz9ys90a37u3wr2";
 
         private const string AuthorizationEndpoint = "https://id.twitch.tv/oauth2/authorize";
         private const string UserInfoEndpoint = "https://id.twitch.tv/oauth2/validate";
@@ -79,10 +81,10 @@ namespace wBeatSaberCamera.Utils.OAuth
             Output("redirect URI: " + redirectUri);
 
             // Creates an HttpListener to listen for requests on that redirect URI.
-            var httpListener = new HttpListener();
-            httpListener.Prefixes.Add(redirectUri);
+            _httpListener = new HttpListener();
+            _httpListener.Prefixes.Add(redirectUri);
             Output("Listening..");
-            httpListener.Start();
+            _httpListener.Start();
             var scopes = new[]
             {
                 "openid",
@@ -154,7 +156,16 @@ namespace wBeatSaberCamera.Utils.OAuth
                 return httpListenerContext.Request;
             }
 
-            var clientRequest = await HandleIncomingRequest(httpListener);
+            HttpListenerRequest clientRequest = null;
+            try
+            {
+                clientRequest = await HandleIncomingRequest(_httpListener);
+            }
+            catch
+            {
+                return;
+            }
+
             Activate();
 
             // Checks for errors.
@@ -268,6 +279,11 @@ namespace wBeatSaberCamera.Utils.OAuth
             base64 = base64.Replace("=", "");
 
             return base64;
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            _httpListener?.Close();
         }
     }
 }

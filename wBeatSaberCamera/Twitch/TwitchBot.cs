@@ -15,6 +15,7 @@ using TwitchLib.Client.Models;
 using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Models;
 using wBeatSaberCamera.Utils;
+using wBeatSaberCamera.Utils.OAuth;
 
 namespace wBeatSaberCamera.Twitch
 {
@@ -214,7 +215,7 @@ namespace wBeatSaberCamera.Twitch
                 _twitchApi = new TwitchAPI();
 
                 // ReSharper disable StringLiteralTypo
-                _twitchApi.Settings.ClientId = "ijyc8kmvhaoa1wtfz9ys90a37u3wr2";
+                _twitchApi.Settings.ClientId = OAuth.ClientId;
 
                 // ReSharper restore StringLiteralTypo
                 _twitchApi.Settings.AccessToken = _configModel.AccessToken;
