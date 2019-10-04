@@ -56,7 +56,25 @@ namespace wBeatSaberCamera
             mainViewModel.AppConfigModel = settings.AppConfigModel;
             mainViewModel.CameraConfigModel = settings.CameraConfigModel;
             mainViewModel.TwitchBotConfigModel = settings.TwitchBotConfigModel;
+            mainViewModel.ChatConfigModel.Chatters.CollectionChanged -= Chatters_CollectionChanged;
             mainViewModel.ChatConfigModel = settings.ChatConfigModel;
+            mainViewModel.ChatConfigModel.Chatters.CollectionChanged += Chatters_CollectionChanged;
+        }
+
+        private void Chatters_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var mainViewModel = (MainViewModel) Resources["MainViewModel"];
+                var settings = BeatSaberCameraSettings.LoadFromFile();
+                if (settings == null)
+                {
+                    return;
+                }
+                // only update chatters ssettings
+                settings.ChatConfigModel.Chatters = mainViewModel.ChatConfigModel.Chatters;
+                BeatSaberCameraSettings.Save(settings.AppConfigModel, settings.CameraConfigModel, settings.TwitchBotConfigModel, settings.ChatConfigModel);
+            });
         }
 
         public string SearchCameraPlusConfig()
