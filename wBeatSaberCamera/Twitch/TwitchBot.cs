@@ -78,7 +78,7 @@ namespace wBeatSaberCamera.Twitch
             _configModel = configModel;
 
             SpeechToTextModule = new SpeechToTextModule(chatConfigModel, configModel);
-            SpeechToTextModule.SpeechRecognized += _speechToTextModule_SpeechRecognized;
+            SpeechToTextModule.SpeechRecognized += (s, e) => RegisterEventHandlerSafe(s, e, _speechToTextModule_SpeechRecognized);
 
             // ReSharper disable UseObjectOrCollectionInitializer
             FollowParameters = new PublicPropertyAccessorCache<Follow>();
@@ -180,7 +180,7 @@ namespace wBeatSaberCamera.Twitch
                 return;
             }
 
-            _configModel.PropertyChanged += ConfigModelPropertyChanged;
+            _configModel.PropertyChanged += (s, e) => RegisterEventHandlerSafe(s, e, ConfigModelPropertyChanged);
             _twitchClient = new TwitchClient(logger: new TwitchBotLogger<TwitchClient>());
             _twitchClient.Initialize(new ConnectionCredentials(_configModel.UserName, $"oauth:{_configModel.AccessToken}"), _configModel.Channel);
             _twitchClient.OnMessageReceived += (s, e) =>
@@ -226,7 +226,7 @@ namespace wBeatSaberCamera.Twitch
             if (_followerService == null)
             {
                 _followerService = new FollowerService(_twitchApi);
-                _followerService.OnNewFollowersDetected += FollowerService_OnNewFollowersDetected;
+                _followerService.OnNewFollowersDetected += (s, e) => RegisterEventHandlerSafe(s, e, FollowerService_OnNewFollowersDetected);
                 _followerService.SetChannelsById(new List<string>()
                 {
                     channel.Id
@@ -285,15 +285,43 @@ namespace wBeatSaberCamera.Twitch
                 }
             };
 
-            _twitchClient.OnReSubscriber += TwitchClientOnOnReSubscriber;
-            _twitchClient.OnGiftedSubscription += TwitchClientOnOnGiftedSubscription;
-            _twitchClient.OnAnonGiftedSubscription += TwitchClientOnOnAnonGiftedSubscription;
-            _twitchClient.OnBeingHosted += _twitchClient_OnBeingHosted;
-            _twitchClient.OnRaidNotification += _twitchClient_OnRaidNotification;
-            _twitchClient.OnNewSubscriber += _twitchClient_OnNewSubscriber;
+            _twitchClient.OnReSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, TwitchClientOnOnReSubscriber);
+            _twitchClient.OnGiftedSubscription += (s, e) => RegisterEventHandlerSafe(s, e, TwitchClientOnOnGiftedSubscription);
+            _twitchClient.OnAnonGiftedSubscription += (s, e) => RegisterEventHandlerSafe(s, e, TwitchClientOnOnAnonGiftedSubscription);
+            _twitchClient.OnBeingHosted += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnBeingHosted);
+            _twitchClient.OnRaidNotification += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnRaidNotification);
+            _twitchClient.OnNewSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnNewSubscriber);
+            _twitchClient.OnNewSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnNewSubscriber);
 
             _twitchClient.Connect();
             IsConnecting = true;
+        }
+
+        private async void RegisterEventHandlerSafe<T>(object s, T e, Action<object, T> eventAction)
+        {
+            try
+            {
+                eventAction(s, e);
+            }
+            catch (Exception ex)
+            {
+                await SendMessage(_configModel.Channel, "Error: " + ex.Message);
+                Log.Error(ex.ToString());
+            }
+        }
+
+        [PublicAPI]
+        private async void RegisterEventHandlerSafe<T>(object s, T e, Func<object, T, Task> eventAction)
+        {
+            try
+            {
+                await eventAction(s, e);
+            }
+            catch (Exception ex)
+            {
+                await SendMessage(_configModel.Channel, "Error: " + ex.Message);
+                Log.Error(ex.ToString());
+            }
         }
 
         private void TwitchClientOnOnReSubscriber(object sender, OnReSubscriberArgs e)
@@ -399,8 +427,25 @@ namespace wBeatSaberCamera.Twitch
 
         private async void _twitchClient_OnRaidNotification(object sender, OnRaidNotificationArgs onRaidNotificationArgs)
         {
-            var channel = await GetChannelById(onRaidNotificationArgs.Channel);
-            await HandleMessageThing(channel, _configModel.IsRaidAnnouncementsEnabled, _configModel.RaidAnnouncementTemplate, onRaidNotificationArgs, OnRaidNotificationParameters);
+            try
+            {
+                var channel = await GetChannelById(onRaidNotificationArgs.Channel);
+                await HandleMessageThing(channel, _configModel.IsRaidAnnouncementsEnabled, _configModel.RaidAnnouncementTemplate, onRaidNotificationArgs, OnRaidNotificationParameters);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                Console.WriteLine("raid channel: " + onRaidNotificationArgs.Channel);
+                try
+                {
+                    var channel = await GetChannelByName(onRaidNotificationArgs.Channel);
+                    await HandleMessageThing(channel, _configModel.IsRaidAnnouncementsEnabled, _configModel.RaidAnnouncementTemplate, onRaidNotificationArgs, OnRaidNotificationParameters);
+                }
+                catch
+                {
+                    // ignore
+                }
+            }
         }
 
         private async void _twitchClient_OnBeingHosted(object sender, OnBeingHostedArgs e)
