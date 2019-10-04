@@ -23,6 +23,8 @@ namespace wBeatSaberCamera.Models
     [DataContract]
     public class Chatter : DirtyBase
     {
+        private static readonly ThreadLocal<SpeechSynthesizer> s_speechSynthesizer = new ThreadLocal<SpeechSynthesizer>(() => new SpeechSynthesizer());
+
         [DataMember]
         public string Name
         {
@@ -67,6 +69,34 @@ namespace wBeatSaberCamera.Models
                 }
 
                 _pitch = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember]
+        public int SpeechPitch
+        {
+            get => _speechPitch;
+            set
+            {
+                if (value.Equals(_speechPitch))
+                    return;
+
+                _speechPitch = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember]
+        public int SpeechRate
+        {
+            get => _speechRate;
+            set
+            {
+                if (value.Equals(_speechRate))
+                    return;
+
+                _speechRate = value;
                 OnPropertyChanged();
             }
         }
@@ -144,8 +174,8 @@ namespace wBeatSaberCamera.Models
         private double _trembleBegin;
         private double _pitch;
         private Vector3 _position;
-        private readonly Lazy<SpeechSynthesizer> _lazySynthesizer;
-        private string _selectedVoice;
+        private int _speechRate;
+        private int _speechPitch;
         private static ReadOnlyCollection<InstalledVoice> _voices;
         private static readonly Random s_random = new Random();
 
@@ -168,7 +198,11 @@ namespace wBeatSaberCamera.Models
         public Chatter()
         {
             _voiceName = new ObservableDictionary<CultureInfo, string>();
-            _lazySynthesizer = new Lazy<SpeechSynthesizer>(() => new SpeechSynthesizer());
+            _speechRate = RandomProvider.Random.Next(-40, 20);
+            if (_speechRate < 0)
+            {
+                _speechPitch = RandomProvider.Random.Next(0, 50);
+            }
         }
 
         private static readonly Regex s_urlRegex = new Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", RegexOptions.Compiled);
@@ -183,7 +217,15 @@ namespace wBeatSaberCamera.Models
                 while (!success && tries-- > 0)
                 {
                     VoiceName[language] = GetRandomVoice(language).Name;
-                    success = SelectVoice(VoiceName[language]);
+                    try
+                    {
+                        s_speechSynthesizer.Value.SelectVoice(VoiceName[language]);
+                        success = true;
+                    }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
                 }
 
                 if (tries == 0)
@@ -193,58 +235,32 @@ namespace wBeatSaberCamera.Models
                 }
             }
 
-            SelectVoice(VoiceName[language]);
-
             text = s_urlRegex.Replace(text, "URL");
 
             var templatedText = $@"
 <speak version=""1.0"" xmlns=""https://www.w3.org/2001/10/synthesis"" xml:lang=""en-US"">
     <voice name=""{VoiceName[language]}"">
-        {s_ohReplacementRegex.Replace(text, (match) => $"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;0}%\" rate=\"{RandomProvider.Random.Next(50)}%\">{match.Value}</prosody>")}
+        <prosody pitch=""{SpeechPitch:+#;-#;0}%"" rate=""{SpeechRate}%"">
+            {s_ohReplacementRegex.Replace(text, (match) => $"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;0}%\" rate=\"{RandomProvider.Random.Next(50)}%\">{match.Value}</prosody>")}
+        </prosody>
     </voice>
 </speak>";
             //var ohTemplate = "<prosody pitch=\"+50%\" rate=\"1%\">{0}</prosody>"; // <prosody rate="10%" contour="(0%,+20Hz) (50%,+420Hz) (100%, +10Hz)">oh</prosody>
 
-            lock (_lazySynthesizer)
-            {
-                _lazySynthesizer.Value.SetOutputToWaveStream(ms);
-
-                try
-                {
-                    //new PromptBuilder().StartStyle(new PromptStyle()
-                    _lazySynthesizer.Value.SpeakSsml(templatedText);
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    // ignored
-                }
-
-                _lazySynthesizer.Value.Speak(text);
-            }
-        }
-
-        private bool SelectVoice(string voiceName)
-        {
-            if (_selectedVoice == voiceName)
-            {
-                return true;
-            }
+            s_speechSynthesizer.Value.SetOutputToWaveStream(ms);
 
             try
             {
-                lock (_lazySynthesizer)
-                {
-                    _lazySynthesizer.Value.SelectVoice(voiceName);
-                }
-
-                _selectedVoice = voiceName;
-                return true;
+                //new PromptBuilder().StartStyle(new PromptStyle()
+                s_speechSynthesizer.Value.SpeakSsml(templatedText);
+                return;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                // ignored
             }
+
+            s_speechSynthesizer.Value.Speak(text);
         }
 
         #region get voice
