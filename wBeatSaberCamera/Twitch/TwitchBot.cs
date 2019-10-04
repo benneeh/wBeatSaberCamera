@@ -267,7 +267,7 @@ namespace wBeatSaberCamera.Twitch
                 OnPropertyChanged(nameof(IsConnected));
                 IsConnecting = false;
 
-                await SendMessage(_configModel.Channel, "bot started");
+                await SendMessage(_configModel.Channel, "bot started", true);
             };
 
             _twitchClient.OnChatCommandReceived += async (s, e) =>
@@ -305,7 +305,7 @@ namespace wBeatSaberCamera.Twitch
             }
             catch (Exception ex)
             {
-                await SendMessage(_configModel.Channel, "Error: " + ex.Message);
+                await SendMessage(_configModel.Channel, "Error: " + ex.Message, true);
                 Log.Error(ex.ToString());
             }
         }
@@ -319,7 +319,7 @@ namespace wBeatSaberCamera.Twitch
             }
             catch (Exception ex)
             {
-                await SendMessage(_configModel.Channel, "Error: " + ex.Message);
+                await SendMessage(_configModel.Channel, "Error: " + ex.Message, true);
                 Log.Error(ex.ToString());
             }
         }
@@ -346,7 +346,7 @@ namespace wBeatSaberCamera.Twitch
                 return;
             }
 
-            await Task.WhenAll(_twitchClient.JoinedChannels.Select(channel => Task.Run(() => SendMessage(channel.Channel, $"'{_configModel.UserName}' stopping"))));
+            await Task.WhenAll(_twitchClient.JoinedChannels.Select(channel => Task.Run(() => SendMessage(channel.Channel, $"'{_configModel.UserName}' stopping", true))));
 
             _twitchClient.Disconnect();
             IsConnecting = false;
@@ -483,7 +483,7 @@ namespace wBeatSaberCamera.Twitch
                 }
             }
 
-            await SendMessage(channel.Name, sb.ToString());
+            await SendMessage(channel.Name, sb.ToString(), true);
         }
 
         private void ConfigModelPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -509,11 +509,16 @@ namespace wBeatSaberCamera.Twitch
             }
         }
 
-        public async Task SendMessage(string channel, string message)
+        public async Task SendMessage(string channel, string message, bool speak = false)
         {
             if (!_chatConfigModel.IsSendMessagesEnabled)
             {
                 return;
+            }
+
+            if (speak)
+            {
+                _chatConfigModel.Spek(null, message);
             }
 
             var rs = new RetryPolicy();
