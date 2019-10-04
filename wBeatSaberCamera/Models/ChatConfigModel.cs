@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 using TwitchLib.Client.Models;
 using Valve.VR;
+using wBeatSaberCamera.DataType;
 using wBeatSaberCamera.Utils;
 using Quaternion = Microsoft.Xna.Framework.Quaternion;
 using Vector3 = Microsoft.Xna.Framework.Vector3;
@@ -396,13 +397,13 @@ namespace wBeatSaberCamera.Models
                             {
                                 var hmdPositioning = GetHmdPositioning();
 
-                                var newAudioEmitterPosition = Vector3.Transform(chatter.Position, -hmdPositioning.Rotation);
+                                var newAudioEmitterPosition = Vector3.Transform(chatter.Position, hmdPositioning.Rotation);
                                 audioEmitter.Velocity = (newAudioEmitterPosition - audioEmitter.Position) * 100;
                                 audioEmitter.Position = newAudioEmitterPosition;
 
                                 _audioListener.Velocity = hmdPositioning.Velocity - audioEmitter.Position + Vector3.Transform(audioEmitter.Position, new Quaternion(hmdPositioning.Omega, 1));
                                 //_audioListener.Position = hmdPositioning.Position;
-                                Console.WriteLine(audioEmitter.Position + "/" + _audioListener.Position);
+                                //Console.WriteLine(audioEmitter.Position + "/" + _audioListener.Position);
                                 soundEffect.Apply3D(_audioListener, audioEmitter);
 
                                 //am.Rotation = position.GetRotation();
