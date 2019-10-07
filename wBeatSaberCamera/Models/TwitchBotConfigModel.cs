@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
+using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Twitch;
 using wBeatSaberCamera.Utils;
 
@@ -29,6 +30,7 @@ namespace wBeatSaberCamera.Models
         public ObservableCollection<TwitchChatCommand> Commands
         {
             get => _commands;
+            [UsedImplicitly]
             set
             {
                 if (Equals(value, _commands))

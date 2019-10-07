@@ -211,6 +211,7 @@
     <Compile Include="Models\Chatter.cs" />
     <Compile Include="Models\MainViewModel.cs" />
     <Compile Include="Models\ObservableDictionary.cs" />
+    <Compile Include="Utils\TaskSerializer.cs" />
     <Compile Include="Twitch\PublicPropertyAccessorCache.cs" />
     <Compile Include="Twitch\RetryPolicy.cs" />
     <Compile Include="Twitch\TransientException.cs" />
