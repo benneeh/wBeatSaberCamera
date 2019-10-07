@@ -63,7 +63,7 @@ namespace wBeatSaberCamera
 
         private void Chatters_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher?.Invoke(() =>
             {
                 var mainViewModel = (MainViewModel) Resources["MainViewModel"];
                 var settings = BeatSaberCameraSettings.LoadFromFile();
@@ -71,13 +71,13 @@ namespace wBeatSaberCamera
                 {
                     return;
                 }
-                // only update chatters ssettings
+                // only update chatters settings
                 settings.ChatConfigModel.Chatters = mainViewModel.ChatConfigModel.Chatters;
                 BeatSaberCameraSettings.Save(settings.AppConfigModel, settings.CameraConfigModel, settings.TwitchBotConfigModel, settings.ChatConfigModel);
             });
         }
 
-        public string SearchCameraPlusConfig()
+        private string SearchCameraPlusConfig()
         {
             string steam32 = "SOFTWARE\\VALVE\\";
             string steam64 = "SOFTWARE\\Wow6432Node\\Valve\\";
