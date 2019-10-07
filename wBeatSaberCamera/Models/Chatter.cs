@@ -255,7 +255,9 @@ namespace wBeatSaberCamera.Models
                 s_speechSynthesizer.Value.SpeakSsml(templatedText);
                 return;
             }
+#pragma warning disable 168
             catch (Exception ex)
+#pragma warning restore 168
             {
                 // ignored
             }

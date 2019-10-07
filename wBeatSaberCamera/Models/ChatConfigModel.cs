@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 using TwitchLib.Client.Models;
 using Valve.VR;
-using wBeatSaberCamera.DataType;
 using wBeatSaberCamera.Utils;
 using Quaternion = Microsoft.Xna.Framework.Quaternion;
 using Vector3 = Microsoft.Xna.Framework.Vector3;

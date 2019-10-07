@@ -1,25 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Net.Http;
 using System.Speech.Recognition;
 using System.Threading.Tasks;
-using System.Windows.Forms.VisualStyles;
-using FFZ;
 using Newtonsoft.Json;
 using wBeatSaberCamera.Models;
+using wBeatSaberCamera.Models.FrankerFaceZModels;
 
 namespace wBeatSaberCamera.Utils
 {
     public class SpeechToTextModule : ObservableBase, IDisposable
     {
-        private static HttpClient _httpClient = new HttpClient();
+        private static readonly HttpClient s_httpClient = new HttpClient();
         private readonly ChatConfigModel _chatConfigModel;
         private readonly TwitchBotConfigModel _botConfigModel;
         private SpeechRecognitionEngine _speechRecognitionEngine;
         public event EventHandler<SpeechRecognizedEventArgs> SpeechRecognized;
-        private Dictionary<string, Task<string[]>> _emoteCache = new Dictionary<string, Task<string[]>>();
+        private readonly Dictionary<string, Task<string[]>> _emoteCache = new Dictionary<string, Task<string[]>>();
         private bool _isBusy;
 
         public bool IsBusy
@@ -91,22 +89,13 @@ namespace wBeatSaberCamera.Utils
 
                 choices.Add(await _emoteCache[_botConfigModel.Channel]);
 
-                //choices.Add("pog");
-                //choices.Add("pepesuspicious");
                 var keyWordsGrammarBuilder = new GrammarBuilder(choices);
-
-                //keyWordsGrammarBuilder.Append("pog");
-                //keyWordsGrammarBuilder.Append("pepesuspicious");
 
                 var keyWordsGrammar = new Grammar(keyWordsGrammarBuilder);
                 speechRecognitionEngine.LoadGrammar(keyWordsGrammar);
 
-                /*var dictationGrammer = new DictationGrammar();
-                _speechRecognitionEngine.LoadGrammar(new DictationGrammar());*/
-
                 // Add a handler for the speech recognized event.
                 speechRecognitionEngine.SpeechRecognized += (s, e) => SpeechRecognized?.Invoke(s, e);
-                ;
 
                 // Configure input to the speech recognizer.
                 speechRecognitionEngine.SetInputToDefaultAudioDevice();
@@ -142,7 +131,7 @@ namespace wBeatSaberCamera.Utils
             {
                 try
                 {
-                    var resultString = await _httpClient.GetStringAsync($"https://api.betterttv.net/2/channels/{_botConfigModel.Channel}");
+                    var resultString = await s_httpClient.GetStringAsync($"https://api.betterttv.net/2/channels/{_botConfigModel.Channel}");
                     var anon = new
                     {
                         emotes = new[]
@@ -163,9 +152,9 @@ namespace wBeatSaberCamera.Utils
             {
                 try
                 {
-                    var resultString = await _httpClient.GetStringAsync($"https://api.frankerfacez.com/v1/room/{_botConfigModel.Channel}");
+                    var resultString = await s_httpClient.GetStringAsync($"https://api.frankerfacez.com/v1/room/{_botConfigModel.Channel}");
                     var result = JsonConvert.DeserializeObject<FfzRoot>(resultString);
-                    return result.sets[result.room.set].emoticons.Where(x => !x.hidden).Select(x => x.name).ToArray();
+                    return result.Sets[result.Room.Set].Emoticons.Where(x => !x.Hidden).Select(x => x.Name).ToArray();
                 }
                 catch (Exception ex)
                 {
@@ -181,30 +170,5 @@ namespace wBeatSaberCamera.Utils
         {
             _speechRecognitionEngine?.Dispose();
         }
-    }
-}
-
-namespace FFZ
-{
-    public class FfzRoot
-    {
-        public Room room { get; set; }
-        public Dictionary<int, Set> sets { get; set; }
-    }
-
-    public class Room
-    {
-        public int set { get; set; }
-    }
-
-    public class Set
-    {
-        public Emoticon[] emoticons { get; set; }
-    }
-
-    public class Emoticon
-    {
-        public bool hidden { get; set; }
-        public string name { get; set; }
     }
 }

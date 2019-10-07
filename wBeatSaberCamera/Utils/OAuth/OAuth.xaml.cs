@@ -23,7 +23,7 @@ namespace wBeatSaberCamera.Utils.OAuth
         private HttpListener _httpListener;
 
         // client configuration
-        public const string ClientId = "ijyc8kmvhaoa1wtfz9ys90a37u3wr2";
+        public const string CLIENT_ID = "ijyc8kmvhaoa1wtfz9ys90a37u3wr2";
 
         private const string AuthorizationEndpoint = "https://id.twitch.tv/oauth2/authorize";
         private const string UserInfoEndpoint = "https://id.twitch.tv/oauth2/validate";
@@ -78,7 +78,7 @@ namespace wBeatSaberCamera.Utils.OAuth
             // Creates the OAuth 2.0 authorization request.
             var @params = new Dictionary<string, string>()
             {
-                {"client_id", ClientId},
+                {"client_id", CLIENT_ID},
                 {"redirect_uri", Uri.EscapeDataString(redirectUri)},
                 {"response_type", "token"},
                 {"scope", string.Join("+", scopes)},
@@ -129,7 +129,7 @@ namespace wBeatSaberCamera.Utils.OAuth
                 return httpListenerContext.Request;
             }
 
-            HttpListenerRequest clientRequest = null;
+            HttpListenerRequest clientRequest;
             try
             {
                 clientRequest = await HandleIncomingRequest(_httpListener);

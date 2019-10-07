@@ -215,7 +215,7 @@ namespace wBeatSaberCamera.Twitch
                 _twitchApi = new TwitchAPI();
 
                 // ReSharper disable StringLiteralTypo
-                _twitchApi.Settings.ClientId = OAuth.ClientId;
+                _twitchApi.Settings.ClientId = OAuth.CLIENT_ID;
 
                 // ReSharper restore StringLiteralTypo
                 _twitchApi.Settings.AccessToken = _configModel.OAuthAccessToken.AccessToken;

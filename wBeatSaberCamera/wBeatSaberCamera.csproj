@@ -209,6 +209,7 @@
     <Compile Include="Converter\BooleanToInvertedBooleanConverter.cs" />
     <Compile Include="Models\ChatConfigModel.cs" />
     <Compile Include="Models\Chatter.cs" />
+    <Compile Include="Models\FrankerFaceZModels\FrankerFaceZModels.cs" />
     <Compile Include="Models\MainViewModel.cs" />
     <Compile Include="Models\ObservableDictionary.cs" />
     <Compile Include="Utils\TaskSerializer.cs" />
