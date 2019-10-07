@@ -8,8 +8,7 @@ namespace wBeatSaberCamera.Models
     [DataContract]
     public class TwitchBotConfigModel : DirtyBase
     {
-        private string _userName = "";
-        private string _accessToken;
+        private OAuthAccessToken _oAuthAccessToken;
         private string _channel = "";
 
         private ObservableSet<char> _commandIdentifiers = new ObservableSet<char>()
@@ -43,38 +42,19 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
-        public string UserName
+        public OAuthAccessToken OAuthAccessToken
         {
-            get => _userName;
+            get => _oAuthAccessToken;
             set
             {
-                if (value == _userName)
+                if (value == _oAuthAccessToken)
                 {
                     return;
                 }
 
-                _userName = value;
-                OnPropertyChanged();
-            }
-        }
-
-        [DataMember]
-        public string AccessToken
-        {
-            get => _accessToken;
-            set
-            {
-                if (value?.StartsWith("oauth:") ?? false)
-                {
-                    value = value.Substring(6);
-                }
-
-                if (value == _accessToken)
-                {
-                    return;
-                }
-
-                _accessToken = value;
+                UnsubscribeDirtyChild(_oAuthAccessToken);
+                _oAuthAccessToken = value;
+                SubscribeDirtyChild(_oAuthAccessToken);
                 OnPropertyChanged();
             }
         }
@@ -237,6 +217,12 @@ namespace wBeatSaberCamera.Models
                 _commandIdentifiers = value;
                 OnPropertyChanged();
             }
+        }
+
+        public override void Clean()
+        {
+            OAuthAccessToken.Clean();
+            base.Clean();
         }
     }
 }

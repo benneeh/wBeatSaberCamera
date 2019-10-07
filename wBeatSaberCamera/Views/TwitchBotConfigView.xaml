@@ -31,7 +31,7 @@
                     <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" Text="Username" />
-                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding OAuthAccessToken.UserName, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -41,7 +41,7 @@
                     <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" Text="OAuth token" />
-                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding AccessToken, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding OAuthAccessToken.AccessToken, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Effect>
                         <BlurEffect Radius="10" />
                     </TextBox.Effect>

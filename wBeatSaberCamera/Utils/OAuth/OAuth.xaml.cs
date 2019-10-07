@@ -10,6 +10,8 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows;
 using wBeatSaberCamera.Annotations;
+using wBeatSaberCamera.Models;
+using wBeatSaberCamera.Views;
 
 namespace wBeatSaberCamera.Utils.OAuth
 {
@@ -31,37 +33,8 @@ namespace wBeatSaberCamera.Utils.OAuth
             InitializeComponent();
         }
 
-        public string AccessToken
+        public OAuthAccessToken OAuthAccessToken
         {
-            [PublicAPI]
-            get;
-            set;
-        }
-
-        public string TokenType
-        {
-            [PublicAPI]
-            get;
-            set;
-        }
-
-        public string UserName
-        {
-            [PublicAPI]
-            get;
-            set;
-        }
-
-        public string[] Scopes
-        {
-            [PublicAPI]
-            get;
-            set;
-        }
-
-        public int UserId
-        {
-            [PublicAPI]
             get;
             set;
         }
@@ -77,7 +50,7 @@ namespace wBeatSaberCamera.Utils.OAuth
             string state = RandomDataBase64Url(32);
 
             // Creates a redirect URI using an available port on the loopback address.
-            string redirectUri = $"http://localhost:50393/";
+            string redirectUri = $"http://localhost:30393/";
             Output("redirect URI: " + redirectUri);
 
             // Creates an HttpListener to listen for requests on that redirect URI.
@@ -229,13 +202,20 @@ namespace wBeatSaberCamera.Utils.OAuth
                     client_id = "",
                     login = "",
                     scopes = new string[] { },
-                    user_id = 0
+                    user_id = 0,
+                    expires_in = 0
                 });
-                AccessToken = accessToken;
-                TokenType = tokenType;
-                UserName = userInfo.login;
-                UserId = userInfo.user_id;
-                Scopes = userInfo.scopes;
+
+                OAuthAccessToken = new OAuthAccessToken()
+                {
+                    AccessToken = accessToken,
+                    TokenType = tokenType,
+                    UserName = userInfo.login,
+                    UserId = userInfo.user_id,
+                    Scopes = userInfo.scopes,
+                    ExpiresAt = DateTime.UtcNow.AddSeconds(userInfo.expires_in)
+                };
+
                 Output(userInfoResponseText);
             }
         }

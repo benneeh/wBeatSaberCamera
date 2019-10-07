@@ -148,11 +148,10 @@ namespace wBeatSaberCamera.Views
             var oauth = new OAuth();
             if (oauth.ShowDialog() ?? false)
             {
-                MainViewModel.TwitchBotConfigModel.UserName = oauth.UserName;
-                MainViewModel.TwitchBotConfigModel.AccessToken = oauth.AccessToken;
+                MainViewModel.TwitchBotConfigModel.OAuthAccessToken = oauth.OAuthAccessToken;
                 if (MainViewModel.TwitchBotConfigModel.Channel.IsNullOrEmpty())
                 {
-                    MainViewModel.TwitchBotConfigModel.Channel = oauth.UserName;
+                    MainViewModel.TwitchBotConfigModel.Channel = oauth.OAuthAccessToken.UserName;
                 }
             }
             (Parent as Window)?.Activate();

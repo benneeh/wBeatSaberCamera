@@ -182,7 +182,7 @@ namespace wBeatSaberCamera.Twitch
 
             _configModel.PropertyChanged += (s, e) => RegisterEventHandlerSafe(s, e, ConfigModelPropertyChanged);
             _twitchClient = new TwitchClient(logger: new TwitchBotLogger<TwitchClient>());
-            _twitchClient.Initialize(new ConnectionCredentials(_configModel.UserName, $"oauth:{_configModel.AccessToken}"), _configModel.Channel);
+            _twitchClient.Initialize(new ConnectionCredentials(_configModel.OAuthAccessToken.UserName, $"oauth:{_configModel.OAuthAccessToken.AccessToken}"), _configModel.Channel);
             _twitchClient.OnMessageReceived += (s, e) =>
             {
                 if (_chatConfigModel.IsTextToSpeechEnabled && !_configModel.CommandIdentifiers.Contains(e.ChatMessage.Message.FirstOrDefault()))
@@ -218,7 +218,7 @@ namespace wBeatSaberCamera.Twitch
                 _twitchApi.Settings.ClientId = OAuth.ClientId;
 
                 // ReSharper restore StringLiteralTypo
-                _twitchApi.Settings.AccessToken = _configModel.AccessToken;
+                _twitchApi.Settings.AccessToken = _configModel.OAuthAccessToken.AccessToken;
             }
 
             var channel = await GetChannelByName(_configModel.Channel);
@@ -346,7 +346,7 @@ namespace wBeatSaberCamera.Twitch
                 return;
             }
 
-            await Task.WhenAll(_twitchClient.JoinedChannels.Select(channel => Task.Run(() => SendMessage(channel.Channel, $"'{_configModel.UserName}' stopping", true))));
+            await Task.WhenAll(_twitchClient.JoinedChannels.Select(channel => Task.Run(() => SendMessage(channel.Channel, $"'{_configModel.OAuthAccessToken.UserName}' stopping", true))));
 
             _twitchClient.Disconnect();
             IsConnecting = false;

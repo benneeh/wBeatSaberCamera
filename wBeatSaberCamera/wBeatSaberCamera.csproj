@@ -236,6 +236,7 @@
     <Compile Include="Views\ChatConfig.xaml.cs">
       <DependentUpon>ChatConfig.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\OAuthAccessToken.cs" />
     <Compile Include="Views\TwitchBotConfigView.xaml.cs">
       <DependentUpon>TwitchBotConfigView.xaml</DependentUpon>
     </Compile>
