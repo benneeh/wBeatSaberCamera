@@ -27,21 +27,23 @@
         <TextBox Name="TbText" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" VerticalAlignment="Stretch" />
         <Button Content="Read" Grid.Row="2" Click="Button_Click" />
         <GroupBox Header="Chatters" Grid.Column="1" Grid.RowSpan="3">
-            <ItemsControl ItemsSource="{Binding ChatConfigModel.Chatters}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid DataContext="{Binding Value}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <utils:DirtyBackground Grid.ColumnSpan="2" />
-                            <TextBlock Text="{Binding Name}" />
-                            <Button Content="X" Grid.Column="1" CommandParameter="{Binding}" Command="{StaticResource RemoveChatterCommand}" />
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding ChatConfigModel.Chatters}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid DataContext="{Binding Value}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <utils:DirtyBackground Grid.ColumnSpan="2" />
+                                <TextBlock Text="{Binding Name}" />
+                                <Button Content="X" Grid.Column="1" CommandParameter="{Binding}" Command="{StaticResource RemoveChatterCommand}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </GroupBox>
     </Grid>
 </UserControl>
