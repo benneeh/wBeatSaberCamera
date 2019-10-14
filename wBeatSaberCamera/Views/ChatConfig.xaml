@@ -27,23 +27,76 @@
         <TextBox Name="TbText" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" VerticalAlignment="Stretch" />
         <Button Content="Read" Grid.Row="2" Click="Button_Click" />
         <GroupBox Header="Chatters" Grid.Column="1" Grid.RowSpan="3">
-            <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding ChatConfigModel.Chatters}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid DataContext="{Binding Value}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <utils:DirtyBackground Grid.ColumnSpan="2" />
-                                <TextBlock Text="{Binding Name}" />
-                                <Button Content="X" Grid.Column="1" CommandParameter="{Binding}" Command="{StaticResource RemoveChatterCommand}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+                    <ListView Name="Chatters" ItemsSource="{Binding ChatConfigModel.Chatters}" HorizontalContentAlignment="Stretch">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid DataContext="{Binding Value}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <utils:DirtyBackground Grid.ColumnSpan="2" />
+                                    <TextBlock Text="{Binding Name}" />
+                                    <Button Content="X" Grid.Column="1" CommandParameter="{Binding}" Command="{StaticResource RemoveChatterCommand}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </ScrollViewer>
+                <Expander Header="Chatter details" ExpandDirection="Up" Grid.Row="1" DataContext="{Binding SelectedItem.Value, ElementName=Chatters}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center" Grid.Row="0" Text="Name"/>
+                        <TextBox Text="{Binding Name, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="0" />
+
+                        <TextBlock VerticalAlignment="Center" Grid.Row="1" Text="Position"/>
+                        <TextBox Text="{Binding Position, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="1" /> <!--TODO: position binding x,y,z-->
+
+                        <TextBlock VerticalAlignment="Center" Grid.Row="2" Text="Pitch"/>
+                        <TextBox Text="{Binding Pitch}" Grid.Column="1" Grid.Row="2" />
+
+                        <TextBlock VerticalAlignment="Center" Grid.Row="3" Text="SpeechPitch"/>
+                        <TextBox Text="{Binding SpeechPitch}" Grid.Column="1" Grid.Row="3" />
+
+                        <TextBlock VerticalAlignment="Center" Grid.Row="4" Text="SpeechRate"/>
+                        <TextBox Text="{Binding SpeechRate}" Grid.Column="1" Grid.Row="4" />
+
+                        <TextBlock VerticalAlignment="Center" Grid.Row="5" Text="TrembleBegin"/>
+                        <TextBox Text="{Binding TrembleBegin}" Grid.Column="1" Grid.Row="5" />
+
+                        <TextBlock VerticalAlignment="Center" Grid.Row="6" Text="TrembleSpeed"/>
+                        <TextBox Text="{Binding TrembleSpeed}" Grid.Column="1" Grid.Row="6" />
+
+                        <TextBlock VerticalAlignment="Center" Grid.Row="7" Text="TrembleFactor"/>
+                        <TextBox Text="{Binding TrembleFactor}" Grid.Column="1" Grid.Row="7" />
+
+                        <TextBlock VerticalAlignment="Center" Grid.Row="8" Text="LastSpeakTime"/>
+                        <TextBox Text="{Binding LastSpeakTime, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="8" /> <!--TODO: date time binding-->
+
+                        <!--ObservableDictionary<CultureInfo, string>VoiceName-->
+                    </Grid>
+                </Expander>
+            </Grid>
         </GroupBox>
     </Grid>
 </UserControl>
