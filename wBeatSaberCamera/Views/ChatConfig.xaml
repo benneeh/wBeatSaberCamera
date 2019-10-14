@@ -79,7 +79,29 @@
                     <TextBox Text="{Binding Position, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="1" />
                     <!--TODO: position binding x,y,z-->
                 </Grid>
-                <!--ObservableDictionary<CultureInfo, string>-->
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="2" Text="Voices"/>
+                    <ItemsControl Grid.Column="1" ItemsSource="{Binding VoiceName}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Text="{Binding Key.DisplayName, Mode=OneWay}" IsReadOnly="True" />
+                                    <TextBox Grid.Column="1" Text="{Binding Value, Mode=OneWay}" IsReadOnly="True" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
 
                 <Grid>
                     <Grid.ColumnDefinitions>
