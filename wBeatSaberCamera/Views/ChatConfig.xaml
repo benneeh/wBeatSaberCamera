@@ -22,6 +22,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition Width="Auto" MinWidth="200" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <CheckBox Content="Enable TTS for chatters" IsChecked="{Binding ChatConfigModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged}" />
         <TextBox Name="TbText" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" VerticalAlignment="Stretch" />
@@ -49,54 +50,102 @@
                         </ListView.ItemTemplate>
                     </ListView>
                 </ScrollViewer>
-                <Expander Header="Chatter details" ExpandDirection="Up" Grid.Row="1" DataContext="{Binding SelectedItem.Value, ElementName=Chatters}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock VerticalAlignment="Center" Grid.Row="0" Text="Name"/>
-                        <TextBox Text="{Binding Name, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="0" />
-
-                        <TextBlock VerticalAlignment="Center" Grid.Row="1" Text="Position"/>
-                        <TextBox Text="{Binding Position, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="1" /> <!--TODO: position binding x,y,z-->
-
-                        <TextBlock VerticalAlignment="Center" Grid.Row="2" Text="Pitch"/>
-                        <TextBox Text="{Binding Pitch}" Grid.Column="1" Grid.Row="2" />
-
-                        <TextBlock VerticalAlignment="Center" Grid.Row="3" Text="SpeechPitch"/>
-                        <TextBox Text="{Binding SpeechPitch}" Grid.Column="1" Grid.Row="3" />
-
-                        <TextBlock VerticalAlignment="Center" Grid.Row="4" Text="SpeechRate"/>
-                        <TextBox Text="{Binding SpeechRate}" Grid.Column="1" Grid.Row="4" />
-
-                        <TextBlock VerticalAlignment="Center" Grid.Row="5" Text="TrembleBegin"/>
-                        <TextBox Text="{Binding TrembleBegin}" Grid.Column="1" Grid.Row="5" />
-
-                        <TextBlock VerticalAlignment="Center" Grid.Row="6" Text="TrembleSpeed"/>
-                        <TextBox Text="{Binding TrembleSpeed}" Grid.Column="1" Grid.Row="6" />
-
-                        <TextBlock VerticalAlignment="Center" Grid.Row="7" Text="TrembleFactor"/>
-                        <TextBox Text="{Binding TrembleFactor}" Grid.Column="1" Grid.Row="7" />
-
-                        <TextBlock VerticalAlignment="Center" Grid.Row="8" Text="LastSpeakTime"/>
-                        <TextBox Text="{Binding LastSpeakTime, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="8" /> <!--TODO: date time binding-->
-
-                        <!--ObservableDictionary<CultureInfo, string>VoiceName-->
-                    </Grid>
-                </Expander>
             </Grid>
         </GroupBox>
+        <Expander ExpandDirection="Right" Grid.Column="2" Grid.RowSpan="2" DataContext="{Binding SelectedItem.Value, ElementName=Chatters}">
+            <Expander.Header>
+                <TextBlock Text="Chatter details">
+                    <TextBlock.LayoutTransform>
+                        <RotateTransform Angle="90" />
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+            </Expander.Header>
+            <StackPanel Orientation="Vertical" Grid.IsSharedSizeScope="True">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="0" Text="Name"/>
+                    <TextBox Text="{Binding Name, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="0" />
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="1" Text="Position"/>
+                    <TextBox Text="{Binding Position, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="1" />
+                    <!--TODO: position binding x,y,z-->
+                </Grid>
+                <!--ObservableDictionary<CultureInfo, string>-->
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="2" Text="Pitch"/>
+                    <TextBox Text="{Binding Pitch}" Grid.Column="1" Grid.Row="2" />
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="3" Text="SpeechPitch"/>
+                    <TextBox Text="{Binding SpeechPitch}" Grid.Column="1" Grid.Row="3" />
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="4" Text="SpeechRate"/>
+                    <TextBox Text="{Binding SpeechRate}" Grid.Column="1" Grid.Row="4" />
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="5" Text="TrembleBegin"/>
+                    <TextBox Text="{Binding TrembleBegin}" Grid.Column="1" Grid.Row="5" />
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="6" Text="TrembleSpeed"/>
+                    <TextBox Text="{Binding TrembleSpeed}" Grid.Column="1" Grid.Row="6" />
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="7" Text="TrembleFactor"/>
+                    <TextBox Text="{Binding TrembleFactor}" Grid.Column="1" Grid.Row="7" />
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="8" Text="LastSpeakTime"/>
+                    <TextBox Text="{Binding LastSpeakTime, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="8" />
+                    <!--TODO: date time binding-->
+                </Grid>
+            </StackPanel>
+        </Expander>
     </Grid>
 </UserControl>
