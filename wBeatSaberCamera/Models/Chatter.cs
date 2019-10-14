@@ -176,6 +176,7 @@ namespace wBeatSaberCamera.Models
         private Vector3 _position;
         private int _speechRate;
         private int _speechPitch;
+        private DateTime _lastSpeakTime;
         private static ReadOnlyCollection<InstalledVoice> _voices;
         private static readonly Random s_random = new Random();
 
@@ -192,6 +193,20 @@ namespace wBeatSaberCamera.Models
                 }
 
                 return _voices;
+            }
+        }
+
+        [DataMember]
+        public DateTime LastSpeakTime
+        {
+            get => _lastSpeakTime;
+            set
+            {
+                if (value.Equals(_lastSpeakTime))
+                    return;
+
+                _lastSpeakTime = value;
+                OnPropertyChanged();
             }
         }
 

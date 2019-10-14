@@ -305,6 +305,7 @@ namespace wBeatSaberCamera.Models
 
                     using (var ms = new MemoryStream())
                     {
+                        chatter.LastSpeakTime = DateTime.UtcNow;
                         chatter.WriteSpeechToStream(language, text, ms);
                         if (ms.Length == 0)
                         {
