@@ -79,7 +79,7 @@ namespace wBeatSaberCamera.Service
 
         public async Task<bool> Initialize()
         {
-            Process.Start($"{nameof(SpeechHost)}.exe", _port.ToString());
+            Process.Start("SpeechHost.WebApi.exe", _port.ToString());
 
             return await RetryPolicy.ExecuteAsync(async () =>
             {

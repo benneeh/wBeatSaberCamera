@@ -1,9 +1,7 @@
 ﻿using SpeechHost.Requests;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Net.Http;
-using System.Speech.Synthesis;
 using System.Web.Http;
 
 namespace SpeechHost.Controller
@@ -11,8 +9,6 @@ namespace SpeechHost.Controller
     [RoutePrefix("api/Speech")]
     public class SpeechController : ApiController
     {
-        private static readonly SpeechSynthesizer s_speechSynthesizer = new SpeechSynthesizer();
-
         [Route("Hello")]
         [HttpGet]
         public string Hello()
@@ -50,49 +46,39 @@ namespace SpeechHost.Controller
             Console.Title = "Busy";
             try
             {
-                lock (s_speechSynthesizer)
+                byte[] responseBytes = null;
+                if (!string.IsNullOrEmpty(request.Ssml))
                 {
-                    try
-                    {
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            s_speechSynthesizer.SetOutputToWaveStream(memoryStream);
-
-                            if (!string.IsNullOrEmpty(request.Ssml))
-                            {
-                                //new PromptBuilder().StartStyle(new PromptStyle()
-                                s_speechSynthesizer.SpeakSsml(request.Ssml);
-                            }
-                            else if (!string.IsNullOrEmpty(request.Text))
-                            {
-                                if (!string.IsNullOrEmpty(request.VoiceName))
-                                {
-                                    s_speechSynthesizer.SelectVoice(request.VoiceName);
-                                }
-
-                                s_speechSynthesizer.Speak(request.Text);
-                            }
-
-                            var response = new HttpResponseMessage();
-                            response.Content = new ByteArrayContent(memoryStream.ToArray());
-                            return response;
-                        }
-                    }
-#pragma warning disable 168
-                    catch (Exception ex)
-#pragma warning restore 168
-                    {
-                        // ignored
-                    }
-
-                    return null;
+                    //new PromptBuilder().StartStyle(new PromptStyle()
+                    responseBytes = Speech.Speech.SpeakSsml(request.Ssml);
                 }
+
+                if (!string.IsNullOrEmpty(request.Text))
+                {
+                    responseBytes = Speech.Speech.SpeakText(request.Text, request.VoiceName);
+                }
+
+                var response = new HttpResponseMessage()
+                {
+                    Content = new ByteArrayContent(responseBytes)
+                };
+                return response;
+            }
+#pragma warning disable 168
+            catch (Exception ex)
+#pragma warning restore 168
+            {
+                Console.WriteLine(ex);
+
+                // ignored
             }
             finally
             {
                 Console.Title = "On hold";
                 Console.WriteLine($"{DateTime.UtcNow.ToShortTimeString()}: Handling Speak took '{sw.Elapsed}'");
             }
+
+            return null;
         }
 
         [HttpGet]

@@ -356,6 +356,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(SolutionDir)SpeechHost\bin\$(ConfigurationName)\net472\*.*" "$(TargetDir)" /K /D /H</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)SpeechHost.WebApi\bin\$(ConfigurationName)\net472\*.*" "$(TargetDir)" /K /D /H /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>
