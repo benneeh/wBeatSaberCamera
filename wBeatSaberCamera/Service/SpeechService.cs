@@ -8,24 +8,23 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using Newtonsoft.Json;
+using Microsoft.AspNet.SignalR.Client;
+using SpeechHost.WebApi.Hub;
 using wBeatSaberCamera.Models;
 using wBeatSaberCamera.Twitch;
 using wBeatSaberCamera.Utils;
 
 namespace wBeatSaberCamera.Service
 {
-    public class SpeechHostClient : ObservableBase
+    public class SpeechHostSignalRClient : ObservableBase, ISpeechHostClient
     {
         private readonly int _port;
         private bool _isBusy;
-        private HttpClient _httpClient = new HttpClient();
 
         public bool IsBusy
         {
@@ -41,8 +40,10 @@ namespace wBeatSaberCamera.Service
         }
 
         private readonly TaskCompletionSource<object> _busyStartingProcess = new TaskCompletionSource<object>();
+        private IHubProxy _hubProxy;
+        private HubConnection _hubConnection;
 
-        public SpeechHostClient(int port)
+        public SpeechHostSignalRClient(int port)
         {
             _port = port;
         }
@@ -55,20 +56,8 @@ namespace wBeatSaberCamera.Service
 
             try
             {
-                var message = new HttpRequestMessage(HttpMethod.Post, $"http://localhost:{_port}/api/Speech/SpeakSsml");
-                message.Content = new StringContent(JsonConvert.SerializeObject(ssml), Encoding.UTF8, "application/json");
-
-                var response = await _httpClient.SendAsync(message, HttpCompletionOption.ResponseHeadersRead);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var stream = await response.Content.ReadAsStreamAsync();
-                    await stream.CopyToAsync(targetStream);
-                }
-                else
-                {
-                    Log.Error("Got unexpected response from SpeechHost:\n" + response.ToString());
-                }
+                var response = await _hubProxy.Invoke<byte[]>("SpeakSsml", ssml);
+                targetStream.Write(response, 0, response.Length);
             }
             finally
             {
@@ -79,14 +68,27 @@ namespace wBeatSaberCamera.Service
 
         public async Task<bool> Initialize()
         {
-            Process.Start("SpeechHost.WebApi.exe", _port.ToString());
+            var launchParams = new ProcessStartInfo()
+            {
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                FileName = "SpeechHost.WebApi.exe",
+                Arguments = $"{_port}",
+                CreateNoWindow = true
+            };
+
+            Process.Start(launchParams);
+
+            _hubConnection = new HubConnection($"http://localhost:{_port}/signalr");
+            _hubProxy = _hubConnection.CreateHubProxy("SpeechHub");
+            await _hubConnection.Start();
 
             return await RetryPolicy.ExecuteAsync(async () =>
             {
                 try
                 {
-                    var response = await _httpClient.GetStringAsync($"http://localhost:{_port}/api/Speech/Hello");
-                    if (response != "\"World\"")
+                    var response = await _hubProxy.Invoke<string>("Hello");
+                    if (response != "World")
                     {
                         Log.Error($"Expected the world, but only got '{response}'");
                         return false;
@@ -97,12 +99,14 @@ namespace wBeatSaberCamera.Service
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e.ToString());
-                    throw new TransientException(e.Message);
+                    throw new TransientException(e);
                 }
-
-                return false;
             });
+        }
+
+        public void Dispose()
+        {
+            _hubConnection.Stop();
         }
     }
 
@@ -110,19 +114,21 @@ namespace wBeatSaberCamera.Service
     {
         private int cacheIndex;
 
-        public ObservableCollection<SpeechHostClient> SpeechHostClients
+        public ObservableCollection<ISpeechHostClient> SpeechHostClients
         {
             get;
-        } = new ObservableCollection<SpeechHostClient>();
+        } = new ObservableCollection<ISpeechHostClient>();
 
         public SpeechHostClientCache()
         {
             BindingOperations.EnableCollectionSynchronization(SpeechHostClients, new object());
         }
 
-        private async Task<SpeechHostClient> GetFreeClient()
+        private Task<ISpeechHostClient> clientCreator;
+
+        private async Task<ISpeechHostClient> GetFreeClient(int tries = 3)
         {
-            SpeechHostClient client;
+            ISpeechHostClient client;
 
             try
             {
@@ -147,17 +153,29 @@ namespace wBeatSaberCamera.Service
                     }
 
                     throw new TransientException("All clients busy");
-                }, 3);
+                }, tries);
                 return client;
             }
             catch (Exception)
             {
-                client = new SpeechHostClient(FreeRandomTcpPort());
-                if (await client.Initialize())
+                if (clientCreator == null || clientCreator.IsCompleted)
                 {
-                    SpeechHostClients.Add(client);
-                    return client;
+                    clientCreator = Task.Run(async () =>
+                    {
+                        var newClient = new SpeechHostSignalRClient(FreeRandomTcpPort());
+                        if (await newClient.Initialize())
+                        {
+                            SpeechHostClients.Add(newClient);
+                            return (ISpeechHostClient)newClient;
+                        }
+
+                        newClient.Dispose();
+
+                        throw new InvalidOperationException("couldnt create new client");
+                    });
                 }
+
+                return await clientCreator;
             }
 
             throw new Exception("Could not get/create a new SpeechHostClient");
@@ -184,8 +202,8 @@ namespace wBeatSaberCamera.Service
                 catch (Exception ex)
                 {
                     SpeechHostClients.Remove(client);
-                    Log.Warn(ex.ToString());
-                    throw new TransientException(ex.Message);
+                    client.Dispose();
+                    throw new TransientException(ex);
                 }
             });
         }
@@ -193,15 +211,15 @@ namespace wBeatSaberCamera.Service
 
     public class SpeechService
     {
-        private readonly ChatConfigModel _chatConfigModel;
+        private readonly ChatViewModel _chatViewModel;
         private NaiveBayesLanguageIdentifier _lazyLanguagesIdentifier;
         private readonly AudioListener _audioListener;
         private readonly VrPositioningService _vrPositioningService;
         private readonly SpeechHostClientCache _speechHostClientCache = new SpeechHostClientCache();
 
-        public SpeechService(ChatConfigModel chatConfigModel)
+        public SpeechService(ChatViewModel chatViewModel)
         {
-            _chatConfigModel = chatConfigModel;
+            _chatViewModel = chatViewModel;
             _audioListener = new AudioListener();
             _vrPositioningService = new VrPositioningService();
         }
@@ -290,7 +308,7 @@ namespace wBeatSaberCamera.Service
                             pitch = 1;
                         }
 
-                        pitch *= _chatConfigModel.MaxPitchFactor;
+                        pitch *= _chatViewModel.MaxPitchFactor;
 
                         //Console.WriteLine(pitch);
                         soundEffect.Pitch = (float)pitch;

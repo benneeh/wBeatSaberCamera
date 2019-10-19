@@ -75,6 +75,8 @@ namespace SpeechHost
             config.MapHttpAttributeRoutes();
 
             app.UseWebApi(config);
+
+            app.MapSignalR();
         }
     }
 }

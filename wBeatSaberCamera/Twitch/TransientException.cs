@@ -8,5 +8,10 @@ namespace wBeatSaberCamera.Twitch
             : base(message)
         {
         }
+
+        public TransientException(Exception ex)
+            : base(ex.Message, ex)
+        {
+        }
     }
 }
