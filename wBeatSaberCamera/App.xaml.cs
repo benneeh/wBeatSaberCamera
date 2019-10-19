@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using wBeatSaberCamera.DataType;
 using wBeatSaberCamera.Models;
@@ -13,6 +14,8 @@ namespace wBeatSaberCamera
     /// </summary>
     public partial class App : Application
     {
+        private static bool s_isSaving;
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -50,30 +53,60 @@ namespace wBeatSaberCamera
                 settings.AppConfigModel.IsDirty = true;
                 settings.CameraConfigModel.IsDirty = true;
                 settings.TwitchBotConfigModel.IsDirty = true;
-                settings.ChatConfigModel.IsDirty = true;
             }
 
             mainViewModel.AppConfigModel = settings.AppConfigModel;
             mainViewModel.CameraConfigModel = settings.CameraConfigModel;
             mainViewModel.TwitchBotConfigModel = settings.TwitchBotConfigModel;
-            mainViewModel.ChatConfigModel.Chatters.CollectionChanged -= Chatters_CollectionChanged;
-            mainViewModel.ChatConfigModel = settings.ChatConfigModel;
-            mainViewModel.ChatConfigModel.Chatters.CollectionChanged += Chatters_CollectionChanged;
+            mainViewModel.ChatViewModel.Chatters.CollectionChanged -= Chatters_CollectionChanged;
+            mainViewModel.ChatViewModel = new ChatViewModel()
+            {
+                Chatters = new ObservableDictionary<string, Chatter>(settings.ChatConfigModel.Chatters),
+                IsSpeechToTextEnabled = settings.ChatConfigModel.IsSpeechToTextEnabled,
+                MaxPitchFactor = settings.ChatConfigModel.MaxPitchFactor,
+                IsReadingStreamerMessagesEnabled = settings.ChatConfigModel.IsReadingStreamerMessagesEnabled,
+                IsSendMessagesEnabled = settings.ChatConfigModel.IsSendMessagesEnabled,
+                IsTextToSpeechEnabled = settings.ChatConfigModel.IsTextToSpeechEnabled,
+            };
+            mainViewModel.ChatViewModel.Clean();
+            mainViewModel.ChatViewModel.Chatters.CollectionChanged += Chatters_CollectionChanged;
         }
 
         private void Chatters_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            Dispatcher?.Invoke(() =>
+            if (s_isSaving)
             {
-                var mainViewModel = (MainViewModel) Resources["MainViewModel"];
-                var settings = BeatSaberCameraSettings.LoadFromFile();
-                if (settings == null)
+                return;
+            }
+
+            s_isSaving = true;
+            var mainViewModel = (MainViewModel)Resources["MainViewModel"];
+
+            Task.Run(() =>
+            {
+                try
                 {
-                    return;
+                    var settings = BeatSaberCameraSettings.LoadFromFile();
+                    if (settings == null)
+                    {
+                        return;
+                    }
+
+                    // only update chatters settings
+                    lock (mainViewModel.ChatViewModel.Chatters)
+                    {
+                        settings.ChatConfigModel.Chatters = new ObservableDictionary<string, Chatter>(mainViewModel.ChatViewModel.Chatters);
+                    }
+                    BeatSaberCameraSettings.Save(settings);
+                    foreach (var chatter in settings.ChatConfigModel.Chatters.Values)
+                    {
+                        chatter.Clean();
+                    }
                 }
-                // only update chatters settings
-                settings.ChatConfigModel.Chatters = mainViewModel.ChatConfigModel.Chatters;
-                BeatSaberCameraSettings.Save(settings.AppConfigModel, settings.CameraConfigModel, settings.TwitchBotConfigModel, settings.ChatConfigModel);
+                finally
+                {
+                    s_isSaving = false;
+                }
             });
         }
 

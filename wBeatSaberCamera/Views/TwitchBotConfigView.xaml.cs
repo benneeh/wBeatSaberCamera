@@ -20,7 +20,7 @@ namespace wBeatSaberCamera.Views
         public TwitchBotConfigView()
         {
             InitializeComponent();
-            MainViewModel.TwitchBot = new TwitchBot(MainViewModel.ChatConfigModel, MainViewModel.TwitchBotConfigModel);
+            MainViewModel.TwitchBot = new TwitchBot(MainViewModel.ChatViewModel, MainViewModel.TwitchBotConfigModel);
             //MainViewModel.TwitchBotConfigModel.Commands.Add(
             //    new TwitchChatCommand(
             //        "fpv",

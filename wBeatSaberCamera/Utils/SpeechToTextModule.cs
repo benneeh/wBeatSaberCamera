@@ -13,7 +13,7 @@ namespace wBeatSaberCamera.Utils
     public class SpeechToTextModule : ObservableBase, IDisposable
     {
         private static readonly HttpClient s_httpClient = new HttpClient();
-        private readonly ChatConfigModel _chatConfigModel;
+        private readonly ChatViewModel _chatViewModel;
         private readonly TwitchBotConfigModel _botConfigModel;
         private SpeechRecognitionEngine _speechRecognitionEngine;
         public event EventHandler<SpeechRecognizedEventArgs> SpeechRecognized;
@@ -33,13 +33,13 @@ namespace wBeatSaberCamera.Utils
             }
         }
 
-        public SpeechToTextModule(ChatConfigModel chatConfigModel, TwitchBotConfigModel botConfigModel)
+        public SpeechToTextModule(ChatViewModel chatViewModel, TwitchBotConfigModel botConfigModel)
         {
-            _chatConfigModel = chatConfigModel;
+            _chatViewModel = chatViewModel;
             _botConfigModel = botConfigModel;
             botConfigModel.PropertyChanged += BotConfigModelPropertyChanged;
-            chatConfigModel.PropertyChanged += ChatConfigModel_PropertyChanged;
-            if (chatConfigModel.IsSpeechToTextEnabled)
+            chatViewModel.PropertyChanged += ChatConfigModel_PropertyChanged;
+            if (chatViewModel.IsSpeechToTextEnabled)
             {
                 Start();
             }
@@ -47,9 +47,9 @@ namespace wBeatSaberCamera.Utils
 
         private void ChatConfigModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(_chatConfigModel.IsSpeechToTextEnabled))
+            if (e.PropertyName == nameof(_chatViewModel.IsSpeechToTextEnabled))
             {
-                if (_chatConfigModel.IsSpeechToTextEnabled)
+                if (_chatViewModel.IsSpeechToTextEnabled)
                 {
                     Start();
                 }
@@ -64,7 +64,7 @@ namespace wBeatSaberCamera.Utils
         {
             if (e.PropertyName == nameof(_botConfigModel.Channel))
             {
-                if (_chatConfigModel.IsSpeechToTextEnabled)
+                if (_chatViewModel.IsSpeechToTextEnabled)
                 {
                     Stop();
                     Start();
@@ -103,7 +103,7 @@ namespace wBeatSaberCamera.Utils
                 // Start asynchronous, continuous speech recognition.
                 speechRecognitionEngine.RecognizeAsync(RecognizeMode.Multiple);
 
-                if (!_chatConfigModel.IsSpeechToTextEnabled)
+                if (!_chatViewModel.IsSpeechToTextEnabled)
                 {
                     speechRecognitionEngine.Dispose();
                     return;

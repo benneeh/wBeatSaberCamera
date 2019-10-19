@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using TwitchLib.Client.Models;
 using wBeatSaberCamera.Service;
@@ -10,7 +11,52 @@ using Vector3 = Microsoft.Xna.Framework.Vector3;
 namespace wBeatSaberCamera.Models
 {
     [DataContract]
-    public class ChatConfigModel : DirtyBase
+    public class ChatConfigModel
+    {
+        [DataMember]
+        public ObservableDictionary<string, Chatter> Chatters
+        {
+            get;
+            set;
+        }
+
+        [DataMember]
+        public bool IsTextToSpeechEnabled
+        {
+            get;
+            set;
+        }
+
+        [DataMember]
+        public double MaxPitchFactor
+        {
+            get;
+            set;
+        }
+
+        [DataMember]
+        public bool IsSendMessagesEnabled
+        {
+            get;
+            set;
+        }
+
+        [DataMember]
+        public bool IsReadingStreamerMessagesEnabled
+        {
+            get;
+            set;
+        }
+
+        [DataMember]
+        public bool IsSpeechToTextEnabled
+        {
+            get;
+            set;
+        }
+    }
+
+    public class ChatViewModel : DirtyBase
     {
         #region private fields
 
@@ -23,13 +69,13 @@ namespace wBeatSaberCamera.Models
         private bool _isSendMessagesEnabled;
         private bool _isReadingStreamerMessagesEnabled;
         private bool _isSpeechToTextEnabled;
-        private readonly SpeechService _speechService;
+        private SpeechService SpeechService => _lazySpeechService.Value;
+        private readonly Lazy<SpeechService> _lazySpeechService;
 
         #endregion private fields
 
         #region properties
 
-        [DataMember]
         public ObservableDictionary<string, Chatter> Chatters
         {
             get => _chatters;
@@ -41,6 +87,7 @@ namespace wBeatSaberCamera.Models
                 }
 
                 UnsubscribeDirtyCollection(_chatters);
+                BindingOperations.EnableCollectionSynchronization(value, new object());
                 _chatters = value;
                 SubscribeDirtyCollection(_chatters);
 
@@ -48,7 +95,6 @@ namespace wBeatSaberCamera.Models
             }
         }
 
-        [DataMember]
         public bool IsTextToSpeechEnabled
         {
             get => _isTextToSpeechEnabled;
@@ -64,7 +110,6 @@ namespace wBeatSaberCamera.Models
             }
         }
 
-        [DataMember]
         public double MaxPitchFactor
         {
             get => _maxPitchFactor;
@@ -80,7 +125,6 @@ namespace wBeatSaberCamera.Models
             }
         }
 
-        [DataMember]
         public bool IsSendMessagesEnabled
         {
             get => _isSendMessagesEnabled;
@@ -94,7 +138,6 @@ namespace wBeatSaberCamera.Models
             }
         }
 
-        [DataMember]
         public bool IsReadingStreamerMessagesEnabled
         {
             get => _isReadingStreamerMessagesEnabled;
@@ -108,7 +151,6 @@ namespace wBeatSaberCamera.Models
             }
         }
 
-        [DataMember]
         public bool IsSpeechToTextEnabled
         {
             get => _isSpeechToTextEnabled;
@@ -124,12 +166,11 @@ namespace wBeatSaberCamera.Models
 
         #endregion properties
 
-        public ChatConfigModel()
+        public ChatViewModel()
         {
             Chatters = new ObservableDictionary<string, Chatter>();
-            BindingOperations.EnableCollectionSynchronization(Chatters, new object());
 
-            _speechService = new SpeechService(this);
+            _lazySpeechService = new Lazy<SpeechService>(() => new SpeechService(this));
         }
 
         public void Speak(string user, string text)
@@ -167,12 +208,12 @@ namespace wBeatSaberCamera.Models
                     //Console.WriteLine($"TS: {chatter.TrembleSpeed}, TF: {chatter.TrembleFactor}");
                 }
 
-                await _speechService.Speak(chatter, text, false);
+                await SpeechService.Speak(chatter, text, false);
             };
 
             if (user != null)
             {
-                _taskSerializer.Enqueue(user, task);
+                _taskSerializer.Enqueue(user, () => task());
             }
             else
             {
@@ -196,6 +237,22 @@ namespace wBeatSaberCamera.Models
                 chatter.Clean();
             }
             base.Clean();
+        }
+
+        public ChatConfigModel AsConfigModel()
+        {
+            lock (Chatters)
+            {
+                return new ChatConfigModel()
+                {
+                    Chatters = new ObservableDictionary<string, Chatter>(Chatters),
+                    IsSpeechToTextEnabled = IsSpeechToTextEnabled,
+                    MaxPitchFactor = MaxPitchFactor,
+                    IsReadingStreamerMessagesEnabled = IsReadingStreamerMessagesEnabled,
+                    IsSendMessagesEnabled = IsSendMessagesEnabled,
+                    IsTextToSpeechEnabled = IsTextToSpeechEnabled,
+                };
+            }
         }
     }
 }

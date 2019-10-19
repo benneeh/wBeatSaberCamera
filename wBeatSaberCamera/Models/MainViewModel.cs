@@ -1,4 +1,5 @@
-﻿using wBeatSaberCamera.Twitch;
+﻿using wBeatSaberCamera.DataType;
+using wBeatSaberCamera.Twitch;
 using wBeatSaberCamera.Utils;
 
 namespace wBeatSaberCamera.Models
@@ -9,19 +10,19 @@ namespace wBeatSaberCamera.Models
         private CameraConfigModel _cameraConfigModel = new CameraConfigModel();
         private TwitchBotConfigModel _twitchBotConfigModel = new TwitchBotConfigModel();
         private TwitchBot _twitchBot;
-        private ChatConfigModel _chatConfigModel = new ChatConfigModel();
+        private ChatViewModel _chatViewModel = new ChatViewModel();
 
-        public ChatConfigModel ChatConfigModel
+        public ChatViewModel ChatViewModel
         {
-            get => _chatConfigModel;
+            get => _chatViewModel;
             set
             {
-                if (Equals(value, _chatConfigModel))
+                if (Equals(value, _chatViewModel))
                 {
                     return;
                 }
 
-                _chatConfigModel = value;
+                _chatViewModel = value;
                 OnPropertyChanged();
             }
         }
@@ -84,6 +85,17 @@ namespace wBeatSaberCamera.Models
                 _twitchBot = value;
                 OnPropertyChanged();
             }
+        }
+
+        public BeatSaberCameraSettings AsSettings()
+        {
+            return new BeatSaberCameraSettings()
+            {
+                CameraConfigModel = CameraConfigModel,
+                TwitchBotConfigModel = TwitchBotConfigModel,
+                AppConfigModel = AppConfigModel,
+                ChatConfigModel = ChatViewModel.AsConfigModel()
+            };
         }
     }
 }

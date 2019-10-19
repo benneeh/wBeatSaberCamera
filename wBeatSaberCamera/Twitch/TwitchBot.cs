@@ -21,7 +21,7 @@ namespace wBeatSaberCamera.Twitch
 {
     public class TwitchBot : ObservableBase, IDisposable
     {
-        private readonly ChatConfigModel _chatConfigModel;
+        private readonly ChatViewModel _chatViewModel;
         private readonly TwitchBotConfigModel _configModel;
 
         [PublicAPI]
@@ -72,12 +72,12 @@ namespace wBeatSaberCamera.Twitch
 
         public IEnumerable<string> FollowKeys => FollowParameters.Union(UserParameters).Union(ChannelParameters).Select(x => $"{{{x}}}");
 
-        public TwitchBot(ChatConfigModel chatConfigModel, TwitchBotConfigModel configModel)
+        public TwitchBot(ChatViewModel chatViewModel, TwitchBotConfigModel configModel)
         {
-            _chatConfigModel = chatConfigModel;
+            _chatViewModel = chatViewModel;
             _configModel = configModel;
 
-            SpeechToTextModule = new SpeechToTextModule(chatConfigModel, configModel);
+            SpeechToTextModule = new SpeechToTextModule(chatViewModel, configModel);
             SpeechToTextModule.SpeechRecognized += (s, e) => RegisterEventHandlerSafe(s, e, _speechToTextModule_SpeechRecognized);
 
             // ReSharper disable UseObjectOrCollectionInitializer
@@ -185,10 +185,10 @@ namespace wBeatSaberCamera.Twitch
             _twitchClient.Initialize(new ConnectionCredentials(_configModel.OAuthAccessToken.UserName, $"oauth:{_configModel.OAuthAccessToken.AccessToken}"), _configModel.Channel);
             _twitchClient.OnMessageReceived += (s, e) =>
             {
-                if (_chatConfigModel.IsTextToSpeechEnabled && !_configModel.CommandIdentifiers.Contains(e.ChatMessage.Message.FirstOrDefault()))
+                if (_chatViewModel.IsTextToSpeechEnabled && !_configModel.CommandIdentifiers.Contains(e.ChatMessage.Message.FirstOrDefault()))
                 {
                     Task.Run(() =>
-                        _chatConfigModel.Speak(e.ChatMessage));
+                        _chatViewModel.Speak(e.ChatMessage));
                 }
             };
             _twitchClient.OnWhisperReceived += (s, e) =>
@@ -511,14 +511,14 @@ namespace wBeatSaberCamera.Twitch
 
         public async Task SendMessage(string channel, string message, bool speak = false)
         {
-            if (!_chatConfigModel.IsSendMessagesEnabled)
+            if (!_chatViewModel.IsSendMessagesEnabled)
             {
                 return;
             }
 
             if (speak)
             {
-                _chatConfigModel.Speak(null, message);
+                _chatViewModel.Speak(null, message);
             }
 
             await RetryPolicy.Execute(() =>

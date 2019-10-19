@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace SpeechHost.Requests
+namespace SpeechHost.WebApi.Requests
 {
     public class SpeechRequest
     {

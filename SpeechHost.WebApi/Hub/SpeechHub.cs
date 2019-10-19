@@ -1,6 +1,6 @@
-﻿using SpeechHost.Requests;
-using System;
+﻿using System;
 using System.Diagnostics;
+using SpeechHost.WebApi.Requests;
 
 namespace SpeechHost.WebApi.Hub
 {

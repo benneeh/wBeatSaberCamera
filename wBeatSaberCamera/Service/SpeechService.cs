@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.AspNet.SignalR.Client;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using NTextCat;
 using System;
@@ -10,11 +11,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using Microsoft.AspNet.SignalR.Client;
-using SpeechHost.WebApi.Hub;
+using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Models;
 using wBeatSaberCamera.Twitch;
 using wBeatSaberCamera.Utils;
@@ -57,7 +56,10 @@ namespace wBeatSaberCamera.Service
             try
             {
                 var response = await _hubProxy.Invoke<byte[]>("SpeakSsml", ssml);
-                targetStream.Write(response, 0, response.Length);
+                if (response != null)
+                {
+                    targetStream.Write(response, 0, response.Length);
+                }
             }
             finally
             {
@@ -70,11 +72,12 @@ namespace wBeatSaberCamera.Service
         {
             var launchParams = new ProcessStartInfo()
             {
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
                 FileName = "SpeechHost.WebApi.exe",
                 Arguments = $"{_port}",
-                CreateNoWindow = true
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                UseShellExecute = false
             };
 
             Process.Start(launchParams);
@@ -112,8 +115,10 @@ namespace wBeatSaberCamera.Service
 
     public class SpeechHostClientCache
     {
-        private int cacheIndex;
+        private int _cacheIndex;
+        private Task<ISpeechHostClient> _clientCreator;
 
+        [PublicAPI]
         public ObservableCollection<ISpeechHostClient> SpeechHostClients
         {
             get;
@@ -123,8 +128,6 @@ namespace wBeatSaberCamera.Service
         {
             BindingOperations.EnableCollectionSynchronization(SpeechHostClients, new object());
         }
-
-        private Task<ISpeechHostClient> clientCreator;
 
         private async Task<ISpeechHostClient> GetFreeClient(int tries = 3)
         {
@@ -137,12 +140,12 @@ namespace wBeatSaberCamera.Service
                     int testCount = 0;
                     while (testCount++ < SpeechHostClients.Count)
                     {
-                        if (cacheIndex > SpeechHostClients.Count - 1)
+                        if (_cacheIndex > SpeechHostClients.Count - 1)
                         {
-                            cacheIndex = 0;
+                            _cacheIndex = 0;
                         }
 
-                        client = SpeechHostClients[cacheIndex++ % SpeechHostClients.Count];
+                        client = SpeechHostClients[_cacheIndex++ % SpeechHostClients.Count];
 
                         if (client.IsBusy)
                         {
@@ -158,9 +161,9 @@ namespace wBeatSaberCamera.Service
             }
             catch (Exception)
             {
-                if (clientCreator == null || clientCreator.IsCompleted)
+                if (_clientCreator == null || _clientCreator.IsCompleted)
                 {
-                    clientCreator = Task.Run(async () =>
+                    _clientCreator = Task.Run(async () =>
                     {
                         var newClient = new SpeechHostSignalRClient(FreeRandomTcpPort());
                         if (await newClient.Initialize())
@@ -171,14 +174,12 @@ namespace wBeatSaberCamera.Service
 
                         newClient.Dispose();
 
-                        throw new InvalidOperationException("couldnt create new client");
+                        throw new InvalidOperationException("Couldn't create new client");
                     });
                 }
 
-                return await clientCreator;
+                return await _clientCreator;
             }
-
-            throw new Exception("Could not get/create a new SpeechHostClient");
         }
 
         private int FreeRandomTcpPort()
@@ -333,6 +334,7 @@ namespace wBeatSaberCamera.Service
             return GetCultureInfoFromIso3Name(res.FirstOrDefault()?.Item1.Iso639_3) ?? CultureInfo.InvariantCulture;
         }
 
+        [PublicAPI]
         public static CultureInfo GetCultureInfoFromIso3Name(string name)
         {
             return CultureInfo

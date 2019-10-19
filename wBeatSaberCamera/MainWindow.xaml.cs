@@ -45,7 +45,8 @@ namespace wBeatSaberCamera
 
         private void SaveCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            BeatSaberCameraSettings.Save(MainViewModel.AppConfigModel, MainViewModel.CameraConfigModel, MainViewModel.TwitchBotConfigModel, MainViewModel.ChatConfigModel);
+            BeatSaberCameraSettings.Save(MainViewModel.AsSettings());
+            MainViewModel.ChatViewModel.Clean();
         }
 
         private void LoadConfigurationCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)

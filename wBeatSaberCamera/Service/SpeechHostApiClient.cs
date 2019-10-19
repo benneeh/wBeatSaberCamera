@@ -58,7 +58,7 @@ namespace wBeatSaberCamera.Service
                 }
                 else
                 {
-                    Log.Error("Got unexpected response from SpeechHost:\n" + response.ToString());
+                    Log.Error("Got unexpected response from SpeechHost:\n" + response);
                 }
             }
             finally

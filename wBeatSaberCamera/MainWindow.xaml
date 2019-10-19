@@ -214,7 +214,7 @@
                     <views:TwitchBotConfigView Grid.Row="1"/>
                 </Grid>
             </TabItem>
-            <TabItem DataContext="{Binding ChatConfigModel}" Header="Chat config">
+            <TabItem DataContext="{Binding ChatViewModel}" Header="Chat config">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -244,7 +244,7 @@
                     <Binding Path="AppConfigModel.IsDirty" />
                     <Binding Path="CameraConfigModel.IsDirty" />
                     <Binding Path="TwitchBotConfigModel.IsDirty" />
-                    <Binding Path="ChatConfigModel.IsDirty" />
+                    <Binding Path="ChatViewModel.IsDirty" />
                 </MultiBinding>
             </Border.IsEnabled>
             <StackPanel>

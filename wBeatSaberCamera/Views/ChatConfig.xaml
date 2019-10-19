@@ -24,7 +24,7 @@
             <ColumnDefinition Width="Auto" MinWidth="200" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <CheckBox Content="Enable TTS for chatters" IsChecked="{Binding ChatConfigModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged}" />
+        <CheckBox Content="Enable TTS for chatters" IsChecked="{Binding ChatViewModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged}" />
         <TextBox Name="TbText" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" VerticalAlignment="Stretch" />
         <Button Content="Read" Grid.Row="2" Click="Button_Click" />
         <GroupBox Header="Chatters" Grid.Column="1" Grid.RowSpan="3">
@@ -33,23 +33,21 @@
                     <RowDefinition />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
-                    <ListView Name="Chatters" ItemsSource="{Binding ChatConfigModel.Chatters}" HorizontalContentAlignment="Stretch">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid DataContext="{Binding Value}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <utils:DirtyBackground Grid.ColumnSpan="2" />
-                                    <TextBlock Text="{Binding Name}" />
-                                    <Button Content="X" Grid.Column="1" CommandParameter="{Binding}" Command="{StaticResource RemoveChatterCommand}" />
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </ScrollViewer>
+                <ListView Name="Chatters" ItemsSource="{Binding ChatViewModel.Chatters}" HorizontalContentAlignment="Stretch">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid DataContext="{Binding Value}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <utils:DirtyBackground Grid.ColumnSpan="2" />
+                                <TextBlock Text="{Binding Name}" />
+                                <Button Content="X" Grid.Column="1" CommandParameter="{Binding}" Command="{StaticResource RemoveChatterCommand}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
             </Grid>
         </GroupBox>
         <Expander ExpandDirection="Right" Grid.Column="2" Grid.RowSpan="2" DataContext="{Binding SelectedItem.Value, ElementName=Chatters}">

@@ -18,13 +18,16 @@ namespace wBeatSaberCamera.Views
             InitializeComponent();
             MainViewModel.TwitchBotConfigModel.Commands.Add(new TwitchChatCommand("rv", "Creates a new voice for the requester", (bot, msg) =>
             {
-                MainViewModel.ChatConfigModel.Chatters.Remove(msg.ChatMessage.Username);
+                lock (MainViewModel.ChatViewModel.Chatters)
+                {
+                    MainViewModel.ChatViewModel.Chatters.Remove(msg.ChatMessage.Username);
+                }
             }));
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            MainViewModel.ChatConfigModel.Speak(null, TbText.Text);
+            MainViewModel.ChatViewModel.Speak(null, TbText.Text);
         }
 
         private void RemoveChatterCommand_OnCanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -35,7 +38,10 @@ namespace wBeatSaberCamera.Views
         private void RemoveChatterCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             var chatter = (Chatter)e.Parameter;
-            MainViewModel.ChatConfigModel.Chatters.Remove(chatter.Name);
+            lock (MainViewModel.ChatViewModel.Chatters)
+            {
+                MainViewModel.ChatViewModel.Chatters.Remove(chatter.Name);
+            }
         }
     }
 }

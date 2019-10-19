@@ -6,9 +6,9 @@ using System.Web.Http;
 using Microsoft.Owin.Hosting;
 using Owin;
 
-namespace SpeechHost
+namespace SpeechHost.WebApi
 {
-    class Program
+    static class Program
     {
         public static readonly TaskCompletionSource<object> AppStopSource = new TaskCompletionSource<object>();
 
@@ -66,8 +66,10 @@ namespace SpeechHost
         }
     }
 
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class Startup
     {
+        // ReSharper disable once UnusedMember.Global
         public void Configuration(IAppBuilder app)
         {
             var config = new HttpConfiguration();
