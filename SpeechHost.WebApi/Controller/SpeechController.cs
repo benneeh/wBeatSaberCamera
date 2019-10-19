@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Web.Http;
 
-namespace SpeechHost.Controller
+namespace SpeechHost.WebApi.Controller
 {
     [RoutePrefix("api/Speech")]
     public class SpeechController : ApiController
