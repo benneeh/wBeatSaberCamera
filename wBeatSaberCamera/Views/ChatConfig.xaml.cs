@@ -24,7 +24,7 @@ namespace wBeatSaberCamera.Views
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            MainViewModel.ChatConfigModel.Spek(null, TbText.Text);
+            MainViewModel.ChatConfigModel.Speak(null, TbText.Text);
         }
 
         private void RemoveChatterCommand_OnCanExecute(object sender, CanExecuteRoutedEventArgs e)

@@ -188,7 +188,7 @@ namespace wBeatSaberCamera.Twitch
                 if (_chatConfigModel.IsTextToSpeechEnabled && !_configModel.CommandIdentifiers.Contains(e.ChatMessage.Message.FirstOrDefault()))
                 {
                     Task.Run(() =>
-                        _chatConfigModel.Spek(e.ChatMessage));
+                        _chatConfigModel.Speak(e.ChatMessage));
                 }
             };
             _twitchClient.OnWhisperReceived += (s, e) =>
@@ -518,11 +518,10 @@ namespace wBeatSaberCamera.Twitch
 
             if (speak)
             {
-                _chatConfigModel.Spek(null, message);
+                _chatConfigModel.Speak(null, message);
             }
 
-            var rs = new RetryPolicy();
-            await rs.ExecuteAsync(() =>
+            await RetryPolicy.Execute(() =>
             {
                 if (!IsConnected)
                 {
@@ -535,7 +534,6 @@ namespace wBeatSaberCamera.Twitch
                 }
 
                 _twitchClient.SendMessage(channel, message);
-                return Task.CompletedTask;
             });
         }
 

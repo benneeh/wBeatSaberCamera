@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>wBeatSaberCamera</RootNamespace>
     <AssemblyName>wBeatSaberCamera</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -211,7 +211,10 @@
     <Compile Include="Models\Chatter.cs" />
     <Compile Include="Models\FrankerFaceZModels\FrankerFaceZModels.cs" />
     <Compile Include="Models\MainViewModel.cs" />
+    <Compile Include="Extensions\Matrix4X4Extensions.cs" />
     <Compile Include="Models\ObservableDictionary.cs" />
+    <Compile Include="Service\SpeechService.cs" />
+    <Compile Include="Service\VrPositioningService.cs" />
     <Compile Include="Utils\TaskSerializer.cs" />
     <Compile Include="Twitch\PublicPropertyAccessorCache.cs" />
     <Compile Include="Twitch\RetryPolicy.cs" />
@@ -346,6 +349,13 @@
       <Project>{65fd0185-aa32-4c79-99b3-acfce70ba99e}</Project>
       <Name>TwitchLib.Client</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SpeechHost\SpeechHost.csproj">
+      <Project>{b62800a6-2820-415a-963a-da07b59c04a0}</Project>
+      <Name>SpeechHost</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(SolutionDir)SpeechHost\bin\$(ConfigurationName)\net472\*.*" "$(TargetDir)" /K /D /H</PostBuildEvent>
+  </PropertyGroup>
 </Project>

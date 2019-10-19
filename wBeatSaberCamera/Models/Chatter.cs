@@ -23,7 +23,7 @@ namespace wBeatSaberCamera.Models
     [DataContract]
     public class Chatter : DirtyBase
     {
-        private static readonly ThreadLocal<SpeechSynthesizer> s_speechSynthesizer = new ThreadLocal<SpeechSynthesizer>(() => new SpeechSynthesizer());
+        private static readonly SpeechSynthesizer s_speechSynthesizer = new SpeechSynthesizer();
 
         [DataMember]
         public string Name
@@ -223,18 +223,42 @@ namespace wBeatSaberCamera.Models
         private static readonly Regex s_urlRegex = new Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", RegexOptions.Compiled);
         private static readonly Regex s_ohReplacementRegex = new Regex("\\b(([a-zA-Z]{2,2})|([a-zA-Z)][aAeEiIoOuUöyYÖäÄüÜ]{2,2}))\\b", RegexOptions.Compiled);
 
-        public void WriteSpeechToStream(CultureInfo language, string text, MemoryStream ms)
+        public string GetSsmlFromText(CultureInfo cultureInfo, string text)
         {
-            if (!VoiceName.ContainsKey(language))
+            var voiceNameForLangueage = GetVoiceForLanguage(cultureInfo);
+
+            text = s_urlRegex.Replace(text, "URL");
+
+            var ssml = $@"
+<speak version=""1.0"" xmlns=""https://www.w3.org/2001/10/synthesis"" xml:lang=""en-US"">
+    <voice name=""{voiceNameForLangueage}"">
+        <prosody pitch=""{SpeechPitch:+#;-#;0}%"" rate=""{SpeechRate}%"">
+            {s_ohReplacementRegex.Replace(text, (match) => $"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;0}%\" rate=\"{RandomProvider.Random.Next(50)}%\">{match.Value}</prosody>")}
+        </prosody>
+    </voice>
+</speak>";
+
+            //var ohTemplate = "<prosody pitch=\"+50%\" rate=\"1%\">{0}</prosody>"; // <prosody rate="10%" contour="(0%,+20Hz) (50%,+420Hz) (100%, +10Hz)">oh</prosody>
+
+            return ssml;
+        }
+
+        private string GetVoiceForLanguage(CultureInfo cultureInfo)
+        {
+            if (!VoiceName.ContainsKey(cultureInfo))
             {
                 bool success = false;
                 int tries = 10;
                 while (!success && tries-- > 0)
                 {
-                    VoiceName[language] = GetRandomVoice(language).Name;
+                    VoiceName[cultureInfo] = GetRandomVoice(cultureInfo).Name;
                     try
                     {
-                        s_speechSynthesizer.Value.SelectVoice(VoiceName[language]);
+                        lock (s_speechSynthesizer)
+                        {
+                            s_speechSynthesizer.SelectVoice(VoiceName[cultureInfo]);
+                        }
+
                         success = true;
                     }
                     catch (Exception)
@@ -245,39 +269,27 @@ namespace wBeatSaberCamera.Models
 
                 if (tries == 0)
                 {
-                    Console.WriteLine($"Couldn't find a proper voice for {Name} and language {language}");
-                    return;
+                    Console.WriteLine($"Couldn't find a proper voice for {Name} and language {cultureInfo}");
+                }
+                lock (s_speechSynthesizer)
+                {
+                    return s_speechSynthesizer.Voice.Name;
                 }
             }
 
-            text = s_urlRegex.Replace(text, "URL");
+            return VoiceName[cultureInfo];
+        }
 
-            var templatedText = $@"
-<speak version=""1.0"" xmlns=""https://www.w3.org/2001/10/synthesis"" xml:lang=""en-US"">
-    <voice name=""{VoiceName[language]}"">
-        <prosody pitch=""{SpeechPitch:+#;-#;0}%"" rate=""{SpeechRate}%"">
-            {s_ohReplacementRegex.Replace(text, (match) => $"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;0}%\" rate=\"{RandomProvider.Random.Next(50)}%\">{match.Value}</prosody>")}
-        </prosody>
-    </voice>
-</speak>";
-            //var ohTemplate = "<prosody pitch=\"+50%\" rate=\"1%\">{0}</prosody>"; // <prosody rate="10%" contour="(0%,+20Hz) (50%,+420Hz) (100%, +10Hz)">oh</prosody>
-
-            s_speechSynthesizer.Value.SetOutputToWaveStream(ms);
-
-            try
+        public void WriteSpeechToStream(CultureInfo language, string text, MemoryStream ms)
+        {
+            lock (s_speechSynthesizer)
             {
-                //new PromptBuilder().StartStyle(new PromptStyle()
-                s_speechSynthesizer.Value.SpeakSsml(templatedText);
-                return;
-            }
-#pragma warning disable 168
-            catch (Exception ex)
-#pragma warning restore 168
-            {
-                // ignored
-            }
+                s_speechSynthesizer.SetOutputToWaveStream(ms);
 
-            s_speechSynthesizer.Value.Speak(text);
+                var ssml = GetSsmlFromText(language, text);
+
+                s_speechSynthesizer.SpeakSsml(ssml);
+            }
         }
 
         #region get voice
