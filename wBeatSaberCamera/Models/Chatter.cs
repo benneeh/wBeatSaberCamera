@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Speech.Synthesis;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Windows.Data;
 using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Utils;
 
@@ -162,6 +163,10 @@ namespace wBeatSaberCamera.Models
 
                 UnsubscribeDirtyCollection(_voiceName);
                 _voiceName = value;
+                if (value != null)
+                {
+                    BindingOperations.EnableCollectionSynchronization(value, new object());
+                }
                 SubscribeDirtyCollection(_voiceName);
                 OnPropertyChanged();
             }
