@@ -9,9 +9,11 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <RoutedUICommand x:Key="RemoveChatterCommand" />
+        <RoutedUICommand x:Key="SpeakCommand" />
     </UserControl.Resources>
     <UserControl.CommandBindings>
         <CommandBinding Command="{StaticResource RemoveChatterCommand}" CanExecute="RemoveChatterCommand_OnCanExecute" Executed="RemoveChatterCommand_OnExecuted" />
+        <CommandBinding Command="{StaticResource SpeakCommand}" Executed="SpeakCommand_OnExecuted" />
     </UserControl.CommandBindings>
     <Grid DataContext="{StaticResource MainViewModel}">
         <Grid.RowDefinitions>
@@ -26,8 +28,16 @@
         </Grid.ColumnDefinitions>
         <CheckBox Content="Enable TTS for chatters" IsChecked="{Binding ChatViewModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged}" />
         <TextBox Name="TbText" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" VerticalAlignment="Stretch" />
-        <Button Content="Read" Grid.Row="2" Click="Button_Click" />
-        <GroupBox Header="Chatters" Grid.Column="1" Grid.RowSpan="3">
+        <Button Content="Read" Grid.Row="2" Command="{StaticResource SpeakCommand}" />
+        <Button Grid.Row="2" Grid.Column="1" CommandParameter="{Binding SelectedItem.Key, ElementName=Chatters, Mode=OneWay}" Command="{StaticResource SpeakCommand}" >
+            <Button.Content>
+                <TextBlock>
+                    <Run Text="Read as" />
+                    <Run Text="{Binding SelectedItem.Key, ElementName=Chatters, Mode=OneWay}" />
+                </TextBlock>
+            </Button.Content>
+        </Button>
+        <GroupBox Header="Chatters" Grid.Column="1" Grid.RowSpan="2">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition />

@@ -25,11 +25,6 @@ namespace wBeatSaberCamera.Views
             }));
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            MainViewModel.ChatViewModel.Speak(null, TbText.Text);
-        }
-
         private void RemoveChatterCommand_OnCanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = e.Parameter is Chatter;
@@ -42,6 +37,11 @@ namespace wBeatSaberCamera.Views
             {
                 MainViewModel.ChatViewModel.Chatters.Remove(chatter.Name);
             }
+        }
+
+        private void SpeakCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            MainViewModel.ChatConfigModel.Spek(e.Parameter as string, TbText.Text);
         }
     }
 }
