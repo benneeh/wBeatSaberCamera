@@ -225,6 +225,14 @@ namespace wBeatSaberCamera.Service
             _vrPositioningService = new VrPositioningService();
         }
 
+        public async Task Speak(Chatter chatter, byte[] audioData)
+        {
+            using (var memoryStream = new MemoryStream(audioData))
+            {
+                await Speak(chatter, memoryStream);
+            }
+        }
+
         public async Task Speak(Chatter chatter, string text, bool useLocalSpeak)
         {
             chatter.LastSpeakTime = DateTime.UtcNow;
@@ -243,82 +251,88 @@ namespace wBeatSaberCamera.Service
                         await _speechHostClientCache.FillStreamWithSpeech(chatter.GetSsmlFromText(language, text), memoryStream);
                     }
 
-                    if (memoryStream.Length == 0)
-                    {
-                        return;
-                    }
-
-                    memoryStream.Position = 0;
-                    var wavDuration = TimeSpan.FromMilliseconds(50);
-                    try
-                    {
-                        wavDuration = new NAudio.Wave.WaveFileReader(memoryStream).TotalTime - TimeSpan.FromMilliseconds(800);
-                        if (wavDuration < TimeSpan.FromMilliseconds(50))
-                        {
-                            wavDuration = TimeSpan.FromMilliseconds(50);
-                        }
-                    }
-                    catch
-                    {
-                        // meh
-                    }
-
-                    memoryStream.Position = 0;
-                    var soundEffect = SoundEffect.FromStream(memoryStream).CreateInstance();
-                    var audioEmitter = new AudioEmitter();
-                    if (_vrPositioningService.IsVrEnabled)
-                    {
-                        var hmdPositioning = _vrPositioningService.GetHmdPositioning();
-                        audioEmitter.Position = Vector3.Transform(chatter.Position, -hmdPositioning.Rotation);
-                    }
-
-                    soundEffect.Apply3D(_audioListener, audioEmitter);
-                    soundEffect.Play();
-
-                    double sineTime = chatter.TrembleBegin;
-                    var stopWatch = Stopwatch.StartNew();
-                    while (stopWatch.Elapsed < wavDuration)
-                    {
-                        sineTime += chatter.TrembleSpeed;
-                        await Task.Delay(10);
-
-                        if (_vrPositioningService.IsVrEnabled)
-                        {
-                            var hmdPositioning = _vrPositioningService.GetHmdPositioning();
-
-                            var newAudioEmitterPosition = Vector3.Transform(chatter.Position, hmdPositioning.Rotation);
-                            audioEmitter.Velocity = (newAudioEmitterPosition - audioEmitter.Position) * 100;
-                            audioEmitter.Position = newAudioEmitterPosition;
-
-                            _audioListener.Velocity = hmdPositioning.Velocity - audioEmitter.Position + Vector3.Transform(audioEmitter.Position, new Quaternion(hmdPositioning.Omega, 1));
-                            //_audioListener.Position = hmdPositioning.Position;
-                            //Console.WriteLine(audioEmitter.Position + "/" + _audioListener.Position);
-                            soundEffect.Apply3D(_audioListener, audioEmitter);
-
-                            //am.Rotation = position.GetRotation();
-                        }
-
-                        var pitch = chatter.Pitch + Math.Sin(sineTime) * chatter.TrembleFactor;
-                        if (pitch < -1)
-                        {
-                            pitch = -1;
-                        }
-
-                        if (pitch > 1)
-                        {
-                            pitch = 1;
-                        }
-
-                        pitch *= _chatViewModel.MaxPitchFactor;
-
-                        //Console.WriteLine(pitch);
-                        soundEffect.Pitch = (float)pitch;
-                    }
+                    await Speak(chatter, memoryStream);
                 }
             }
             catch (Exception ex)
             {
                 Log.Error($"Error while text text '{text}': " + ex);
+            }
+        }
+
+        private async Task Speak(Chatter chatter, MemoryStream memoryStream)
+        {
+            if (memoryStream.Length == 0)
+            {
+                return;
+            }
+
+            memoryStream.Position = 0;
+            var wavDuration = TimeSpan.FromMilliseconds(50);
+            try
+            {
+                wavDuration = new NAudio.Wave.WaveFileReader(memoryStream).TotalTime - TimeSpan.FromMilliseconds(800);
+                if (wavDuration < TimeSpan.FromMilliseconds(50))
+                {
+                    wavDuration = TimeSpan.FromMilliseconds(50);
+                }
+            }
+            catch
+            {
+                // meh
+            }
+
+            memoryStream.Position = 0;
+            var soundEffect = SoundEffect.FromStream(memoryStream).CreateInstance();
+            var audioEmitter = new AudioEmitter();
+            if (_vrPositioningService.IsVrEnabled)
+            {
+                var hmdPositioning = _vrPositioningService.GetHmdPositioning();
+                audioEmitter.Position = Vector3.Transform(chatter.Position, -hmdPositioning.Rotation);
+            }
+
+            soundEffect.Apply3D(_audioListener, audioEmitter);
+            soundEffect.Play();
+
+            double sineTime = chatter.TrembleBegin;
+            var stopWatch = Stopwatch.StartNew();
+            while (stopWatch.Elapsed < wavDuration)
+            {
+                sineTime += chatter.TrembleSpeed;
+                await Task.Delay(10);
+
+                if (_vrPositioningService.IsVrEnabled)
+                {
+                    var hmdPositioning = _vrPositioningService.GetHmdPositioning();
+
+                    var newAudioEmitterPosition = Vector3.Transform(chatter.Position, hmdPositioning.Rotation);
+                    audioEmitter.Velocity = (newAudioEmitterPosition - audioEmitter.Position) * 100;
+                    audioEmitter.Position = newAudioEmitterPosition;
+
+                    _audioListener.Velocity = hmdPositioning.Velocity - audioEmitter.Position + Vector3.Transform(audioEmitter.Position, new Quaternion(hmdPositioning.Omega, 1));
+
+                    //_audioListener.Position = hmdPositioning.Position;
+                    //Console.WriteLine(audioEmitter.Position + "/" + _audioListener.Position);
+                    soundEffect.Apply3D(_audioListener, audioEmitter);
+
+                    //am.Rotation = position.GetRotation();
+                }
+
+                var pitch = chatter.Pitch + Math.Sin(sineTime) * chatter.TrembleFactor;
+                if (pitch < -1)
+                {
+                    pitch = -1;
+                }
+
+                if (pitch > 1)
+                {
+                    pitch = 1;
+                }
+
+                pitch *= _chatViewModel.MaxPitchFactor;
+
+                //Console.WriteLine(pitch);
+                soundEffect.Pitch = (float) pitch;
             }
         }
 

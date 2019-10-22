@@ -226,17 +226,17 @@ namespace wBeatSaberCamera.Models
         }
 
         private static readonly Regex s_urlRegex = new Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", RegexOptions.Compiled);
-        private static readonly Regex s_ohReplacementRegex = new Regex("\\b(([a-zA-Z]{2,2})|([a-zA-Z)][aAeEiIoOuUöyYÖäÄüÜ]{2,2}))\\b", RegexOptions.Compiled);
+        private static readonly Regex s_ohReplacementRegex = new Regex("\\b(([a-zA-Z]{2,2})|([a-zA-Z)]+[aAeEiIoOuUöyYÖäÄüÜ]{1,}[a-zA-Z]+))\\b", RegexOptions.Compiled);
 
         public string GetSsmlFromText(CultureInfo cultureInfo, string text)
         {
-            var voiceNameForLangueage = GetVoiceForLanguage(cultureInfo);
+            var voiceForLanguage = GetVoiceForLanguage(cultureInfo);
 
             text = s_urlRegex.Replace(text, "URL");
 
             var ssml = $@"
 <speak version=""1.0"" xmlns=""https://www.w3.org/2001/10/synthesis"" xml:lang=""en-US"">
-    <voice name=""{voiceNameForLangueage}"">
+    <voice name=""{voiceForLanguage}"">
         <prosody pitch=""{SpeechPitch:+#;-#;0}%"" rate=""{SpeechRate}%"">
             {s_ohReplacementRegex.Replace(text, (match) => $"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;0}%\" rate=\"{RandomProvider.Random.Next(50)}%\">{match.Value}</prosody>")}
         </prosody>

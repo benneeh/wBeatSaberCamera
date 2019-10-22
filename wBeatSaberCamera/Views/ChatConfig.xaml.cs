@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using wBeatSaberCamera.Models;
@@ -41,7 +42,7 @@ namespace wBeatSaberCamera.Views
 
         private void SpeakCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            MainViewModel.ChatConfigModel.Spek(e.Parameter as string, TbText.Text);
+            MainViewModel.ChatViewModel.Speak(e.Parameter as string, TbText.Text);
         }
     }
 }

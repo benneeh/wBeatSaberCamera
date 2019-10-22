@@ -177,36 +177,7 @@ namespace wBeatSaberCamera.Models
         {
             Func<Task> task = async () =>
             {
-                if (user == null || !Chatters.TryGetValue(user, out var chatter))
-                {
-                    chatter = new Chatter()
-                    {
-                        Name = user
-                    };
-
-                    chatter.Position = /*Vector3.Right * 2;*/ (Vector3.Lerp(Vector3.Left, Vector3.Right, (float)s_random.NextDouble())
-                                                               + Vector3.Lerp(Vector3.Up, Vector3.Down, (float)s_random.NextDouble())
-                                                               + Vector3.Lerp(Vector3.Forward, Vector3.Backward, (float)s_random.NextDouble()));
-                    chatter.Pitch = (s_random.NextDouble() * 2 - 1.0) * MaxPitchFactor;
-                    chatter.TrembleBegin = s_random.NextDouble() * Math.PI * 2;
-                    chatter.TrembleSpeed = s_random.NextDouble();
-                    var factorMultMax = .3;
-                    if (chatter.TrembleSpeed < .02)
-                    {
-                        factorMultMax = 2;
-                    }
-
-                    chatter.TrembleFactor = s_random.NextDouble() * factorMultMax;
-                    if (user != null)
-                    {
-                        lock (Chatters)
-                        {
-                            Chatters[user] = chatter;
-                        }
-                    }
-
-                    //Console.WriteLine($"TS: {chatter.TrembleSpeed}, TF: {chatter.TrembleFactor}");
-                }
+                var chatter = GetChatterFromUsername(user);
 
                 await SpeechService.Speak(chatter, text, false);
             };
@@ -219,6 +190,49 @@ namespace wBeatSaberCamera.Models
             {
                 task();
             }
+        }
+
+        private Chatter GetChatterFromUsername(string user)
+        {
+            if (user == null || !Chatters.TryGetValue(user, out var chatter))
+            {
+                chatter = new Chatter()
+                {
+                    Name = user
+                };
+
+                chatter.Position = /*Vector3.Right * 2;*/ (Vector3.Lerp(Vector3.Left, Vector3.Right, (float)s_random.NextDouble())
+                                                           + Vector3.Lerp(Vector3.Up, Vector3.Down, (float)s_random.NextDouble())
+                                                           + Vector3.Lerp(Vector3.Forward, Vector3.Backward, (float)s_random.NextDouble()));
+                chatter.Pitch = (s_random.NextDouble() * 2 - 1.0) * MaxPitchFactor;
+                chatter.TrembleBegin = s_random.NextDouble() * Math.PI * 2;
+                chatter.TrembleSpeed = s_random.NextDouble();
+                var factorMultMax = .3;
+                if (chatter.TrembleSpeed < .02)
+                {
+                    factorMultMax = 2;
+                }
+
+                chatter.TrembleFactor = s_random.NextDouble() * factorMultMax;
+                if (user != null)
+                {
+                    lock (Chatters)
+                    {
+                        Chatters[user] = chatter;
+                    }
+                }
+
+                //Console.WriteLine($"TS: {chatter.TrembleSpeed}, TF: {chatter.TrembleFactor}");
+            }
+
+            return chatter;
+        }
+
+        public async Task Speak(string user, byte[] speechResultAudioData)
+        {
+            var chatter = GetChatterFromUsername(user);
+
+            await SpeechService.Speak(chatter, speechResultAudioData);
         }
 
         public void Speak(ChatMessage chatMessage)
