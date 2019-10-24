@@ -163,10 +163,6 @@ namespace wBeatSaberCamera.Models
 
                 UnsubscribeDirtyCollection(_voiceName);
                 _voiceName = value;
-                if (value != null)
-                {
-                    BindingOperations.EnableCollectionSynchronization(value, new object());
-                }
                 SubscribeDirtyCollection(_voiceName);
                 OnPropertyChanged();
             }
@@ -256,7 +252,8 @@ namespace wBeatSaberCamera.Models
                 int tries = 10;
                 while (!success && tries-- > 0)
                 {
-                    VoiceName[cultureInfo] = GetRandomVoice(cultureInfo).Name;
+                    App.Current.Dispatcher.Invoke(() => VoiceName[cultureInfo] = GetRandomVoice(cultureInfo).Name);
+
                     try
                     {
                         lock (s_speechSynthesizer)
