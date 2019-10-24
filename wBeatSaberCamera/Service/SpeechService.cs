@@ -13,6 +13,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using NAudio.Wave;
 using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Models;
 using wBeatSaberCamera.Twitch;
@@ -271,7 +272,10 @@ namespace wBeatSaberCamera.Service
             var wavDuration = TimeSpan.FromMilliseconds(50);
             try
             {
-                wavDuration = new NAudio.Wave.WaveFileReader(memoryStream).TotalTime - TimeSpan.FromMilliseconds(800);
+                var normalizeResult = NormalizeAudio(memoryStream);
+                wavDuration = normalizeResult.WavDuration;
+                memoryStream = normalizeResult.NormalizedStream;
+
                 if (wavDuration < TimeSpan.FromMilliseconds(50))
                 {
                     wavDuration = TimeSpan.FromMilliseconds(50);
@@ -282,58 +286,106 @@ namespace wBeatSaberCamera.Service
                 // meh
             }
 
-            memoryStream.Position = 0;
-            var soundEffect = SoundEffect.FromStream(memoryStream).CreateInstance();
-            var audioEmitter = new AudioEmitter();
-            if (_vrPositioningService.IsVrEnabled)
+            using (memoryStream)
             {
-                var hmdPositioning = _vrPositioningService.GetHmdPositioning();
-                audioEmitter.Position = Vector3.Transform(chatter.Position, -hmdPositioning.Rotation);
-            }
-
-            soundEffect.Apply3D(_audioListener, audioEmitter);
-            soundEffect.Play();
-
-            double sineTime = chatter.TrembleBegin;
-            var stopWatch = Stopwatch.StartNew();
-            while (stopWatch.Elapsed < wavDuration)
-            {
-                sineTime += chatter.TrembleSpeed;
-                await Task.Delay(10);
-
+                memoryStream.Position = 0;
+                var soundEffect = SoundEffect.FromStream(memoryStream).CreateInstance();
+                var audioEmitter = new AudioEmitter();
                 if (_vrPositioningService.IsVrEnabled)
                 {
                     var hmdPositioning = _vrPositioningService.GetHmdPositioning();
-
-                    var newAudioEmitterPosition = Vector3.Transform(chatter.Position, hmdPositioning.Rotation);
-                    audioEmitter.Velocity = (newAudioEmitterPosition - audioEmitter.Position) * 100;
-                    audioEmitter.Position = newAudioEmitterPosition;
-
-                    _audioListener.Velocity = hmdPositioning.Velocity - audioEmitter.Position + Vector3.Transform(audioEmitter.Position, new Quaternion(hmdPositioning.Omega, 1));
-
-                    //_audioListener.Position = hmdPositioning.Position;
-                    //Console.WriteLine(audioEmitter.Position + "/" + _audioListener.Position);
-                    soundEffect.Apply3D(_audioListener, audioEmitter);
-
-                    //am.Rotation = position.GetRotation();
+                    audioEmitter.Position = Vector3.Transform(chatter.Position, -hmdPositioning.Rotation);
                 }
 
-                var pitch = chatter.Pitch + Math.Sin(sineTime) * chatter.TrembleFactor;
-                if (pitch < -1)
+                soundEffect.Apply3D(_audioListener, audioEmitter);
+                soundEffect.Play();
+
+                double sineTime = chatter.TrembleBegin;
+                var stopWatch = Stopwatch.StartNew();
+                while (stopWatch.Elapsed < wavDuration)
                 {
-                    pitch = -1;
+                    sineTime += chatter.TrembleSpeed;
+                    await Task.Delay(10);
+
+                    if (_vrPositioningService.IsVrEnabled)
+                    {
+                        var hmdPositioning = _vrPositioningService.GetHmdPositioning();
+
+                        var newAudioEmitterPosition = Vector3.Transform(chatter.Position, hmdPositioning.Rotation);
+                        audioEmitter.Velocity = (newAudioEmitterPosition - audioEmitter.Position) * 100;
+                        audioEmitter.Position = newAudioEmitterPosition;
+
+                        _audioListener.Velocity = hmdPositioning.Velocity - audioEmitter.Position + Vector3.Transform(audioEmitter.Position, new Quaternion(hmdPositioning.Omega, 1));
+
+                        //_audioListener.Position = hmdPositioning.Position;
+                        //Console.WriteLine(audioEmitter.Position + "/" + _audioListener.Position);
+                        soundEffect.Apply3D(_audioListener, audioEmitter);
+
+                        //am.Rotation = position.GetRotation();
+                    }
+
+                    var pitch = chatter.Pitch + Math.Sin(sineTime) * chatter.TrembleFactor;
+                    if (pitch < -1)
+                    {
+                        pitch = -1;
+                    }
+
+                    if (pitch > 1)
+                    {
+                        pitch = 1;
+                    }
+
+                    pitch *= _chatViewModel.MaxPitchFactor;
+
+                    //Console.WriteLine(pitch);
+                    soundEffect.Pitch = (float)pitch;
                 }
-
-                if (pitch > 1)
-                {
-                    pitch = 1;
-                }
-
-                pitch *= _chatViewModel.MaxPitchFactor;
-
-                //Console.WriteLine(pitch);
-                soundEffect.Pitch = (float) pitch;
             }
+        }
+
+        private (MemoryStream NormalizedStream, TimeSpan WavDuration) NormalizeAudio(MemoryStream memoryStream)
+        {
+            float max = 0;
+            TimeSpan wavDuration;
+            using (var reader = new WaveFileReader(memoryStream))
+            {
+                var sampleProvider = reader.ToSampleProvider();
+
+                wavDuration = reader.TotalTime;
+                // find the max peak
+                float[] buffer = new float[sampleProvider.WaveFormat.SampleRate];
+                int read;
+                do
+                {
+                    read = sampleProvider.Read(buffer, 0, buffer.Length);
+                    for (int n = 0; n < read; n++)
+                    {
+                        var abs = Math.Abs(buffer[n]);
+                        if (abs > max) max = abs;
+                    }
+                } while (read > 0);
+                Console.WriteLine($"Max sample value: {max}");
+
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if (max == 0 || max > 1.0f)
+                {
+                    return (memoryStream, wavDuration);
+                }
+
+                // rewind and amplify
+                reader.Position = 0;
+                var volumeModifier = new VolumeWaveProvider16(reader)
+                {
+                    Volume = 1.0f / max
+                };
+
+                // write out to a new WAV file
+                var resultStream = new MemoryStream();
+                WaveFileWriter.WriteWavFileToStream(resultStream, volumeModifier);
+                memoryStream = resultStream;
+            }
+
+            return (memoryStream, wavDuration);
         }
 
         private CultureInfo GetLanguageFromText(string text)
