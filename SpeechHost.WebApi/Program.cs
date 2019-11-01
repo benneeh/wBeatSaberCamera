@@ -54,7 +54,7 @@ namespace SpeechHost.WebApi
             {
                 try
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(1), cancellationTokenSource.Token);
+                    await Task.Delay(TimeSpan.FromMinutes(5), cancellationTokenSource.Token);
                 }
                 catch (TaskCanceledException)
                 {
