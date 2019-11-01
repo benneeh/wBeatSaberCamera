@@ -29,11 +29,11 @@
         <CheckBox Content="Enable TTS for chatters" IsChecked="{Binding ChatViewModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged}" />
         <TextBox Name="TbText" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" VerticalAlignment="Stretch" />
         <Button Content="Read" Grid.Row="2" Command="{StaticResource SpeakCommand}" />
-        <Button Grid.Row="2" Grid.Column="1" CommandParameter="{Binding SelectedItem.Key, ElementName=Chatters, Mode=OneWay}" Command="{StaticResource SpeakCommand}" >
+        <Button Grid.Row="2" Grid.Column="1" CommandParameter="{Binding SelectedChatter.Name}" Command="{StaticResource SpeakCommand}" >
             <Button.Content>
                 <TextBlock>
                     <Run Text="Read as" />
-                    <Run Text="{Binding SelectedItem.Key, ElementName=Chatters, Mode=OneWay}" />
+                    <Run Text="{Binding SelectedChatter.Name}" />
                 </TextBlock>
             </Button.Content>
         </Button>
@@ -43,10 +43,10 @@
                     <RowDefinition />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <ListView Name="Chatters" ItemsSource="{Binding ChatViewModel.Chatters}" HorizontalContentAlignment="Stretch">
+                <ListView ItemsSource="{Binding ChatViewModel.Chatters}" SelectedItem="{Binding SelectedChatter, Mode=TwoWay}" HorizontalContentAlignment="Stretch">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Grid DataContext="{Binding Value}">
+                            <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition/>
                                     <ColumnDefinition Width="Auto"/>
@@ -60,7 +60,7 @@
                 </ListView>
             </Grid>
         </GroupBox>
-        <Expander ExpandDirection="Right" Grid.Column="2" Grid.RowSpan="2" DataContext="{Binding SelectedItem.Value, ElementName=Chatters}">
+        <Expander ExpandDirection="Right" Grid.Column="2" Grid.RowSpan="2" DataContext="{Binding SelectedChatter}">
             <Expander.Header>
                 <TextBlock Text="Chatter details">
                     <TextBlock.LayoutTransform>

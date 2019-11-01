@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Data;
 using TwitchLib.Client.Models;
+using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Service;
 using wBeatSaberCamera.Utils;
 using Vector3 = Microsoft.Xna.Framework.Vector3;
@@ -14,10 +17,25 @@ namespace wBeatSaberCamera.Models
     public class ChatConfigModel
     {
         [DataMember]
-        public ObservableDictionary<string, Chatter> Chatters
+        public List<Chatter> ChatterList
         {
             get;
             set;
+        }
+
+        [DataMember(Name = "Chatters", EmitDefaultValue = false)]
+        [UsedImplicitly]
+        [Obsolete]
+        private Dictionary<string, Chatter> ChatterDict
+        {
+            get => null;
+            set
+            {
+                if (value != null && value.Count > 0 && (ChatterList?.Count ?? 0) == 0)
+                {
+                    ChatterList = value.Values.ToList();
+                }
+            }
         }
 
         [DataMember]
@@ -60,7 +78,7 @@ namespace wBeatSaberCamera.Models
     {
         #region private fields
 
-        private ObservableDictionary<string, Chatter> _chatters;
+        private ObservableCollection<Chatter> _chatters;
         private bool _isTextToSpeechEnabled;
         private double _maxPitchFactor = .3;
         private static readonly Random s_random = new Random();
@@ -71,12 +89,13 @@ namespace wBeatSaberCamera.Models
         private bool _isSpeechToTextEnabled;
         private SpeechService SpeechService => _lazySpeechService.Value;
         private readonly Lazy<SpeechService> _lazySpeechService;
+        private Dictionary<string, Chatter> _chatterDictionary;
 
         #endregion private fields
 
         #region properties
 
-        public ObservableDictionary<string, Chatter> Chatters
+        public ObservableCollection<Chatter> Chatters
         {
             get => _chatters;
             set
@@ -89,6 +108,7 @@ namespace wBeatSaberCamera.Models
                 UnsubscribeDirtyCollection(_chatters);
                 BindingOperations.EnableCollectionSynchronization(value, new object());
                 _chatters = value;
+                _chatterDictionary = value?.ToDictionary(x => x.Name);
                 SubscribeDirtyCollection(_chatters);
 
                 OnPropertyChanged();
@@ -168,7 +188,7 @@ namespace wBeatSaberCamera.Models
 
         public ChatViewModel()
         {
-            Chatters = new ObservableDictionary<string, Chatter>();
+            Chatters = new ObservableCollection<Chatter>();
 
             _lazySpeechService = new Lazy<SpeechService>(() => new SpeechService(this));
         }
@@ -194,7 +214,7 @@ namespace wBeatSaberCamera.Models
 
         private Chatter GetChatterFromUsername(string user)
         {
-            if (user == null || !Chatters.TryGetValue(user, out var chatter))
+            if (user == null || !_chatterDictionary.TryGetValue(user, out var chatter))
             {
                 chatter = new Chatter()
                 {
@@ -218,7 +238,8 @@ namespace wBeatSaberCamera.Models
                 {
                     lock (Chatters)
                     {
-                        Chatters[user] = chatter;
+                        _chatterDictionary.Add(user, chatter);
+                        Chatters.Add(chatter);
                     }
                 }
 
@@ -246,7 +267,7 @@ namespace wBeatSaberCamera.Models
 
         public override void Clean()
         {
-            foreach (var chatter in Chatters.Values)
+            foreach (var chatter in Chatters)
             {
                 chatter.Clean();
             }
@@ -259,13 +280,24 @@ namespace wBeatSaberCamera.Models
             {
                 return new ChatConfigModel()
                 {
-                    Chatters = new ObservableDictionary<string, Chatter>(Chatters),
+                    ChatterList = new List<Chatter>(Chatters),
                     IsSpeechToTextEnabled = IsSpeechToTextEnabled,
                     MaxPitchFactor = MaxPitchFactor,
                     IsReadingStreamerMessagesEnabled = IsReadingStreamerMessagesEnabled,
                     IsSendMessagesEnabled = IsSendMessagesEnabled,
                     IsTextToSpeechEnabled = IsTextToSpeechEnabled,
                 };
+            }
+        }
+
+        public void RemoveChatter(string chatterName)
+        {
+            Chatter chatter = null;
+            _chatterDictionary?.TryGetValue(chatterName, out chatter);
+            if (chatter != null)
+            {
+                Chatters.Remove(chatter);
+                _chatterDictionary.Remove(chatterName);
             }
         }
     }

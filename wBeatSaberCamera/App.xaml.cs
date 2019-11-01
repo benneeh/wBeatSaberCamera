@@ -1,6 +1,8 @@
 ﻿using Microsoft.Win32;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,7 +16,7 @@ namespace wBeatSaberCamera
     /// </summary>
     public partial class App : Application
     {
-        private static bool s_isSaving;
+        private static bool _isSaving;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -61,7 +63,7 @@ namespace wBeatSaberCamera
             mainViewModel.ChatViewModel.Chatters.CollectionChanged -= Chatters_CollectionChanged;
             mainViewModel.ChatViewModel = new ChatViewModel()
             {
-                Chatters = new ObservableDictionary<string, Chatter>(settings.ChatConfigModel.Chatters),
+                Chatters = new ObservableCollection<Chatter>(settings.ChatConfigModel.ChatterList),
                 IsSpeechToTextEnabled = settings.ChatConfigModel.IsSpeechToTextEnabled,
                 MaxPitchFactor = settings.ChatConfigModel.MaxPitchFactor,
                 IsReadingStreamerMessagesEnabled = settings.ChatConfigModel.IsReadingStreamerMessagesEnabled,
@@ -74,12 +76,12 @@ namespace wBeatSaberCamera
 
         private void Chatters_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            if (s_isSaving)
+            if (_isSaving)
             {
                 return;
             }
 
-            s_isSaving = true;
+            _isSaving = true;
             var mainViewModel = (MainViewModel)Resources["MainViewModel"];
 
             Task.Run(() =>
@@ -95,17 +97,17 @@ namespace wBeatSaberCamera
                     // only update chatters settings
                     lock (mainViewModel.ChatViewModel.Chatters)
                     {
-                        settings.ChatConfigModel.Chatters = new ObservableDictionary<string, Chatter>(mainViewModel.ChatViewModel.Chatters);
+                        settings.ChatConfigModel.ChatterList = mainViewModel.ChatViewModel.Chatters.ToList();
                     }
                     BeatSaberCameraSettings.Save(settings);
-                    foreach (var chatter in settings.ChatConfigModel.Chatters.Values)
+                    foreach (var chatter in settings.ChatConfigModel.ChatterList)
                     {
                         chatter.Clean();
                     }
                 }
                 finally
                 {
-                    s_isSaving = false;
+                    _isSaving = false;
                 }
             });
         }

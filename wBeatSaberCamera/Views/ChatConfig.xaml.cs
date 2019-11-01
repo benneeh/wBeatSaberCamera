@@ -2,6 +2,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using wBeatSaberCamera.Models;
 using wBeatSaberCamera.Twitch;
 
@@ -21,7 +23,7 @@ namespace wBeatSaberCamera.Views
             {
                 lock (MainViewModel.ChatViewModel.Chatters)
                 {
-                    MainViewModel.ChatViewModel.Chatters.Remove(msg.ChatMessage.Username);
+                    MainViewModel.ChatViewModel.RemoveChatter(msg.ChatMessage.Username);
                 }
             }));
         }
@@ -36,7 +38,7 @@ namespace wBeatSaberCamera.Views
             var chatter = (Chatter)e.Parameter;
             lock (MainViewModel.ChatViewModel.Chatters)
             {
-                MainViewModel.ChatViewModel.Chatters.Remove(chatter.Name);
+                MainViewModel.ChatViewModel.RemoveChatter(chatter.Name);
             }
         }
 

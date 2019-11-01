@@ -11,6 +11,7 @@ namespace wBeatSaberCamera.Models
         private TwitchBotConfigModel _twitchBotConfigModel = new TwitchBotConfigModel();
         private TwitchBot _twitchBot;
         private ChatViewModel _chatViewModel = new ChatViewModel();
+        private Chatter _selectedChatter;
 
         public ChatViewModel ChatViewModel
         {
@@ -83,6 +84,19 @@ namespace wBeatSaberCamera.Models
                 }
 
                 _twitchBot = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Chatter SelectedChatter
+        {
+            get => _selectedChatter;
+            set
+            {
+                if (Equals(value, _selectedChatter))
+                    return;
+
+                _selectedChatter = value;
                 OnPropertyChanged();
             }
         }
