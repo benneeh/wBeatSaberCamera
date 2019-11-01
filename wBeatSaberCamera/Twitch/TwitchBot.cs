@@ -70,6 +70,8 @@ namespace wBeatSaberCamera.Twitch
 
         public IEnumerable<string> SubscribeKeys => OnNewSubscriberParameters.Union(ChannelParameters).Select(x => $"{{{x}}}");
 
+        public IEnumerable<string> WelcomeChattersKeys => WelcomeChattersParameters.Union(ChannelParameters).Select(x => $"{{{x}}}");
+
         public IEnumerable<string> FollowKeys => FollowParameters.Union(UserParameters).Union(ChannelParameters).Select(x => $"{{{x}}}");
 
         public TwitchBot(ChatViewModel chatViewModel, TwitchBotConfigModel configModel)
@@ -134,6 +136,17 @@ namespace wBeatSaberCamera.Twitch
             OnRaidNotificationParameters["Raider.IsTurbo"] = _ => _.RaidNotification.Turbo;
             OnRaidNotificationParameters["Raider.Login"] = _ => _.RaidNotification.Login;
             OnRaidNotificationParameters["ViewerCount"] = _ => _.RaidNotification.MsgParamViewerCount;
+
+            WelcomeChattersParameters = new PublicPropertyAccessorCache<ChatMessage>();
+            WelcomeChattersParameters["User.Name"] = _ => _.DisplayName;
+            WelcomeChattersParameters["User.Id"] = _ => _.UserId;
+            WelcomeChattersParameters["User.Type"] = _ => _.UserType;
+            WelcomeChattersParameters["User.IsSubscriber"] = _ => _.IsSubscriber;
+            WelcomeChattersParameters["User.IsModerator"] = _ => _.IsModerator;
+            WelcomeChattersParameters["User.IsTurbo"] = _ => _.IsTurbo;
+            WelcomeChattersParameters["Message"] = _ => _.Message;
+            WelcomeChattersParameters["EmoteReplacedMessage"] = _ => _.EmoteReplacedMessage;
+
             // ReSharper restore UseObjectOrCollectionInitializer
         }
 
@@ -166,11 +179,19 @@ namespace wBeatSaberCamera.Twitch
         [PublicAPI]
         public PublicPropertyAccessorCache<OnNewSubscriberArgs> OnNewSubscriberParameters { get; }
 
+        [PublicAPI]
+        public PublicPropertyAccessorCache<ChatMessage> WelcomeChattersParameters { get; }
+
         private DateTime _followServiceInitializationDate;
         private readonly Dictionary<string, Channel> _channelIdToChannelCache = new Dictionary<string, Channel>();
         private readonly Dictionary<string, Channel> _channelNameToChannelCache = new Dictionary<string, Channel>();
         private TwitchAPI _twitchApi;
         public SpeechToTextModule SpeechToTextModule { get; }
+
+        /// <summary>
+        /// this set contains all chatters that have said something, it is uses to welcome new chatters
+        /// </summary>
+        private HashSet<string> _knownChatters = new HashSet<string>();
 
         public async void Start()
         {
@@ -183,14 +204,6 @@ namespace wBeatSaberCamera.Twitch
             _configModel.PropertyChanged += (s, e) => RegisterEventHandlerSafe(s, e, ConfigModelPropertyChanged);
             _twitchClient = new TwitchClient(logger: new TwitchBotLogger<TwitchClient>());
             _twitchClient.Initialize(new ConnectionCredentials(_configModel.OAuthAccessToken.UserName, $"oauth:{_configModel.OAuthAccessToken.AccessToken}"), _configModel.Channel);
-            _twitchClient.OnMessageReceived += (s, e) =>
-            {
-                if (_chatViewModel.IsTextToSpeechEnabled && !_configModel.CommandIdentifiers.Contains(e.ChatMessage.Message.FirstOrDefault()))
-                {
-                    Task.Run(() =>
-                        _chatViewModel.Speak(e.ChatMessage));
-                }
-            };
             _twitchClient.OnWhisperReceived += (s, e) =>
             {
                 // TBD
@@ -292,9 +305,28 @@ namespace wBeatSaberCamera.Twitch
             _twitchClient.OnRaidNotification += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnRaidNotification);
             _twitchClient.OnNewSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnNewSubscriber);
             _twitchClient.OnNewSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnNewSubscriber);
+            _twitchClient.OnMessageReceived += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnMessageReceived);
 
             _twitchClient.Connect();
             IsConnecting = true;
+        }
+
+        private async void _twitchClient_OnMessageReceived(object s, OnMessageReceivedArgs e)
+        {
+            if (_chatViewModel.IsTextToSpeechEnabled && !_configModel.CommandIdentifiers.Contains(e.ChatMessage.Message.FirstOrDefault()))
+            {
+#pragma warning disable 4014
+                Task.Run(() => _chatViewModel.Speak(e.ChatMessage));
+#pragma warning restore 4014
+            }
+
+            if (!_knownChatters.Add(e.ChatMessage.Username))
+            {
+                return;
+            }
+
+            var channel = await GetChannelByName(e.ChatMessage.Channel);
+            await HandleMessageThing(channel, _configModel.IsWelcomeChattersEnabled, _configModel.WelcomeChattersTemplate, e.ChatMessage, WelcomeChattersParameters);
         }
 
         private async void RegisterEventHandlerSafe<T>(object s, T e, Action<object, T> eventAction)

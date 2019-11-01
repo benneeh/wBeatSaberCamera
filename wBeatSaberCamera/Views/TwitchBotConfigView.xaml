@@ -172,6 +172,33 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Welcome new chatters" IsChecked="{Binding IsWelcomeChattersEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" Padding="0" AcceptsReturn="True" Text="{Binding WelcomeChattersTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.WelcomeChattersKeys, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
                 <CheckBox Content="Enable TTS" IsChecked="{Binding ChatViewModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
                 <CheckBox Content="Enable Speech to Text (emotes)" IsEnabled="{Binding Path=TwitchBot.SpeechToTextModule.IsBusy, Source={StaticResource MainViewModel}, Converter={StaticResource BooleanToInvertedBooleanConverter}}" Grid.Column="1" IsChecked="{Binding ChatViewModel.IsSpeechToTextEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
             </Grid>

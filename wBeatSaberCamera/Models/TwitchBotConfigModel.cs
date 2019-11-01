@@ -22,10 +22,12 @@ namespace wBeatSaberCamera.Models
         private string _raidAnnouncementTemplate = "'{Raider.Name}' has raided this channel with '{ViewerCount}' viewers!";
         private string _hostAnnouncementTemplate = "'{HostedByChannel}' is now hosting your channel with '{ViewerCount}' viewers!";
         private string _subscriberAnnouncementTemplate = "'{User.Name}' has subscribed!";
+        private string _welcomeChattersTemplate = "Hi {User.Name}!";
         private bool _isFollowerAnnouncementsEnabled;
         private bool _isRaidAnnouncementsEnabled;
         private bool _isHostAnnouncementsEnabled;
         private bool _isSubscriberAnnouncementsEnabled;
+        private bool _isWelcomeChattersEnabled;
 
         public ObservableCollection<TwitchChatCommand> Commands
         {
@@ -137,6 +139,34 @@ namespace wBeatSaberCamera.Models
                 }
 
                 _isRaidAnnouncementsEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember]
+        public bool IsWelcomeChattersEnabled
+        {
+            get => _isWelcomeChattersEnabled;
+            set
+            {
+                if (value == _isWelcomeChattersEnabled)
+                    return;
+
+                _isWelcomeChattersEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember]
+        public string WelcomeChattersTemplate
+        {
+            get => _welcomeChattersTemplate;
+            set
+            {
+                if (value == _welcomeChattersTemplate)
+                    return;
+
+                _welcomeChattersTemplate = value;
                 OnPropertyChanged();
             }
         }
