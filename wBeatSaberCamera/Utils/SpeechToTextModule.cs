@@ -1,24 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Speech.Recognition;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using wBeatSaberCamera.Models;
-using wBeatSaberCamera.Models.FrankerFaceZModels;
 
 namespace wBeatSaberCamera.Utils
 {
     public class SpeechToTextModule : ObservableBase, IDisposable
     {
-        private static readonly HttpClient s_httpClient = new HttpClient();
-        private readonly ChatViewModel _chatViewModel;
-        private readonly TwitchBotConfigModel _botConfigModel;
         private SpeechRecognitionEngine _speechRecognitionEngine;
+
         public event EventHandler<SpeechRecognizedEventArgs> SpeechRecognized;
-        private readonly Dictionary<string, Task<string[]>> _emoteCache = new Dictionary<string, Task<string[]>>();
+
         private bool _isBusy;
+
+        public Func<Task<Grammar>> GrammarLoader = null;
 
         public bool IsBusy
         {
@@ -33,66 +27,19 @@ namespace wBeatSaberCamera.Utils
             }
         }
 
-        public SpeechToTextModule(ChatViewModel chatViewModel, TwitchBotConfigModel botConfigModel)
+        public async void Start()
         {
-            _chatViewModel = chatViewModel;
-            _botConfigModel = botConfigModel;
-            botConfigModel.PropertyChanged += BotConfigModelPropertyChanged;
-            chatViewModel.PropertyChanged += ChatConfigModel_PropertyChanged;
-            if (chatViewModel.IsSpeechEmojiEnabled)
-            {
-                Start();
-            }
-        }
-
-        private void ChatConfigModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(_chatViewModel.IsSpeechEmojiEnabled))
-            {
-                if (_chatViewModel.IsSpeechEmojiEnabled)
-                {
-                    Start();
-                }
-                else
-                {
-                    Stop();
-                }
-            }
-        }
-
-        private void BotConfigModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(_botConfigModel.Channel))
-            {
-                if (_chatViewModel.IsSpeechEmojiEnabled)
-                {
-                    Stop();
-                    Start();
-                }
-            }
-        }
-
-        private async void Start()
-        {
-            IsBusy = true;
             try
             {
                 _speechRecognitionEngine?.Dispose();
 
                 // Create an in-process speech recognizer for the en-US locale.
                 var speechRecognitionEngine = new SpeechRecognitionEngine(new System.Globalization.CultureInfo("en-US"));
-                var choices = new Choices();
-                if (!_emoteCache.ContainsKey(_botConfigModel.Channel))
+
+                if (GrammarLoader != null)
                 {
-                    _emoteCache.Add(_botConfigModel.Channel, Task.Run(GetChannelEmotes));
+                    speechRecognitionEngine.LoadGrammar(await GrammarLoader());
                 }
-
-                choices.Add(await _emoteCache[_botConfigModel.Channel]);
-
-                var keyWordsGrammarBuilder = new GrammarBuilder(choices);
-
-                var keyWordsGrammar = new Grammar(keyWordsGrammarBuilder);
-                speechRecognitionEngine.LoadGrammar(keyWordsGrammar);
 
                 // Add a handler for the speech recognized event.
                 speechRecognitionEngine.SpeechRecognized += (s, e) => SpeechRecognized?.Invoke(s, e);
@@ -103,12 +50,6 @@ namespace wBeatSaberCamera.Utils
                 // Start asynchronous, continuous speech recognition.
                 speechRecognitionEngine.RecognizeAsync(RecognizeMode.Multiple);
 
-                if (!_chatViewModel.IsSpeechEmojiEnabled)
-                {
-                    speechRecognitionEngine.Dispose();
-                    return;
-                }
-
                 _speechRecognitionEngine = speechRecognitionEngine;
             }
             finally
@@ -117,53 +58,9 @@ namespace wBeatSaberCamera.Utils
             }
         }
 
-        void Stop()
+        public void Stop()
         {
             _speechRecognitionEngine?.Dispose();
-        }
-
-        async Task<string[]> GetChannelEmotes()
-        {
-            // https://api.betterttv.net/2/channels/benneeeh
-            // https://api.frankerfacez.com/v1/room/benneeeh
-
-            var t1 = Task.Run(async () =>
-            {
-                try
-                {
-                    var resultString = await s_httpClient.GetStringAsync($"https://api.betterttv.net/2/channels/{_botConfigModel.Channel}");
-                    var anon = new
-                    {
-                        emotes = new[]
-                        {
-                            new {code=""}
-                        }
-                    };
-                    anon = JsonConvert.DeserializeAnonymousType(resultString, anon);
-                    return anon.emotes.Select(x => x.code).ToArray();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                    return new string[0];
-                }
-            });
-            var t2 = Task.Run(async () =>
-            {
-                try
-                {
-                    var resultString = await s_httpClient.GetStringAsync($"https://api.frankerfacez.com/v1/room/{_botConfigModel.Channel}");
-                    var result = JsonConvert.DeserializeObject<FfzRoot>(resultString);
-                    return result.Sets[result.Room.Set].Emoticons.Where(x => !x.Hidden).Select(x => x.Name).ToArray();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                    return new string[0];
-                }
-            });
-
-            return (await Task.WhenAll(t1, t2)).SelectMany(x => x).ToArray();
         }
 
         public void Dispose()

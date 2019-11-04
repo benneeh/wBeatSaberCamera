@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
+using System.Speech.Recognition;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Newtonsoft.Json;
 using wBeatSaberCamera.Models;
+using wBeatSaberCamera.Models.FrankerFaceZModels;
 using wBeatSaberCamera.Twitch;
 using wBeatSaberCamera.Utils;
 using wBeatSaberCamera.Utils.OAuth;
@@ -18,13 +24,38 @@ namespace wBeatSaberCamera.Views
     {
         private MainViewModel MainViewModel => Application.Current.Resources["MainViewModel"] as MainViewModel;
         private CameraConfigModel CameraConfigModel => MainViewModel.CameraConfigModel;
+        private readonly Dictionary<string, Task<string[]>> _emoteCache = new Dictionary<string, Task<string[]>>();
+        private static readonly HttpClient s_httpClient = new HttpClient();
 
         public TwitchBotConfigView()
         {
             InitializeComponent();
-            MainViewModel.SpeechToTextModule = new SpeechToTextModule(MainViewModel.ChatViewModel, MainViewModel.TwitchBotConfigModel);
-            MainViewModel.SpeechToTextModule.SpeechRecognized += _speechToTextModule_SpeechRecognized;
             MainViewModel.TwitchBot = new TwitchBot(MainViewModel.ChatViewModel, MainViewModel.TwitchBotConfigModel);
+            MainViewModel.SpeechToTextModule = new SpeechToTextModule();
+            MainViewModel.SpeechToTextModule.GrammarLoader = async () =>
+            {
+                var choices = new Choices();
+                if (!_emoteCache.ContainsKey(MainViewModel.TwitchBotConfigModel.Channel))
+                {
+                    _emoteCache.Add(MainViewModel.TwitchBotConfigModel.Channel, Task.Run(GetChannelEmotes));
+                }
+
+                choices.Add(await _emoteCache[MainViewModel.TwitchBotConfigModel.Channel]);
+
+                var keyWordsGrammarBuilder = new GrammarBuilder(choices);
+
+                var keyWordsGrammar = new Grammar(keyWordsGrammarBuilder);
+                return keyWordsGrammar;
+            };
+            MainViewModel.SpeechToTextModule.SpeechRecognized += _speechToTextModule_SpeechRecognized;
+            MainViewModel.TwitchBotConfigModel.PropertyChanged += BotConfigModelPropertyChanged;
+            MainViewModel.ChatViewModel.PropertyChanged += ChatConfigModel_PropertyChanged;
+            if (MainViewModel.ChatViewModel.IsSpeechEmojiEnabled)
+            {
+                MainViewModel.SpeechToTextModule.Start();
+            }
+
+
             //MainViewModel.TwitchBotConfigModel.Commands.Add(
             //    new TwitchChatCommand(
             //        "fpv",
@@ -122,6 +153,50 @@ namespace wBeatSaberCamera.Views
                 ));
         }
 
+        async Task<string[]> GetChannelEmotes()
+        {
+            // https://api.betterttv.net/2/channels/benneeeh
+            // https://api.frankerfacez.com/v1/room/benneeeh
+
+            var t1 = Task.Run(async () =>
+            {
+                try
+                {
+                    var resultString = await s_httpClient.GetStringAsync($"https://api.betterttv.net/2/channels/{MainViewModel.TwitchBotConfigModel.Channel}");
+                    var anon = new
+                    {
+                        emotes = new[]
+                        {
+                            new {code=""}
+                        }
+                    };
+                    anon = JsonConvert.DeserializeAnonymousType(resultString, anon);
+                    return anon.emotes.Select(x => x.code).ToArray();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                    return new string[0];
+                }
+            });
+            var t2 = Task.Run(async () =>
+            {
+                try
+                {
+                    var resultString = await s_httpClient.GetStringAsync($"https://api.frankerfacez.com/v1/room/{MainViewModel.TwitchBotConfigModel.Channel}");
+                    var result = JsonConvert.DeserializeObject<FfzRoot>(resultString);
+                    return result.Sets[result.Room.Set].Emoticons.Where(x => !x.Hidden).Select(x => x.Name).ToArray();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                    return new string[0];
+                }
+            });
+
+            return (await Task.WhenAll(t1, t2)).SelectMany(x => x).ToArray();
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             MainViewModel.TwitchBot.Start();
@@ -146,6 +221,34 @@ namespace wBeatSaberCamera.Views
             //    synthesizer = new SpeechSynthesizer();
             //}
         }
+
+        private void ChatConfigModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(MainViewModel.ChatViewModel.IsSpeechEmojiEnabled))
+            {
+                if (MainViewModel.ChatViewModel.IsSpeechEmojiEnabled)
+                {
+                    MainViewModel.SpeechToTextModule.Start();
+                }
+                else
+                {
+                    MainViewModel.SpeechToTextModule.Stop();
+                }
+            }
+        }
+
+        private void BotConfigModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(MainViewModel.TwitchBotConfigModel.Channel))
+            {
+                if (MainViewModel.ChatViewModel.IsSpeechEmojiEnabled)
+                {
+                    MainViewModel.SpeechToTextModule.Stop();
+                    MainViewModel.SpeechToTextModule.Start();
+                }
+            }
+        }
+
         private async void _speechToTextModule_SpeechRecognized(object sender, System.Speech.Recognition.SpeechRecognizedEventArgs e)
         {
             if (!MainViewModel.TwitchBot.IsConnected)
