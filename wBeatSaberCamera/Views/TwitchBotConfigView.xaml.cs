@@ -31,6 +31,12 @@ namespace wBeatSaberCamera.Views
             InitializeComponent();
             MainViewModel.TwitchBot = new TwitchBot(MainViewModel.ChatViewModel, MainViewModel.TwitchBotConfigModel);
             MainViewModel.SpeechToEmojiModule = new SpeechToTextModule();
+            MainViewModel.SpeechToTextModule = new SpeechToTextModule()
+            {
+                GrammarLoader = () => Task.FromResult((Grammar)new DictationGrammar())
+            };
+
+            MainViewModel.SpeechToTextModule.SpeechRecognized += _speechToTextModule_SpeechRecognized;
             MainViewModel.SpeechToEmojiModule.GrammarLoader = async () =>
             {
                 var choices = new Choices();
@@ -47,8 +53,14 @@ namespace wBeatSaberCamera.Views
                 return keyWordsGrammar;
             };
             MainViewModel.SpeechToEmojiModule.SpeechRecognized += _speechToEmojiModule_SpeechRecognized;
+
             MainViewModel.TwitchBotConfigModel.PropertyChanged += BotConfigModelPropertyChanged;
             MainViewModel.ChatViewModel.PropertyChanged += ChatConfigModel_PropertyChanged;
+
+            if (MainViewModel.ChatViewModel.IsSpeechToTextEnabled)
+            {
+                MainViewModel.SpeechToTextModule.Start();
+            }
             if (MainViewModel.ChatViewModel.IsSpeechEmojiEnabled)
             {
                 MainViewModel.SpeechToEmojiModule.Start();
@@ -234,6 +246,18 @@ namespace wBeatSaberCamera.Views
                     MainViewModel.SpeechToEmojiModule.Stop();
                 }
             }
+
+            if (e.PropertyName == nameof(MainViewModel.ChatViewModel.IsSpeechToTextEnabled))
+            {
+                if (MainViewModel.ChatViewModel.IsSpeechToTextEnabled)
+                {
+                    MainViewModel.SpeechToTextModule.Start();
+                }
+                else
+                {
+                    MainViewModel.SpeechToTextModule.Stop();
+                }
+            }
         }
 
         private void BotConfigModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -246,6 +270,16 @@ namespace wBeatSaberCamera.Views
                     MainViewModel.SpeechToEmojiModule.Start();
                 }
             }
+        }
+
+        private async void _speechToTextModule_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+        {
+            if (!MainViewModel.TwitchBot.IsConnected)
+            {
+                return;
+            }
+
+            await MainViewModel.TwitchBot.SendMessage(MainViewModel.TwitchBotConfigModel.Channel, $"{e.Result.Text}", true);
         }
 
         private async void _speechToEmojiModule_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)

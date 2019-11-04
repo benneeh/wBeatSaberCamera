@@ -107,6 +107,12 @@ namespace wBeatSaberCamera.Models
             set;
         }
 
+        public SpeechToTextModule SpeechToTextModule
+        {
+            get;
+            set;
+        }
+
         public BeatSaberCameraSettings AsSettings()
         {
             return new BeatSaberCameraSettings()

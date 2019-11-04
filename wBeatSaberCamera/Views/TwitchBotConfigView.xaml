@@ -195,12 +195,13 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
                     <ColumnDefinition Width="auto" MinWidth="5"/>
-                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" />
                 <CheckBox Content="Enable TTS" IsChecked="{Binding ChatViewModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
-                <CheckBox Content="Enable Speech to Text (emotes)" IsEnabled="{Binding Path=SpeechToEmojiModule.IsBusy, Source={StaticResource MainViewModel}, Converter={StaticResource BooleanToInvertedBooleanConverter}}" Grid.Column="1" IsChecked="{Binding ChatViewModel.IsSpeechEmojiEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
+                <CheckBox Content="Enable Speech to Text" IsEnabled="{Binding Path=SpeechToTextModule.IsBusy, Source={StaticResource MainViewModel}, Converter={StaticResource BooleanToInvertedBooleanConverter}}" Grid.Column="1" IsChecked="{Binding ChatViewModel.IsSpeechToTextEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
+                <CheckBox Content="Enable Speech to Text (emotes)" IsEnabled="{Binding Path=SpeechToEmojiModule.IsBusy, Source={StaticResource MainViewModel}, Converter={StaticResource BooleanToInvertedBooleanConverter}}" Grid.Column="2" IsChecked="{Binding ChatViewModel.IsSpeechEmojiEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
             </Grid>
             <Grid>
                 <Grid.ColumnDefinitions>

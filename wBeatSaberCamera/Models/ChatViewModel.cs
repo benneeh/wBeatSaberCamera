@@ -90,6 +90,7 @@ namespace wBeatSaberCamera.Models
         private SpeechService SpeechService => _lazySpeechService.Value;
         private readonly Lazy<SpeechService> _lazySpeechService;
         private Dictionary<string, Chatter> _chatterDictionary;
+        private bool _isSpeechToTextEnabled;
 
         #endregion private fields
 
@@ -180,6 +181,19 @@ namespace wBeatSaberCamera.Models
                     return;
 
                 _isSpeechEmojiEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsSpeechToTextEnabled
+        {
+            get => _isSpeechToTextEnabled;
+            set
+            {
+                if (value == _isSpeechToTextEnabled)
+                    return;
+
+                _isSpeechToTextEnabled = value;
                 OnPropertyChanged();
             }
         }
