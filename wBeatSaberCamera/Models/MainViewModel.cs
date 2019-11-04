@@ -101,7 +101,7 @@ namespace wBeatSaberCamera.Models
             }
         }
 
-        public SpeechToTextModule SpeechToTextModule
+        public SpeechToTextModule SpeechToEmojiModule
         {
             get;
             set;

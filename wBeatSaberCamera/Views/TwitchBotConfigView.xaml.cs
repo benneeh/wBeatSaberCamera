@@ -31,8 +31,8 @@ namespace wBeatSaberCamera.Views
         {
             InitializeComponent();
             MainViewModel.TwitchBot = new TwitchBot(MainViewModel.ChatViewModel, MainViewModel.TwitchBotConfigModel);
-            MainViewModel.SpeechToTextModule = new SpeechToTextModule();
-            MainViewModel.SpeechToTextModule.GrammarLoader = async () =>
+            MainViewModel.SpeechToEmojiModule = new SpeechToTextModule();
+            MainViewModel.SpeechToEmojiModule.GrammarLoader = async () =>
             {
                 var choices = new Choices();
                 if (!_emoteCache.ContainsKey(MainViewModel.TwitchBotConfigModel.Channel))
@@ -47,12 +47,12 @@ namespace wBeatSaberCamera.Views
                 var keyWordsGrammar = new Grammar(keyWordsGrammarBuilder);
                 return keyWordsGrammar;
             };
-            MainViewModel.SpeechToTextModule.SpeechRecognized += _speechToTextModule_SpeechRecognized;
+            MainViewModel.SpeechToEmojiModule.SpeechRecognized += _speechToTextModule_SpeechRecognized;
             MainViewModel.TwitchBotConfigModel.PropertyChanged += BotConfigModelPropertyChanged;
             MainViewModel.ChatViewModel.PropertyChanged += ChatConfigModel_PropertyChanged;
             if (MainViewModel.ChatViewModel.IsSpeechEmojiEnabled)
             {
-                MainViewModel.SpeechToTextModule.Start();
+                MainViewModel.SpeechToEmojiModule.Start();
             }
 
 
@@ -228,11 +228,11 @@ namespace wBeatSaberCamera.Views
             {
                 if (MainViewModel.ChatViewModel.IsSpeechEmojiEnabled)
                 {
-                    MainViewModel.SpeechToTextModule.Start();
+                    MainViewModel.SpeechToEmojiModule.Start();
                 }
                 else
                 {
-                    MainViewModel.SpeechToTextModule.Stop();
+                    MainViewModel.SpeechToEmojiModule.Stop();
                 }
             }
         }
@@ -243,8 +243,8 @@ namespace wBeatSaberCamera.Views
             {
                 if (MainViewModel.ChatViewModel.IsSpeechEmojiEnabled)
                 {
-                    MainViewModel.SpeechToTextModule.Stop();
-                    MainViewModel.SpeechToTextModule.Start();
+                    MainViewModel.SpeechToEmojiModule.Stop();
+                    MainViewModel.SpeechToEmojiModule.Start();
                 }
             }
         }
