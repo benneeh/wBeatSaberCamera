@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Speech.Recognition;
 using System.Threading.Tasks;
 using System.Windows;
@@ -47,7 +46,7 @@ namespace wBeatSaberCamera.Views
                 var keyWordsGrammar = new Grammar(keyWordsGrammarBuilder);
                 return keyWordsGrammar;
             };
-            MainViewModel.SpeechToEmojiModule.SpeechRecognized += _speechToTextModule_SpeechRecognized;
+            MainViewModel.SpeechToEmojiModule.SpeechRecognized += _speechToEmojiModule_SpeechRecognized;
             MainViewModel.TwitchBotConfigModel.PropertyChanged += BotConfigModelPropertyChanged;
             MainViewModel.ChatViewModel.PropertyChanged += ChatConfigModel_PropertyChanged;
             if (MainViewModel.ChatViewModel.IsSpeechEmojiEnabled)
@@ -249,7 +248,7 @@ namespace wBeatSaberCamera.Views
             }
         }
 
-        private async void _speechToTextModule_SpeechRecognized(object sender, System.Speech.Recognition.SpeechRecognizedEventArgs e)
+        private async void _speechToEmojiModule_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
             if (!MainViewModel.TwitchBot.IsConnected)
             {

@@ -86,7 +86,7 @@ namespace wBeatSaberCamera.Models
         private readonly TaskSerializer _taskSerializer = new TaskSerializer();
         private bool _isSendMessagesEnabled;
         private bool _isReadingStreamerMessagesEnabled;
-        private bool _IsSpeechEmojiEnabled;
+        private bool _isSpeechEmojiEnabled;
         private SpeechService SpeechService => _lazySpeechService.Value;
         private readonly Lazy<SpeechService> _lazySpeechService;
         private Dictionary<string, Chatter> _chatterDictionary;
@@ -173,13 +173,13 @@ namespace wBeatSaberCamera.Models
 
         public bool IsSpeechEmojiEnabled
         {
-            get => _IsSpeechEmojiEnabled;
+            get => _isSpeechEmojiEnabled;
             set
             {
-                if (value == _IsSpeechEmojiEnabled)
+                if (value == _isSpeechEmojiEnabled)
                     return;
 
-                _IsSpeechEmojiEnabled = value;
+                _isSpeechEmojiEnabled = value;
                 OnPropertyChanged();
             }
         }
