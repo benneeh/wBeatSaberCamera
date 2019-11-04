@@ -64,7 +64,7 @@ namespace wBeatSaberCamera
             mainViewModel.ChatViewModel = new ChatViewModel()
             {
                 Chatters = new ObservableCollection<Chatter>(settings.ChatConfigModel.ChatterList),
-                IsSpeechToTextEnabled = settings.ChatConfigModel.IsSpeechToTextEnabled,
+                IsSpeechEmojiEnabled = settings.ChatConfigModel.IsSpeechEmojiEnabled,
                 MaxPitchFactor = settings.ChatConfigModel.MaxPitchFactor,
                 IsReadingStreamerMessagesEnabled = settings.ChatConfigModel.IsReadingStreamerMessagesEnabled,
                 IsSendMessagesEnabled = settings.ChatConfigModel.IsSendMessagesEnabled,

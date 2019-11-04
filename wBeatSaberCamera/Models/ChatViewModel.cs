@@ -67,7 +67,7 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
-        public bool IsSpeechToTextEnabled
+        public bool IsSpeechEmojiEnabled
         {
             get;
             set;
@@ -86,7 +86,7 @@ namespace wBeatSaberCamera.Models
         private readonly TaskSerializer _taskSerializer = new TaskSerializer();
         private bool _isSendMessagesEnabled;
         private bool _isReadingStreamerMessagesEnabled;
-        private bool _isSpeechToTextEnabled;
+        private bool _IsSpeechEmojiEnabled;
         private SpeechService SpeechService => _lazySpeechService.Value;
         private readonly Lazy<SpeechService> _lazySpeechService;
         private Dictionary<string, Chatter> _chatterDictionary;
@@ -171,15 +171,15 @@ namespace wBeatSaberCamera.Models
             }
         }
 
-        public bool IsSpeechToTextEnabled
+        public bool IsSpeechEmojiEnabled
         {
-            get => _isSpeechToTextEnabled;
+            get => _IsSpeechEmojiEnabled;
             set
             {
-                if (value == _isSpeechToTextEnabled)
+                if (value == _IsSpeechEmojiEnabled)
                     return;
 
-                _isSpeechToTextEnabled = value;
+                _IsSpeechEmojiEnabled = value;
                 OnPropertyChanged();
             }
         }
@@ -282,7 +282,7 @@ namespace wBeatSaberCamera.Models
                 return new ChatConfigModel()
                 {
                     ChatterList = new List<Chatter>(Chatters),
-                    IsSpeechToTextEnabled = IsSpeechToTextEnabled,
+                    IsSpeechEmojiEnabled = IsSpeechEmojiEnabled,
                     MaxPitchFactor = MaxPitchFactor,
                     IsReadingStreamerMessagesEnabled = IsReadingStreamerMessagesEnabled,
                     IsSendMessagesEnabled = IsSendMessagesEnabled,

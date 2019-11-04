@@ -39,7 +39,7 @@ namespace wBeatSaberCamera.Utils
             _botConfigModel = botConfigModel;
             botConfigModel.PropertyChanged += BotConfigModelPropertyChanged;
             chatViewModel.PropertyChanged += ChatConfigModel_PropertyChanged;
-            if (chatViewModel.IsSpeechToTextEnabled)
+            if (chatViewModel.IsSpeechEmojiEnabled)
             {
                 Start();
             }
@@ -47,9 +47,9 @@ namespace wBeatSaberCamera.Utils
 
         private void ChatConfigModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(_chatViewModel.IsSpeechToTextEnabled))
+            if (e.PropertyName == nameof(_chatViewModel.IsSpeechEmojiEnabled))
             {
-                if (_chatViewModel.IsSpeechToTextEnabled)
+                if (_chatViewModel.IsSpeechEmojiEnabled)
                 {
                     Start();
                 }
@@ -64,7 +64,7 @@ namespace wBeatSaberCamera.Utils
         {
             if (e.PropertyName == nameof(_botConfigModel.Channel))
             {
-                if (_chatViewModel.IsSpeechToTextEnabled)
+                if (_chatViewModel.IsSpeechEmojiEnabled)
                 {
                     Stop();
                     Start();
@@ -103,7 +103,7 @@ namespace wBeatSaberCamera.Utils
                 // Start asynchronous, continuous speech recognition.
                 speechRecognitionEngine.RecognizeAsync(RecognizeMode.Multiple);
 
-                if (!_chatViewModel.IsSpeechToTextEnabled)
+                if (!_chatViewModel.IsSpeechEmojiEnabled)
                 {
                     speechRecognitionEngine.Dispose();
                     return;
