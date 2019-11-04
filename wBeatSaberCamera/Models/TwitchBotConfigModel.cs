@@ -14,7 +14,7 @@ namespace wBeatSaberCamera.Models
 
         private ObservableSet<char> _commandIdentifiers = new ObservableSet<char>()
         {
-            '!', '@'
+            '!'
         };
 
         private ObservableCollection<TwitchChatCommand> _commands = new ObservableCollection<TwitchChatCommand>();
