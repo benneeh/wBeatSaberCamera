@@ -193,22 +193,23 @@ namespace wBeatSaberCamera.Models
             _lazySpeechService = new Lazy<SpeechService>(() => new SpeechService(this));
         }
 
-        public void Speak(string user, string text)
+        public (Task SpeakStarted, Task SpeakFinished) Speak(string user, string text, string serializerTarget = null)
         {
+            var taskStartedCompletionSource = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
             Func<Task> task = async () =>
             {
                 var chatter = GetChatterFromUsername(user);
-
+                taskStartedCompletionSource.SetResult(null);
                 await SpeechService.Speak(chatter, text, false);
             };
 
-            if (user != null)
+            if (user != null || serializerTarget != null)
             {
-                _taskSerializer.Enqueue(user, () => task());
+                return (taskStartedCompletionSource.Task, _taskSerializer.Enqueue(serializerTarget ?? user, () => task()));
             }
             else
             {
-                task();
+                return (taskStartedCompletionSource.Task, task());
             }
         }
 

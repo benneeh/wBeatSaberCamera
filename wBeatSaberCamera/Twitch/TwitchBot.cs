@@ -326,7 +326,7 @@ namespace wBeatSaberCamera.Twitch
             }
 
             var channel = await GetChannelByName(e.ChatMessage.Channel);
-            await HandleMessageThing(channel, _configModel.IsWelcomeChattersEnabled, _configModel.WelcomeChattersTemplate, e.ChatMessage, WelcomeChattersParameters);
+            await HandleMessageThing(channel, _configModel.IsWelcomeChattersEnabled, _configModel.WelcomeChattersTemplate, e.ChatMessage, WelcomeChattersParameters, e.ChatMessage.Username);
         }
 
         private async void RegisterEventHandlerSafe<T>(object s, T e, Action<object, T> eventAction)
@@ -494,12 +494,12 @@ namespace wBeatSaberCamera.Twitch
             }
         }
 
-        private Task HandleMessageThing<T>(Channel channel, bool isEnabled, string template, T eventArgs, PublicPropertyAccessorCache<T> propertyAccessorCache)
+        private Task HandleMessageThing<T>(Channel channel, bool isEnabled, string template, T eventArgs, PublicPropertyAccessorCache<T> propertyAccessorCache, string serializerTarget = null)
         {
-            return HandleMessageThing(channel, isEnabled, template, EnumerableFromMessageThing(eventArgs, propertyAccessorCache).Union(EnumerableFromMessageThing(channel, ChannelParameters)));
+            return HandleMessageThing(channel, isEnabled, template, EnumerableFromMessageThing(eventArgs, propertyAccessorCache).Union(EnumerableFromMessageThing(channel, ChannelParameters)), serializerTarget);
         }
 
-        private async Task HandleMessageThing(Channel channel, bool isEnabled, string template, IEnumerable<(string Key, Func<string> ValueFactory)> propertyAccessorCache)
+        private async Task HandleMessageThing(Channel channel, bool isEnabled, string template, IEnumerable<(string Key, Func<string> ValueFactory)> propertyAccessorCache, string serializerTarget = null)
         {
             if (!isEnabled)
             {
@@ -515,7 +515,7 @@ namespace wBeatSaberCamera.Twitch
                 }
             }
 
-            await SendMessage(channel.Name, sb.ToString(), true);
+            await SendMessage(channel.Name, sb.ToString(), true, serializerTarget);
         }
 
         private void ConfigModelPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -541,19 +541,20 @@ namespace wBeatSaberCamera.Twitch
             }
         }
 
-        public async Task SendMessage(string channel, string message, bool speak = false)
+        public async Task SendMessage(string channel, string message, bool speak = false, string serializerTarget = null)
         {
             if (!_chatViewModel.IsSendMessagesEnabled)
             {
                 return;
             }
 
+            Task speakStartedTask = Task.CompletedTask;
             if (speak)
             {
-                _chatViewModel.Speak(null, message);
+                speakStartedTask = _chatViewModel.Speak(null, message, serializerTarget).SpeakStarted;
             }
 
-            await RetryPolicy.Execute(() =>
+            await RetryPolicy.ExecuteAsync(async () =>
             {
                 if (!IsConnected)
                 {
@@ -565,6 +566,7 @@ namespace wBeatSaberCamera.Twitch
                     throw new TransientException($"Cant send message '{message}', TwitchBot has not joined channel '{_configModel.Channel}'");
                 }
 
+                await speakStartedTask;
                 _twitchClient.SendMessage(channel, message);
             });
         }
