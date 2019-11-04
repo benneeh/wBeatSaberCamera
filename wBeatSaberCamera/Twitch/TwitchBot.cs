@@ -326,7 +326,7 @@ namespace wBeatSaberCamera.Twitch
             }
 
             var channel = await GetChannelByName(e.ChatMessage.Channel);
-            await HandleMessageThing(channel, _configModel.IsWelcomeChattersEnabled, _configModel.WelcomeChattersTemplate, e.ChatMessage, WelcomeChattersParameters, e.ChatMessage.Username);
+            await HandleMessageThing(channel, _configModel.IsWelcomeChattersEnabled, GetRandomLineFromString(_configModel.WelcomeChattersTemplate), e.ChatMessage, WelcomeChattersParameters, e.ChatMessage.Username);
         }
 
         private async void RegisterEventHandlerSafe<T>(object s, T e, Action<object, T> eventAction)
@@ -406,7 +406,7 @@ namespace wBeatSaberCamera.Twitch
                 await HandleMessageThing(
                     channel,
                     _configModel.IsFollowerAnnouncementsEnabled,
-                    _configModel.FollowerAnnouncementTemplate,
+                    GetRandomLineFromString(_configModel.FollowerAnnouncementTemplate),
                     EnumerableFromMessageThing(newFollower, FollowParameters)
                         .Union(EnumerableFromMessageThing(channel, ChannelParameters))
                         .Union(EnumerableFromMessageThing(twitchUser, UserParameters)));
@@ -418,12 +418,18 @@ namespace wBeatSaberCamera.Twitch
             try
             {
                 var channel = await GetChannelById(e.Channel);
-                await HandleMessageThing(channel, _configModel.IsSubscriberAnnouncementsEnabled, _configModel.SubscriberAnnouncementTemplate, e, OnNewSubscriberParameters);
+                await HandleMessageThing(channel, _configModel.IsSubscriberAnnouncementsEnabled, GetRandomLineFromString(_configModel.SubscriberAnnouncementTemplate), e, OnNewSubscriberParameters);
             }
             catch (Exception ex)
             {
                 Log.Error(ex.ToString());
             }
+        }
+
+        private string GetRandomLineFromString(string multiLineString)
+        {
+            var lines = multiLineString.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            return lines[RandomProvider.Random.Next(lines.Length)];
         }
 
         private async Task<Channel> GetChannelById(string channelId)
@@ -462,7 +468,7 @@ namespace wBeatSaberCamera.Twitch
             try
             {
                 var channel = await GetChannelById(onRaidNotificationArgs.Channel);
-                await HandleMessageThing(channel, _configModel.IsRaidAnnouncementsEnabled, _configModel.RaidAnnouncementTemplate, onRaidNotificationArgs, OnRaidNotificationParameters);
+                await HandleMessageThing(channel, _configModel.IsRaidAnnouncementsEnabled, GetRandomLineFromString(_configModel.RaidAnnouncementTemplate), onRaidNotificationArgs, OnRaidNotificationParameters);
             }
             catch (Exception ex)
             {
@@ -471,7 +477,7 @@ namespace wBeatSaberCamera.Twitch
                 try
                 {
                     var channel = await GetChannelByName(onRaidNotificationArgs.Channel);
-                    await HandleMessageThing(channel, _configModel.IsRaidAnnouncementsEnabled, _configModel.RaidAnnouncementTemplate, onRaidNotificationArgs, OnRaidNotificationParameters);
+                    await HandleMessageThing(channel, _configModel.IsRaidAnnouncementsEnabled, GetRandomLineFromString(_configModel.RaidAnnouncementTemplate), onRaidNotificationArgs, OnRaidNotificationParameters);
                 }
                 catch
                 {
@@ -483,7 +489,7 @@ namespace wBeatSaberCamera.Twitch
         private async void _twitchClient_OnBeingHosted(object sender, OnBeingHostedArgs e)
         {
             var channel = await GetChannelByName(e.BeingHostedNotification.Channel);
-            await HandleMessageThing(channel, _configModel.IsHostAnnouncementsEnabled, _configModel.HostAnnouncementTemplate, e, OnBeingHostedParameters);
+            await HandleMessageThing(channel, _configModel.IsHostAnnouncementsEnabled, GetRandomLineFromString(_configModel.HostAnnouncementTemplate), e, OnBeingHostedParameters);
         }
 
         private IEnumerable<(string Key, Func<string> ValueFactory)> EnumerableFromMessageThing<T>(T eventArgs, PublicPropertyAccessorCache<T> propertyAccessorCache)
