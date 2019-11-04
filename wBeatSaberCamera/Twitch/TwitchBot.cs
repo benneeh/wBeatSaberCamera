@@ -79,9 +79,6 @@ namespace wBeatSaberCamera.Twitch
             _chatViewModel = chatViewModel;
             _configModel = configModel;
 
-            SpeechToTextModule = new SpeechToTextModule(chatViewModel, configModel);
-            SpeechToTextModule.SpeechRecognized += (s, e) => RegisterEventHandlerSafe(s, e, _speechToTextModule_SpeechRecognized);
-
             // ReSharper disable UseObjectOrCollectionInitializer
             FollowParameters = new PublicPropertyAccessorCache<Follow>();
             FollowParameters["FollowedAt"] = _ => _.FollowedAt;
@@ -150,17 +147,6 @@ namespace wBeatSaberCamera.Twitch
             // ReSharper restore UseObjectOrCollectionInitializer
         }
 
-        private async void _speechToTextModule_SpeechRecognized(object sender, System.Speech.Recognition.SpeechRecognizedEventArgs e)
-        {
-            if (!IsConnected)
-            {
-                return;
-            }
-            //Console.WriteLine($"Recognized '{e.Result.Text}' with a confidence of {e.Result.Confidence:P}");
-
-            await SendMessage(_configModel.Channel, $"{e.Result.Text} ({e.Result.Confidence:P})");
-        }
-
         [PublicAPI]
         public PublicPropertyAccessorCache<Channel> ChannelParameters { get; }
 
@@ -186,7 +172,6 @@ namespace wBeatSaberCamera.Twitch
         private readonly Dictionary<string, Channel> _channelIdToChannelCache = new Dictionary<string, Channel>();
         private readonly Dictionary<string, Channel> _channelNameToChannelCache = new Dictionary<string, Channel>();
         private TwitchAPI _twitchApi;
-        public SpeechToTextModule SpeechToTextModule { get; }
 
         /// <summary>
         /// this set contains all chatters that have said something, it is uses to welcome new chatters

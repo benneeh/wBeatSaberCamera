@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using wBeatSaberCamera.Models;
 using wBeatSaberCamera.Twitch;
+using wBeatSaberCamera.Utils;
 using wBeatSaberCamera.Utils.OAuth;
 
 namespace wBeatSaberCamera.Views
@@ -20,6 +22,8 @@ namespace wBeatSaberCamera.Views
         public TwitchBotConfigView()
         {
             InitializeComponent();
+            MainViewModel.SpeechToTextModule = new SpeechToTextModule(MainViewModel.ChatViewModel, MainViewModel.TwitchBotConfigModel);
+            MainViewModel.SpeechToTextModule.SpeechRecognized += _speechToTextModule_SpeechRecognized;
             MainViewModel.TwitchBot = new TwitchBot(MainViewModel.ChatViewModel, MainViewModel.TwitchBotConfigModel);
             //MainViewModel.TwitchBotConfigModel.Commands.Add(
             //    new TwitchChatCommand(
@@ -141,6 +145,16 @@ namespace wBeatSaberCamera.Views
             //    var p = synthesizer.SpeakAsync("Hi, this is a test text");
             //    synthesizer = new SpeechSynthesizer();
             //}
+        }
+        private async void _speechToTextModule_SpeechRecognized(object sender, System.Speech.Recognition.SpeechRecognizedEventArgs e)
+        {
+            if (!MainViewModel.TwitchBot.IsConnected)
+            {
+                return;
+            }
+            //Console.WriteLine($"Recognized '{e.Result.Text}' with a confidence of {e.Result.Confidence:P}");
+
+            await MainViewModel.TwitchBot.SendMessage(MainViewModel.TwitchBotConfigModel.Channel, $"{e.Result.Text} ({e.Result.Confidence:P})");
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)

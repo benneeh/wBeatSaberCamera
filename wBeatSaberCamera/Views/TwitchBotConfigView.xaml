@@ -200,7 +200,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" />
                 <CheckBox Content="Enable TTS" IsChecked="{Binding ChatViewModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
-                <CheckBox Content="Enable Speech to Text (emotes)" IsEnabled="{Binding Path=TwitchBot.SpeechToTextModule.IsBusy, Source={StaticResource MainViewModel}, Converter={StaticResource BooleanToInvertedBooleanConverter}}" Grid.Column="1" IsChecked="{Binding ChatViewModel.IsSpeechToTextEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
+                <CheckBox Content="Enable Speech to Text (emotes)" IsEnabled="{Binding Path=SpeechToTextModule.IsBusy, Source={StaticResource MainViewModel}, Converter={StaticResource BooleanToInvertedBooleanConverter}}" Grid.Column="1" IsChecked="{Binding ChatViewModel.IsSpeechToTextEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
             </Grid>
             <Grid>
                 <Grid.ColumnDefinitions>
