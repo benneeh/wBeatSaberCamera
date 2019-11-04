@@ -252,7 +252,7 @@ namespace wBeatSaberCamera.Models
                 int tries = 10;
                 while (!success && tries-- > 0)
                 {
-                    App.Current.Dispatcher.Invoke(() => VoiceName[cultureInfo] = GetRandomVoice(cultureInfo).Name);
+                    Application.Current.Dispatcher?.Invoke(() => VoiceName[cultureInfo] = GetRandomVoice(cultureInfo).Name);
 
                     try
                     {

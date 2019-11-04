@@ -191,7 +191,7 @@ namespace wBeatSaberCamera.Twitch
         /// <summary>
         /// this set contains all chatters that have said something, it is uses to welcome new chatters
         /// </summary>
-        private HashSet<string> _knownChatters = new HashSet<string>();
+        private readonly HashSet<string> _knownChatters = new HashSet<string>();
 
         public async void Start()
         {

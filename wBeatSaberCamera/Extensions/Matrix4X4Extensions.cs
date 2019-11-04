@@ -1,4 +1,5 @@
-﻿namespace System.Numerics
+﻿// ReSharper disable once CheckNamespace
+namespace System.Numerics
 {
     public static class Matrix4X4Extensions
     {
