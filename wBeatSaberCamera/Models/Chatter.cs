@@ -8,7 +8,7 @@ using System.Runtime.Serialization;
 using System.Speech.Synthesis;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Windows.Data;
+using System.Windows;
 using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Utils;
 
@@ -215,10 +215,10 @@ namespace wBeatSaberCamera.Models
         {
             _voiceName = new ObservableDictionary<CultureInfo, string>();
             _speechRate = RandomProvider.Random.Next(-40, 20);
-            if (_speechRate < 0)
-            {
-                _speechPitch = RandomProvider.Random.Next(0, 50);
-            }
+            //if (_speechRate < 0)
+            //{
+            _speechPitch = RandomProvider.Random.Next(-50, 50);
+            //}
         }
 
         private static readonly Regex s_urlRegex = new Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", RegexOptions.Compiled);
