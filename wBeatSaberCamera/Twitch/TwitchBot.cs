@@ -85,10 +85,10 @@ namespace wBeatSaberCamera.Twitch
 
             UserParameters = new PublicPropertyAccessorCache<User>();
             UserParameters["User.Id"] = _ => _.Id;
-            UserParameters["User.BroadcasterType"] = _ => _.BroadcasterType;
             UserParameters["User.Name"] = _ => _.DisplayName;
-            UserParameters["User.Description"] = _ => _.Description;
             UserParameters["User.Login"] = _ => _.Login;
+            UserParameters["User.BroadcasterType"] = _ => _.BroadcasterType;
+            UserParameters["User.Description"] = _ => _.Description;
             UserParameters["User.Type"] = _ => _.Type;
 
             ChannelParameters = new PublicPropertyAccessorCache<Channel>();
@@ -106,17 +106,60 @@ namespace wBeatSaberCamera.Twitch
             ChannelParameters["Channel.Views"] = _ => _.Views;
 
             OnNewSubscriberParameters = new PublicPropertyAccessorCache<OnNewSubscriberArgs>();
-            OnNewSubscriberParameters["User.Name"] = _ => _.Subscriber.DisplayName;
             OnNewSubscriberParameters["User.Id"] = _ => _.Subscriber.UserId;
+            OnNewSubscriberParameters["User.Name"] = _ => _.Subscriber.DisplayName;
+            OnNewSubscriberParameters["User.Login"] = _ => _.Subscriber.Login;
             OnNewSubscriberParameters["User.Type"] = _ => _.Subscriber.UserType;
             OnNewSubscriberParameters["User.IsSubscriber"] = _ => _.Subscriber.IsSubscriber;
             OnNewSubscriberParameters["User.IsModerator"] = _ => _.Subscriber.IsModerator;
             OnNewSubscriberParameters["User.IsPartner"] = _ => _.Subscriber.IsPartner;
             OnNewSubscriberParameters["User.IsTurbo"] = _ => _.Subscriber.IsTurbo;
-            OnNewSubscriberParameters["User.Login"] = _ => _.Subscriber.Login;
+            OnNewSubscriberParameters["User.SubscriptionMonths"] = _ => 1;
             OnNewSubscriberParameters["User.SubscriptionPlan"] = _ => _.Subscriber.SubscriptionPlan;
-            // ReSharper disable once StringLiteralTypo
             OnNewSubscriberParameters["ResubMessage"] = _ => _.Subscriber.ResubMessage;
+
+            OnReSubscriberParameters = new PublicPropertyAccessorCache<OnReSubscriberArgs>();
+            OnReSubscriberParameters["User.Id"] = _ => _.ReSubscriber.UserId;
+            OnReSubscriberParameters["User.Name"] = _ => _.ReSubscriber.DisplayName;
+            OnReSubscriberParameters["User.Login"] = _ => _.ReSubscriber.Login;
+            OnReSubscriberParameters["User.Type"] = _ => _.ReSubscriber.UserType;
+            OnReSubscriberParameters["User.IsSubscriber"] = _ => _.ReSubscriber.IsSubscriber;
+            OnReSubscriberParameters["User.IsModerator"] = _ => _.ReSubscriber.IsModerator;
+            OnReSubscriberParameters["User.IsPartner"] = _ => _.ReSubscriber.IsPartner;
+            OnReSubscriberParameters["User.IsTurbo"] = _ => _.ReSubscriber.IsTurbo;
+            OnReSubscriberParameters["User.SubscriptionMonths"] = _ => _.ReSubscriber.Months;
+            OnReSubscriberParameters["User.SubscriptionPlan"] = _ => _.ReSubscriber.SubscriptionPlan;
+            OnReSubscriberParameters["ResubMessage"] = _ => _.ReSubscriber.ResubMessage;
+
+            OnGiftedSubscriptionParameters = new PublicPropertyAccessorCache<OnGiftedSubscriptionArgs>();
+            OnGiftedSubscriptionParameters["Gifter.Login"] = _ => _.GiftedSubscription.Login;
+            OnGiftedSubscriptionParameters["Gifter.Name"] = _ => _.GiftedSubscription.DisplayName;
+            OnGiftedSubscriptionParameters["Gifter.Id"] = _ => _.GiftedSubscription.UserId;
+            OnGiftedSubscriptionParameters["Gifter.Type"] = _ => _.GiftedSubscription.UserType;
+            OnGiftedSubscriptionParameters["Gifter.IsSubscriber"] = _ => _.GiftedSubscription.IsSubscriber;
+            OnGiftedSubscriptionParameters["Gifter.IsModerator"] = _ => _.GiftedSubscription.IsModerator;
+            OnGiftedSubscriptionParameters["Gifter.IsTurbo"] = _ => _.GiftedSubscription.IsTurbo;
+            OnGiftedSubscriptionParameters["Gifted.Login"] = _ => _.GiftedSubscription.MsgParamRecipientUserName;
+            OnGiftedSubscriptionParameters["Gifted.Name"] = _ => _.GiftedSubscription.MsgParamRecipientDisplayName;
+            OnGiftedSubscriptionParameters["Gifted.Id"] = _ => _.GiftedSubscription.MsgParamRecipientId;
+            OnGiftedSubscriptionParameters["Gifted.SubscriptionMonths"] = _ => _.GiftedSubscription.MsgParamCumulativeMonths;
+            OnGiftedSubscriptionParameters["Gifted.SubscriptionStreakMonths"] = _ => _.GiftedSubscription.MsgParamStreakMonths;
+            OnGiftedSubscriptionParameters["Gifted.SubscriptionPlan"] = _ => _.GiftedSubscription.MsgParamSubPlan;
+
+            OnAnonGiftedSubscriptionParameters = new PublicPropertyAccessorCache<OnAnonGiftedSubscriptionArgs>();
+            OnAnonGiftedSubscriptionParameters["Gifter.Login"] = _ => _.AnonGiftedSubscription.Login;
+            OnAnonGiftedSubscriptionParameters["Gifter.Name"] = _ => _.AnonGiftedSubscription.DisplayName;
+            OnAnonGiftedSubscriptionParameters["Gifter.Id"] = _ => _.AnonGiftedSubscription.UserId;
+            OnAnonGiftedSubscriptionParameters["Gifter.Type"] = _ => _.AnonGiftedSubscription.UserType;
+            OnAnonGiftedSubscriptionParameters["Gifter.IsSubscriber"] = _ => _.AnonGiftedSubscription.IsSubscriber;
+            OnAnonGiftedSubscriptionParameters["Gifter.IsModerator"] = _ => _.AnonGiftedSubscription.IsModerator;
+            OnAnonGiftedSubscriptionParameters["Gifter.IsTurbo"] = _ => _.AnonGiftedSubscription.IsTurbo;
+            OnAnonGiftedSubscriptionParameters["Gifted.Login"] = _ => _.AnonGiftedSubscription.MsgParamRecipientUserName;
+            OnAnonGiftedSubscriptionParameters["Gifted.Name"] = _ => _.AnonGiftedSubscription.MsgParamRecipientDisplayName;
+            OnAnonGiftedSubscriptionParameters["Gifted.Id"] = _ => _.AnonGiftedSubscription.MsgParamRecipientId;
+            OnAnonGiftedSubscriptionParameters["Gifted.SubscriptionMonths"] = _ => _.AnonGiftedSubscription.MsgParamCumulativeMonths;
+            OnAnonGiftedSubscriptionParameters["Gifted.SubscriptionStreakMonths"] = _ => _.AnonGiftedSubscription.MsgParamStreakMonths;
+            OnAnonGiftedSubscriptionParameters["Gifted.SubscriptionPlan"] = _ => _.AnonGiftedSubscription.MsgParamSubPlan;
 
             OnBeingHostedParameters = new PublicPropertyAccessorCache<OnBeingHostedArgs>();
             OnBeingHostedParameters["HostedByChannel"] = _ => _.BeingHostedNotification.HostedByChannel;
@@ -127,16 +170,16 @@ namespace wBeatSaberCamera.Twitch
             OnRaidNotificationParameters = new PublicPropertyAccessorCache<OnRaidNotificationArgs>();
             OnRaidNotificationParameters["Raider.Id"] = _ => _.RaidNotification.UserId;
             OnRaidNotificationParameters["Raider.Name"] = _ => _.RaidNotification.DisplayName;
+            OnRaidNotificationParameters["Raider.Login"] = _ => _.RaidNotification.Login;
             OnRaidNotificationParameters["Raider.Type"] = _ => _.RaidNotification.UserType;
             OnRaidNotificationParameters["Raider.IsSubscriber"] = _ => _.RaidNotification.Subscriber;
             OnRaidNotificationParameters["Raider.IsModerator"] = _ => _.RaidNotification.Moderator;
             OnRaidNotificationParameters["Raider.IsTurbo"] = _ => _.RaidNotification.Turbo;
-            OnRaidNotificationParameters["Raider.Login"] = _ => _.RaidNotification.Login;
             OnRaidNotificationParameters["ViewerCount"] = _ => _.RaidNotification.MsgParamViewerCount;
 
             WelcomeChattersParameters = new PublicPropertyAccessorCache<ChatMessage>();
-            WelcomeChattersParameters["User.Name"] = _ => _.DisplayName;
             WelcomeChattersParameters["User.Id"] = _ => _.UserId;
+            WelcomeChattersParameters["User.Name"] = _ => _.DisplayName;
             WelcomeChattersParameters["User.Type"] = _ => _.UserType;
             WelcomeChattersParameters["User.IsSubscriber"] = _ => _.IsSubscriber;
             WelcomeChattersParameters["User.IsModerator"] = _ => _.IsModerator;
@@ -164,6 +207,15 @@ namespace wBeatSaberCamera.Twitch
 
         [PublicAPI]
         public PublicPropertyAccessorCache<OnNewSubscriberArgs> OnNewSubscriberParameters { get; }
+
+        [PublicAPI]
+        public PublicPropertyAccessorCache<OnReSubscriberArgs> OnReSubscriberParameters { get; }
+
+        [PublicAPI]
+        public PublicPropertyAccessorCache<OnGiftedSubscriptionArgs> OnGiftedSubscriptionParameters { get; }
+
+        [PublicAPI]
+        public PublicPropertyAccessorCache<OnAnonGiftedSubscriptionArgs> OnAnonGiftedSubscriptionParameters { get; }
 
         [PublicAPI]
         public PublicPropertyAccessorCache<ChatMessage> WelcomeChattersParameters { get; }
@@ -283,15 +335,14 @@ namespace wBeatSaberCamera.Twitch
                 }
             };
 
-            _twitchClient.OnReSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, TwitchClientOnOnReSubscriber);
-            _twitchClient.OnGiftedSubscription += (s, e) => RegisterEventHandlerSafe(s, e, TwitchClientOnOnGiftedSubscription);
-            _twitchClient.OnAnonGiftedSubscription += (s, e) => RegisterEventHandlerSafe(s, e, TwitchClientOnOnAnonGiftedSubscription);
+            _twitchClient.OnNewSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, OnNewSubscriber);
+            _twitchClient.OnReSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, OnReSubscriber);
+            _twitchClient.OnGiftedSubscription += (s, e) => RegisterEventHandlerSafe(s, e, OnGiftedSubscription);
+            _twitchClient.OnAnonGiftedSubscription += (s, e) => RegisterEventHandlerSafe(s, e, OnAnonGiftedSubscription);
+
             _twitchClient.OnBeingHosted += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnBeingHosted);
             _twitchClient.OnRaidNotification += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnRaidNotification);
-            _twitchClient.OnNewSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnNewSubscriber);
-            _twitchClient.OnNewSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnNewSubscriber);
             _twitchClient.OnMessageReceived += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnMessageReceived);
-
             _twitchClient.Connect();
             IsConnecting = true;
         }
@@ -341,19 +392,28 @@ namespace wBeatSaberCamera.Twitch
             }
         }
 
-        private void TwitchClientOnOnReSubscriber(object sender, OnReSubscriberArgs e)
+        private async void OnNewSubscriber(object sender, OnNewSubscriberArgs e)
         {
-            // TBD
+            var channel = await GetChannelById(e.Channel);
+            await HandleMessageThing(channel, _configModel.IsSubscriberAnnouncementsEnabled, GetRandomLineFromString(_configModel.SubscriberAnnouncementTemplate), e, OnNewSubscriberParameters);
         }
 
-        private void TwitchClientOnOnGiftedSubscription(object sender, OnGiftedSubscriptionArgs e)
+        private async void OnReSubscriber(object sender, OnReSubscriberArgs e)
         {
-            // TBD
+            var channel = await GetChannelById(e.Channel);
+            await HandleMessageThing(channel, _configModel.IsSubscriberAnnouncementsEnabled, GetRandomLineFromString(_configModel.SubscriberAnnouncementTemplate), e, OnReSubscriberParameters);
         }
 
-        private void TwitchClientOnOnAnonGiftedSubscription(object sender, OnAnonGiftedSubscriptionArgs e)
+        private async void OnGiftedSubscription(object sender, OnGiftedSubscriptionArgs e)
         {
-            // TBD
+            var channel = await GetChannelById(e.Channel);
+            await HandleMessageThing(channel, _configModel.IsSubscriberAnnouncementsEnabled, GetRandomLineFromString(_configModel.SubscriberAnnouncementTemplate), e, OnGiftedSubscriptionParameters);
+        }
+
+        private async void OnAnonGiftedSubscription(object sender, OnAnonGiftedSubscriptionArgs e)
+        {
+            var channel = await GetChannelById(e.Channel);
+            await HandleMessageThing(channel, _configModel.IsSubscriberAnnouncementsEnabled, GetRandomLineFromString(_configModel.SubscriberAnnouncementTemplate), e, OnAnonGiftedSubscriptionParameters);
         }
 
         public async Task Stop()
@@ -395,19 +455,6 @@ namespace wBeatSaberCamera.Twitch
                     EnumerableFromMessageThing(newFollower, FollowParameters)
                         .Union(EnumerableFromMessageThing(channel, ChannelParameters))
                         .Union(EnumerableFromMessageThing(twitchUser, UserParameters)));
-            }
-        }
-
-        private async void _twitchClient_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
-        {
-            try
-            {
-                var channel = await GetChannelById(e.Channel);
-                await HandleMessageThing(channel, _configModel.IsSubscriberAnnouncementsEnabled, GetRandomLineFromString(_configModel.SubscriberAnnouncementTemplate), e, OnNewSubscriberParameters);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
             }
         }
 
