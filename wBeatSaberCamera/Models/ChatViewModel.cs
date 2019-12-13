@@ -39,6 +39,13 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
+        public bool ReadUserNames
+        {
+            get;
+            set;
+        }
+
+        [DataMember]
         public bool IsTextToSpeechEnabled
         {
             get;
@@ -80,6 +87,7 @@ namespace wBeatSaberCamera.Models
 
         private ObservableCollection<Chatter> _chatters;
         private bool _isTextToSpeechEnabled;
+        private bool _ReadUserNames;
         private double _maxPitchFactor = .3;
         private static readonly Random s_random = new Random();
 
@@ -112,6 +120,21 @@ namespace wBeatSaberCamera.Models
                 _chatterDictionary = value?.ToDictionary(x => x.Name);
                 SubscribeDirtyCollection(_chatters);
 
+                OnPropertyChanged();
+            }
+        }
+
+        public bool ReadUserNames
+        {
+            get => _ReadUserNames;
+            set
+            {
+                if (value == _ReadUserNames)
+                {
+                    return;
+                }
+
+                _ReadUserNames = value;
                 OnPropertyChanged();
             }
         }
@@ -216,7 +239,10 @@ namespace wBeatSaberCamera.Models
                 taskStartedCompletionSource.SetResult(null);
                 await SpeechService.Speak(chatter, text, false);
             };
-
+            if (ReadUserNames && !string.IsNullOrEmpty(user))
+            {
+                text = $"{user}: {text}";
+            }
             if (user != null || serializerTarget != null)
             {
                 return (taskStartedCompletionSource.Task, _taskSerializer.Enqueue(serializerTarget ?? user, () => task()));
@@ -301,6 +327,7 @@ namespace wBeatSaberCamera.Models
                     IsReadingStreamerMessagesEnabled = IsReadingStreamerMessagesEnabled,
                     IsSendMessagesEnabled = IsSendMessagesEnabled,
                     IsTextToSpeechEnabled = IsTextToSpeechEnabled,
+                    ReadUserNames = ReadUserNames,
                 };
             }
         }

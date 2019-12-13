@@ -214,6 +214,16 @@
                 <CheckBox Content="Enable Message Sending" IsChecked="{Binding ChatViewModel.IsSendMessagesEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
                 <CheckBox Content="Read own(streamer) messages" Grid.Column="1" IsChecked="{Binding ChatViewModel.IsReadingStreamerMessagesEnabled, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
             </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Read user names" IsChecked="{Binding ChatViewModel.ReadUserNames, UpdateSourceTrigger=PropertyChanged, Source={StaticResource MainViewModel}}" />
+            </Grid>
         </StackPanel>
         <StackPanel Grid.Row="1">
             <Grid>

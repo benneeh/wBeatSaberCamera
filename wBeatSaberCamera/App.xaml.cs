@@ -69,6 +69,7 @@ namespace wBeatSaberCamera
                 IsReadingStreamerMessagesEnabled = settings.ChatConfigModel.IsReadingStreamerMessagesEnabled,
                 IsSendMessagesEnabled = settings.ChatConfigModel.IsSendMessagesEnabled,
                 IsTextToSpeechEnabled = settings.ChatConfigModel.IsTextToSpeechEnabled,
+                ReadUserNames = settings.ChatConfigModel.ReadUserNames,
             };
             mainViewModel.ChatViewModel.Clean();
             mainViewModel.ChatViewModel.Chatters.CollectionChanged += Chatters_CollectionChanged;
