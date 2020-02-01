@@ -23,11 +23,13 @@ namespace wBeatSaberCamera.Models
         private string _hostAnnouncementTemplate = "'{HostedByChannel}' is now hosting your channel with '{ViewerCount}' viewers!";
         private string _subscriberAnnouncementTemplate = "'{User.Name}' has subscribed!";
         private string _welcomeChattersTemplate = "Hi {User.Name}!";
+        private string _giftedSubscriptionAnnouncementTemplate = "{Gifter.Name} hast gifted {Gifted.Name} a {Gifted.SubscriptionPlan} subscription! Thank you!";
         private bool _isFollowerAnnouncementsEnabled;
         private bool _isRaidAnnouncementsEnabled;
         private bool _isHostAnnouncementsEnabled;
         private bool _isSubscriberAnnouncementsEnabled;
         private bool _isWelcomeChattersEnabled;
+        private bool _isGiftedSubscriptionAnnouncementsEnabled;
 
         public ObservableCollection<TwitchChatCommand> Commands
         {
@@ -107,6 +109,20 @@ namespace wBeatSaberCamera.Models
                 }
 
                 _isSubscriberAnnouncementsEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember]
+        public bool IsGiftedSubscriptionAnnouncementsEnabled
+        {
+            get => _isGiftedSubscriptionAnnouncementsEnabled;
+            set
+            {
+                if (value == _isGiftedSubscriptionAnnouncementsEnabled)
+                    return;
+
+                _isGiftedSubscriptionAnnouncementsEnabled = value;
                 OnPropertyChanged();
             }
         }
@@ -231,6 +247,20 @@ namespace wBeatSaberCamera.Models
                 }
 
                 _subscriberAnnouncementTemplate = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember]
+        public string GiftedSubscriptionAnnouncementTemplate
+        {
+            get => _giftedSubscriptionAnnouncementTemplate;
+            set
+            {
+                if (value == _giftedSubscriptionAnnouncementTemplate)
+                    return;
+
+                _giftedSubscriptionAnnouncementTemplate = value;
                 OnPropertyChanged();
             }
         }

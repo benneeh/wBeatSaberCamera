@@ -70,6 +70,8 @@ namespace wBeatSaberCamera.Twitch
 
         public IEnumerable<string> SubscribeKeys => OnNewSubscriberParameters.Union(ChannelParameters).Select(x => $"{{{x}}}");
 
+        public IEnumerable<string> GiftedSubscriptionKeys => OnGiftedSubscriptionParameters.Union(ChannelParameters).Select(x => $"{{{x}}}");
+
         public IEnumerable<string> WelcomeChattersKeys => WelcomeChattersParameters.Union(ChannelParameters).Select(x => $"{{{x}}}");
 
         public IEnumerable<string> FollowKeys => FollowParameters.Union(UserParameters).Union(ChannelParameters).Select(x => $"{{{x}}}");
@@ -407,13 +409,13 @@ namespace wBeatSaberCamera.Twitch
         private async void OnGiftedSubscription(object sender, OnGiftedSubscriptionArgs e)
         {
             var channel = await GetChannelById(e.Channel);
-            await HandleMessageThing(channel, _configModel.IsSubscriberAnnouncementsEnabled, GetRandomLineFromString(_configModel.SubscriberAnnouncementTemplate), e, OnGiftedSubscriptionParameters);
+            await HandleMessageThing(channel, _configModel.IsGiftedSubscriptionAnnouncementsEnabled, GetRandomLineFromString(_configModel.GiftedSubscriptionAnnouncementTemplate), e, OnGiftedSubscriptionParameters);
         }
 
         private async void OnAnonGiftedSubscription(object sender, OnAnonGiftedSubscriptionArgs e)
         {
             var channel = await GetChannelById(e.Channel);
-            await HandleMessageThing(channel, _configModel.IsSubscriberAnnouncementsEnabled, GetRandomLineFromString(_configModel.SubscriberAnnouncementTemplate), e, OnAnonGiftedSubscriptionParameters);
+            await HandleMessageThing(channel, _configModel.IsGiftedSubscriptionAnnouncementsEnabled, GetRandomLineFromString(_configModel.GiftedSubscriptionAnnouncementTemplate), e, OnAnonGiftedSubscriptionParameters);
         }
 
         public async Task Stop()
