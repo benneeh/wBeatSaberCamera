@@ -234,23 +234,24 @@ namespace wBeatSaberCamera.Models
         {
             var taskStartedCompletionSource = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-            Func<string, Task> task = async (textCopy) =>
+            async Task SpeechTask(string textCopy)
             {
                 var chatter = GetChatterFromUsername(user);
                 taskStartedCompletionSource.SetResult(null);
                 await SpeechService.Speak(chatter, textCopy, false);
-            };
+            }
+
             if (ReadUserNames && !string.IsNullOrEmpty(user))
             {
                 text = $"{user}: {text}";
             }
             if (user != null || serializerTarget != null)
             {
-                return (taskStartedCompletionSource.Task, _taskSerializer.Enqueue(serializerTarget ?? user, () => task(text)));
+                return (taskStartedCompletionSource.Task, _taskSerializer.Enqueue(serializerTarget ?? user, () => SpeechTask(text)));
             }
             else
             {
-                return (taskStartedCompletionSource.Task, task(text));
+                return (taskStartedCompletionSource.Task, SpeechTask(text));
             }
         }
 
