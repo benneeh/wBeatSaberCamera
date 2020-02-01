@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using SpeechHost.WebApi.Requests;
 using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Twitch;
 using wBeatSaberCamera.Utils;
@@ -38,7 +39,7 @@ namespace wBeatSaberCamera.Service
             _port = port;
         }
 
-        public async Task FillStreamWithSpeech(string ssml, Stream targetStream)
+        public async Task FillStreamWithSpeech(string voiceName, string ssml, Stream targetStream)
         {
             IsBusy = true;
             var sw = Stopwatch.StartNew();
@@ -47,7 +48,11 @@ namespace wBeatSaberCamera.Service
             try
             {
                 var message = new HttpRequestMessage(HttpMethod.Post, $"http://localhost:{_port}/api/Speech/SpeakSsml");
-                message.Content = new StringContent(JsonConvert.SerializeObject(ssml), Encoding.UTF8, "application/json");
+                message.Content = new StringContent(JsonConvert.SerializeObject(new SpeechRequest()
+                {
+                    VoiceName = voiceName,
+                    Ssml = ssml
+                }), Encoding.UTF8, "application/json");
 
                 var response = await _httpClient.SendAsync(message, HttpCompletionOption.ResponseHeadersRead);
 

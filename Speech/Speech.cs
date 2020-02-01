@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.Speech.Synthesis;
+using System.Linq;
+using System.Text;
 
 namespace Speech
 {
@@ -7,12 +9,17 @@ namespace Speech
     {
         private static readonly SpeechSynthesizer s_speechSynthesizer = new SpeechSynthesizer();
 
-        public static byte[] SpeakSsml(string ssml)
+        public static byte[] SpeakSsml(string ssml, string defaultVoiceName)
         {
             lock (s_speechSynthesizer)
             {
                 using (var memoryStream = new MemoryStream())
                 {
+                    if (!string.IsNullOrEmpty(defaultVoiceName))
+                    {
+                        s_speechSynthesizer.SelectVoice(defaultVoiceName);
+                    }
+
                     s_speechSynthesizer.SetOutputToWaveStream(memoryStream);
 
                     s_speechSynthesizer.SpeakSsml(ssml);

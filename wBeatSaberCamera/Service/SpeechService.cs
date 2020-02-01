@@ -18,6 +18,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Xml.Linq;
+using SpeechHost.WebApi.Requests;
 using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Models;
 using wBeatSaberCamera.Twitch;
@@ -52,7 +53,7 @@ namespace wBeatSaberCamera.Service
             _port = port;
         }
 
-        public async Task FillStreamWithSpeech(string ssml, Stream targetStream)
+        public async Task FillStreamWithSpeech(string voiceName, string ssml, Stream targetStream)
         {
             IsBusy = true;
             var sw = Stopwatch.StartNew();
@@ -60,7 +61,13 @@ namespace wBeatSaberCamera.Service
 
             try
             {
-                var response = await _hubProxy.Invoke<byte[]>("SpeakSsml", ssml);
+                var response = await _hubProxy.Invoke<byte[]>(
+                    "Speak", 
+                    new SpeechRequest()
+                    {
+                        Ssml = ssml,
+                        VoiceName = voiceName
+                    });
                 if (response != null)
                 {
                     targetStream.Write(response, 0, response.Length);
@@ -196,14 +203,14 @@ namespace wBeatSaberCamera.Service
             return port;
         }
 
-        public async Task FillStreamWithSpeech(string ssml, Stream targetStream)
+        public async Task FillStreamWithSpeech(string voiceName, string ssml, Stream targetStream)
         {
             await RetryPolicy.ExecuteAsync(async () =>
             {
                 var client = await GetFreeClient();
                 try
                 {
-                    await client.FillStreamWithSpeech(ssml, targetStream);
+                    await client.FillStreamWithSpeech(voiceName, ssml, targetStream);
                 }
                 catch (Exception ex)
                 {
@@ -272,7 +279,9 @@ namespace wBeatSaberCamera.Service
                     }
                     else
                     {
-                        await _speechHostClientCache.FillStreamWithSpeech(GetSsmlFromText(chatter, language, text), memoryStream);
+                        var voiceForLanguage = chatter.GetVoiceForLanguage(language);
+
+                        await _speechHostClientCache.FillStreamWithSpeech(voiceForLanguage, GetSsmlFromText(text, voiceForLanguage, chatter.SpeechPitch, chatter.SpeechRate), memoryStream);
                     }
 
                     await PlaySound(memoryStream, chatter);
@@ -296,7 +305,7 @@ namespace wBeatSaberCamera.Service
                     }
                     else
                     {
-                        await _speechHostClientCache.FillStreamWithSpeech(GetSsmlFromText(text, voiceName), memoryStream);
+                        await _speechHostClientCache.FillStreamWithSpeech(voiceName, GetSsmlFromText(text, voiceName), memoryStream);
                     }
 
                     await PlaySound(memoryStream);
@@ -466,7 +475,8 @@ namespace wBeatSaberCamera.Service
             {
                 s_speechSynthesizer.SetOutputToWaveStream(ms);
 
-                var ssml = GetSsmlFromText(chatter, language, text);
+                var voiceForLanguage = chatter.GetVoiceForLanguage(language);
+                var ssml = GetSsmlFromText(text, voiceForLanguage, chatter.SpeechPitch, chatter.SpeechRate);
 
                 s_speechSynthesizer.SpeakSsml(ssml);
             }
@@ -486,13 +496,6 @@ namespace wBeatSaberCamera.Service
 
         private static readonly Regex s_urlRegex = new Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", RegexOptions.Compiled);
         private static readonly Regex s_ohReplacementRegex = new Regex("^(([a-zA-Z]{2,2})|([a-zA-ZöÖäÄüÜ)]+[aAeEiIoOuUöyYÖäÄüÜhH]{1,}[a-zA-Z]+))$", RegexOptions.Compiled);
-
-        public string GetSsmlFromText(Chatter chatter, CultureInfo cultureInfo, string text)
-        {
-            var voiceForLanguage = chatter.GetVoiceForLanguage(cultureInfo);
-
-            return GetSsmlFromText(text, voiceForLanguage, chatter.SpeechPitch, chatter.SpeechRate);
-        }
 
         private static string GetSsmlFromText(string text, string voiceName, int speechPitch = 0, int speechRate = 0)
         {
@@ -563,7 +566,7 @@ namespace wBeatSaberCamera.Service
             ReadOnlyCollection<ChatterVoice> voices = Voices;
             if (language != null)
             {
-                voices = new ReadOnlyCollection<ChatterVoice>(voices.Where(x => x.Voice.VoiceInfo.Culture.Equals(language) || x.Voice.VoiceInfo.Culture.Parent.Equals(language)).ToList());
+                voices = new ReadOnlyCollection<ChatterVoice>(voices.Where(x => x.IsValid && x.Voice.VoiceInfo.Culture.Equals(language) || x.Voice.VoiceInfo.Culture.Parent.Equals(language)).ToList());
             }
 
             if (voices.Count == 0)

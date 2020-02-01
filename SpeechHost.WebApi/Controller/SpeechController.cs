@@ -16,27 +16,6 @@ namespace SpeechHost.WebApi.Controller
             return "World";
         }
 
-        [Route("SpeakSsml")]
-        [HttpPost]
-        public HttpResponseMessage SpeakSsml([FromBody]string ssml)
-        {
-            return Speak(new SpeechRequest()
-            {
-                Ssml = ssml
-            });
-        }
-
-        [Route("SpeakText")]
-        [HttpPost]
-        public HttpResponseMessage SpeakText([FromBody]string text, string voiceName = null)
-        {
-            return Speak(new SpeechRequest()
-            {
-                Text = text,
-                VoiceName = voiceName
-            });
-        }
-
         [Route("Speak")]
         [HttpGet]
         public HttpResponseMessage Speak([FromBody] SpeechRequest request)
@@ -50,7 +29,7 @@ namespace SpeechHost.WebApi.Controller
                 if (!string.IsNullOrEmpty(request.Ssml))
                 {
                     //new PromptBuilder().StartStyle(new PromptStyle()
-                    responseBytes = Speech.Speech.SpeakSsml(request.Ssml);
+                    responseBytes = Speech.Speech.SpeakSsml(request.Ssml, request.VoiceName);
                 }
 
                 if (!string.IsNullOrEmpty(request.Text))

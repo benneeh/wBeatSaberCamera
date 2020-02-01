@@ -11,23 +11,6 @@ namespace SpeechHost.WebApi.Hub
             return "World";
         }
 
-        public byte[] SpeakSsml(string ssml)
-        {
-            return Speak(new SpeechRequest()
-            {
-                Ssml = ssml
-            });
-        }
-
-        public byte[] SpeakText(string text, string voiceName = null)
-        {
-            return Speak(new SpeechRequest()
-            {
-                Text = text,
-                VoiceName = voiceName
-            });
-        }
-
         public byte[] Speak(SpeechRequest request)
         {
             Program.ReportActivity();
@@ -39,7 +22,7 @@ namespace SpeechHost.WebApi.Hub
                 if (!string.IsNullOrEmpty(request.Ssml))
                 {
                     //new PromptBuilder().StartStyle(new PromptStyle()
-                    responseBytes = Speech.Speech.SpeakSsml(request.Ssml);
+                    responseBytes = Speech.Speech.SpeakSsml(request.Ssml, request.VoiceName);
                 }
 
                 if (!string.IsNullOrEmpty(request.Text))

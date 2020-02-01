@@ -9,7 +9,7 @@ namespace wBeatSaberCamera.Service
     {
         bool IsBusy { get; }
 
-        Task FillStreamWithSpeech(string ssml, Stream targetStream);
+        Task FillStreamWithSpeech(string voiceName, string ssml, Stream targetStream);
 
         Task<bool> Initialize();
     }
