@@ -1,17 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
-using System.Collections.ObjectModel;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Speech.Synthesis;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
-using System.Xml.Linq;
-using wBeatSaberCamera.Annotations;
+using wBeatSaberCamera.Service;
 using wBeatSaberCamera.Utils;
 
 namespace wBeatSaberCamera.Models
@@ -23,11 +17,24 @@ namespace wBeatSaberCamera.Models
         public static Random Random => s_random.Value;
     }
 
+    public class ChatterVoice
+    {
+        public readonly bool IsValid;
+
+        public string VoiceName => Voice.VoiceInfo.Name;
+
+        public readonly InstalledVoice Voice;
+
+        public ChatterVoice(InstalledVoice voice)
+        {
+            Voice = voice;
+            IsValid = SpeechService.IsVoiceValid(this);
+        }
+    }
+
     [DataContract]
     public class Chatter : DirtyBase
     {
-        private static readonly SpeechSynthesizer s_speechSynthesizer = new SpeechSynthesizer();
-
         [DataMember]
         public string Name
         {
@@ -153,25 +160,24 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
-        public ObservableDictionary<CultureInfo, string> VoiceName
+        public ObservableDictionary<CultureInfo, string> LocalizedVoices
         {
-            get => _voiceName;
+            get => _localizedVoices;
             set
             {
-                if (value == _voiceName)
+                if (value == _localizedVoices)
                 {
                     return;
                 }
 
-                UnsubscribeDirtyCollection(_voiceName);
-                _voiceName = value;
-                SubscribeDirtyCollection(_voiceName);
+                UnsubscribeDirtyCollection(_localizedVoices);
+                _localizedVoices = value;
+                SubscribeDirtyCollection(_localizedVoices);
                 OnPropertyChanged();
             }
         }
 
         private string _name;
-        private ObservableDictionary<CultureInfo, string> _voiceName;
         private double _trembleFactor;
         private double _trembleSpeed;
         private double _trembleBegin;
@@ -179,25 +185,8 @@ namespace wBeatSaberCamera.Models
         private Vector3 _position;
         private int _speechRate;
         private int _speechPitch;
+        private ObservableDictionary<CultureInfo, string> _localizedVoices;
         private DateTime _lastSpeakTime;
-        private static ReadOnlyCollection<InstalledVoice> _voices;
-        private static readonly Random s_random = new Random();
-
-        private static ReadOnlyCollection<InstalledVoice> Voices
-        {
-            get
-            {
-                if (_voices == null)
-                {
-                    using (var synthesizer = new SpeechSynthesizer())
-                    {
-                        _voices = synthesizer.GetInstalledVoices();
-                    }
-                }
-
-                return _voices;
-            }
-        }
 
         [DataMember]
         public DateTime LastSpeakTime
@@ -215,134 +204,31 @@ namespace wBeatSaberCamera.Models
 
         public Chatter()
         {
-            _voiceName = new ObservableDictionary<CultureInfo, string>();
+            _localizedVoices = new ObservableDictionary<CultureInfo, string>();
             _speechRate = RandomProvider.Random.Next(-40, 40);
-            //if (_speechRate < 0)
-            //{
             _speechPitch = RandomProvider.Random.Next(-50, 50);
-            //}
         }
 
-        private static readonly Regex s_urlRegex = new Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", RegexOptions.Compiled);
-        private static readonly Regex s_ohReplacementRegex = new Regex("^(([a-zA-Z]{2,2})|([a-zA-ZöÖäÄüÜ)]+[aAeEiIoOuUöyYÖäÄüÜhH]{1,}[a-zA-Z]+))$", RegexOptions.Compiled);
-
-        public string GetSsmlFromText(CultureInfo cultureInfo, string text)
+        public string GetVoiceForLanguage(CultureInfo cultureInfo)
         {
-            var voiceForLanguage = GetVoiceForLanguage(cultureInfo);
-
-            text = s_urlRegex.Replace(text, "URL");
-            var words = text.Split(new[] {' '}, StringSplitOptions.None);
-            var woahBuilder = new StringBuilder();
-            foreach(var word in words)
-            {
-                if (s_ohReplacementRegex.Match(word).Success)
-                {
-                    woahBuilder.Append($"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;0}%\" rate=\"{RandomProvider.Random.Next(50)}%\">{new XText(word)}</prosody>");
-                }
-                else
-                {
-                    woahBuilder.Append(new XText(word));
-                }
-            }
-
-            var woahText = woahBuilder.ToString();//;s_ohReplacementRegex.Replace(text, (match) => $"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;0}%\" rate=\"{RandomProvider.Random.Next(50)}%\">{new XText(match.Value)}</prosody>");
-            var ssml = $@"
-<speak version=""1.0"" xmlns=""https://www.w3.org/2001/10/synthesis"" xml:lang=""en-US"">
-    <voice name=""{voiceForLanguage}"">
-        <prosody pitch=""{SpeechPitch:+#;-#;0}%"" rate=""{SpeechRate}%"">
-            {woahText}
-        </prosody>
-    </voice>
-</speak>";
-
-            //var ohTemplate = "<prosody pitch=\"+50%\" rate=\"1%\">{0}</prosody>"; // <prosody rate="10%" contour="(0%,+20Hz) (50%,+420Hz) (100%, +10Hz)">oh</prosody>
-
-            return ssml;
-        }
-
-        private string GetVoiceForLanguage(CultureInfo cultureInfo)
-        {
-            if (!VoiceName.ContainsKey(cultureInfo))
+            if (!LocalizedVoices.ContainsKey(cultureInfo))
             {
                 bool success = false;
                 int tries = 10;
                 while (!success && tries-- > 0)
                 {
-                    Application.Current.Dispatcher?.Invoke(() => VoiceName[cultureInfo] = GetRandomVoice(cultureInfo).Name);
+                    Application.Current.Dispatcher?.Invoke(() => LocalizedVoices[cultureInfo] = SpeechService.GetRandomVoice(cultureInfo).Name);
 
-                    try
-                    {
-                        lock (s_speechSynthesizer)
-                        {
-                            s_speechSynthesizer.SelectVoice(VoiceName[cultureInfo]);
-                        }
-
-                        success = true;
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
+                    success = SpeechService.IsVoiceValid(LocalizedVoices[cultureInfo]);
                 }
 
                 if (tries == 0)
                 {
                     Console.WriteLine($"Couldn't find a proper voice for {Name} and language {cultureInfo}");
                 }
-                lock (s_speechSynthesizer)
-                {
-                    return s_speechSynthesizer.Voice.Name;
-                }
             }
 
-            return VoiceName[cultureInfo];
+            return LocalizedVoices[cultureInfo];
         }
-
-        public void WriteSpeechToStream(CultureInfo language, string text, MemoryStream ms)
-        {
-            lock (s_speechSynthesizer)
-            {
-                s_speechSynthesizer.SetOutputToWaveStream(ms);
-
-                var ssml = GetSsmlFromText(language, text);
-
-                s_speechSynthesizer.SpeakSsml(ssml);
-            }
-        }
-
-        #region get voice
-
-        [PublicAPI]
-        private VoiceInfo GetRandomVoice([CanBeNull] CultureInfo language)
-        {
-            ReadOnlyCollection<InstalledVoice> voices = Voices;
-            if (language != null)
-            {
-                voices = new ReadOnlyCollection<InstalledVoice>(voices.Where(x => x.VoiceInfo.Culture.Equals(language) || x.VoiceInfo.Culture.Parent.Equals(language)).ToList());
-            }
-
-            if (voices.Count == 0)
-            {
-                voices = Voices;
-            }
-
-            var selectedVoice = voices[s_random.Next(voices.Count)].VoiceInfo;
-
-            return selectedVoice;
-        }
-
-        [PublicAPI]
-        private VoiceInfo GetVoiceByName(string name)
-        {
-            return Voices.FirstOrDefault(x => x.VoiceInfo.Name == name)?.VoiceInfo ?? new SpeechSynthesizer().Voice;
-        }
-
-        [PublicAPI]
-        private VoiceInfo GetVoiceById(string id)
-        {
-            return Voices.FirstOrDefault(x => x.VoiceInfo.Id == id)?.VoiceInfo ?? new SpeechSynthesizer().Voice;
-        }
-
-        #endregion get voice
     }
 }

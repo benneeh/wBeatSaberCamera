@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNet.SignalR.Client;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
+using NAudio.Wave;
 using NTextCat;
 using System;
 using System.Collections.ObjectModel;
@@ -11,9 +12,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Speech.Synthesis;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using NAudio.Wave;
+using System.Xml.Linq;
 using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Models;
 using wBeatSaberCamera.Twitch;
@@ -218,6 +222,25 @@ namespace wBeatSaberCamera.Service
         private readonly AudioListener _audioListener;
         private readonly VrPositioningService _vrPositioningService;
         private readonly SpeechHostClientCache _speechHostClientCache = new SpeechHostClientCache();
+        private static ReadOnlyCollection<ChatterVoice> _voices;
+        private static readonly Random s_random = new Random();
+        private static readonly SpeechSynthesizer s_speechSynthesizer = new SpeechSynthesizer();
+
+        private static ReadOnlyCollection<ChatterVoice> Voices
+        {
+            get
+            {
+                if (_voices == null)
+                {
+                    using (var synthesizer = new SpeechSynthesizer())
+                    {
+                        _voices = new ReadOnlyCollection<ChatterVoice>(synthesizer.GetInstalledVoices().Select(x => new ChatterVoice(x)).ToList());
+                    }
+                }
+
+                return _voices;
+            }
+        }
 
         public SpeechService(ChatViewModel chatViewModel)
         {
@@ -245,11 +268,11 @@ namespace wBeatSaberCamera.Service
                 {
                     if (useLocalSpeak)
                     {
-                        chatter.WriteSpeechToStream(language, text, memoryStream);
+                        WriteSpeechToStream(chatter, language, text, memoryStream);
                     }
                     else
                     {
-                        await _speechHostClientCache.FillStreamWithSpeech(chatter.GetSsmlFromText(language, text), memoryStream);
+                        await _speechHostClientCache.FillStreamWithSpeech(GetSsmlFromText(chatter, language, text), memoryStream);
                     }
 
                     await Speak(chatter, memoryStream);
@@ -407,5 +430,123 @@ namespace wBeatSaberCamera.Service
                    .GetCultures(CultureTypes.NeutralCultures)
                    .FirstOrDefault(c => c.ThreeLetterISOLanguageName == name);
         }
+
+        public void WriteSpeechToStream(Chatter chatter, CultureInfo language, string text, MemoryStream ms)
+        {
+            lock (s_speechSynthesizer)
+            {
+                s_speechSynthesizer.SetOutputToWaveStream(ms);
+
+                var ssml = GetSsmlFromText(chatter, language, text);
+
+                s_speechSynthesizer.SpeakSsml(ssml);
+            }
+        }
+
+        private static readonly Regex s_urlRegex = new Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", RegexOptions.Compiled);
+        private static readonly Regex s_ohReplacementRegex = new Regex("^(([a-zA-Z]{2,2})|([a-zA-ZöÖäÄüÜ)]+[aAeEiIoOuUöyYÖäÄüÜhH]{1,}[a-zA-Z]+))$", RegexOptions.Compiled);
+
+        public string GetSsmlFromText(Chatter chatter, CultureInfo cultureInfo, string text)
+        {
+            var voiceForLanguage = chatter.GetVoiceForLanguage(cultureInfo);
+
+            return SsmlFromText(text, voiceForLanguage, chatter.SpeechPitch, chatter.SpeechRate);
+        }
+
+        private static string SsmlFromText(string text, string voiceName, int speechPitch, int speechRate)
+        {
+            text = s_urlRegex.Replace(text, "URL");
+            var words = text.Split(new[] { ' ' }, StringSplitOptions.None);
+            var woahBuilder = new StringBuilder();
+            foreach (var word in words)
+            {
+                if (s_ohReplacementRegex.Match(word).Success)
+                {
+                    woahBuilder.Append($"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;0}%\" rate=\"{RandomProvider.Random.Next(50)}%\">{new XText(word)}</prosody>");
+                }
+                else
+                {
+                    woahBuilder.Append(new XText(word));
+                }
+            }
+
+            var woahText = woahBuilder.ToString(); //;s_ohReplacementRegex.Replace(text, (match) => $"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;0}%\" rate=\"{RandomProvider.Random.Next(50)}%\">{new XText(match.Value)}</prosody>");
+            var ssml = $@"
+<speak version=""1.0"" xmlns=""https://www.w3.org/2001/10/synthesis"" xml:lang=""en-US"">
+    <voice name=""{voiceName}"">
+        <prosody pitch=""{speechPitch:+#;-#;0}%"" rate=""{speechRate}%"">
+            {woahText}
+        </prosody>
+    </voice>
+</speak>";
+
+            //var ohTemplate = "<prosody pitch=\"+50%\" rate=\"1%\">{0}</prosody>"; // <prosody rate="10%" contour="(0%,+20Hz) (50%,+420Hz) (100%, +10Hz)">oh</prosody>
+
+            return ssml;
+        }
+
+        #region get voice
+
+        public static bool IsVoiceValid(ChatterVoice voice)
+        {
+            if (!voice.Voice.Enabled)
+            {
+                return false;
+            }
+
+            return IsVoiceValid(voice.VoiceName);
+        }
+
+        public static bool IsVoiceValid(string voiceName)
+        {
+            try
+            {
+                lock (s_speechSynthesizer)
+                {
+                    s_speechSynthesizer.SelectVoice(voiceName);
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            return false;
+        }
+
+        [PublicAPI]
+        public static VoiceInfo GetRandomVoice([CanBeNull] CultureInfo language)
+        {
+            ReadOnlyCollection<ChatterVoice> voices = Voices;
+            if (language != null)
+            {
+                voices = new ReadOnlyCollection<ChatterVoice>(voices.Where(x => x.Voice.VoiceInfo.Culture.Equals(language) || x.Voice.VoiceInfo.Culture.Parent.Equals(language)).ToList());
+            }
+
+            if (voices.Count == 0)
+            {
+                voices = Voices;
+            }
+
+            var selectedVoice = voices[s_random.Next(voices.Count)].Voice.VoiceInfo;
+
+            return selectedVoice;
+        }
+
+        [PublicAPI]
+        private VoiceInfo GetVoiceByName(string name)
+        {
+            return Voices.FirstOrDefault(x => x.VoiceName == name)?.Voice.VoiceInfo ?? new SpeechSynthesizer().Voice;
+        }
+
+        [PublicAPI]
+        private VoiceInfo GetVoiceById(string id)
+        {
+            return Voices.FirstOrDefault(x => x.Voice.VoiceInfo.Id == id)?.Voice.VoiceInfo ?? new SpeechSynthesizer().Voice;
+        }
+
+        #endregion get voice
     }
 }
