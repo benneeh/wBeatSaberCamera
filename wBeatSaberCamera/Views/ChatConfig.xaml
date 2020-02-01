@@ -108,7 +108,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBox Text="{Binding Key.DisplayName, Mode=OneWay}" IsReadOnly="True" />
                                     <TextBox Grid.Column="1" Text="{Binding Value, Mode=OneWay}" IsReadOnly="True" />
-                                    <Button Content="Read" Grid.Column="1" CommandParameter="{Binding Value}" Command="{StaticResource SpeakSpecificVoiceCommand}" />
+                                    <Button Content="Read" Grid.Column="2" CommandParameter="{Binding Value}" Command="{StaticResource SpeakSpecificVoiceCommand}" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
