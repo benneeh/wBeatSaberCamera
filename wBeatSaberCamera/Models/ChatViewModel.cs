@@ -255,7 +255,7 @@ namespace wBeatSaberCamera.Models
             }
         }
 
-        private Chatter GetChatterFromUsername(string user)
+        public Chatter GetChatterFromUsername(string user)
         {
             if (user == null || !_chatterDictionary.TryGetValue(user, out var chatter))
             {
@@ -334,7 +334,7 @@ namespace wBeatSaberCamera.Models
             }
         }
 
-        public void RemoveChatter(string chatterName)
+        public bool RemoveChatter(string chatterName)
         {
             Chatter chatter = null;
             _chatterDictionary?.TryGetValue(chatterName, out chatter);
@@ -342,7 +342,10 @@ namespace wBeatSaberCamera.Models
             {
                 Chatters.Remove(chatter);
                 _chatterDictionary.Remove(chatterName);
+                return true;
             }
+
+            return false;
         }
     }
 }
