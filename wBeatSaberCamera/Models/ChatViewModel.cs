@@ -87,7 +87,7 @@ namespace wBeatSaberCamera.Models
 
         private ObservableCollection<Chatter> _chatters;
         private bool _isTextToSpeechEnabled;
-        private bool _ReadUserNames;
+        private bool _readUserNames;
         private double _maxPitchFactor = .3;
         private static readonly Random s_random = new Random();
 
@@ -126,15 +126,15 @@ namespace wBeatSaberCamera.Models
 
         public bool ReadUserNames
         {
-            get => _ReadUserNames;
+            get => _readUserNames;
             set
             {
-                if (value == _ReadUserNames)
+                if (value == _readUserNames)
                 {
                     return;
                 }
 
-                _ReadUserNames = value;
+                _readUserNames = value;
                 OnPropertyChanged();
             }
         }
@@ -233,11 +233,12 @@ namespace wBeatSaberCamera.Models
         public (Task SpeakStarted, Task SpeakFinished) Speak(string user, string text, string serializerTarget = null)
         {
             var taskStartedCompletionSource = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-            Func<Task> task = async () =>
+
+            Func<string, Task> task = async (textCopy) =>
             {
                 var chatter = GetChatterFromUsername(user);
                 taskStartedCompletionSource.SetResult(null);
-                await SpeechService.Speak(chatter, text, false);
+                await SpeechService.Speak(chatter, textCopy, false);
             };
             if (ReadUserNames && !string.IsNullOrEmpty(user))
             {
@@ -245,11 +246,11 @@ namespace wBeatSaberCamera.Models
             }
             if (user != null || serializerTarget != null)
             {
-                return (taskStartedCompletionSource.Task, _taskSerializer.Enqueue(serializerTarget ?? user, () => task()));
+                return (taskStartedCompletionSource.Task, _taskSerializer.Enqueue(serializerTarget ?? user, () => task(text)));
             }
             else
             {
-                return (taskStartedCompletionSource.Task, task());
+                return (taskStartedCompletionSource.Task, task(text));
             }
         }
 
