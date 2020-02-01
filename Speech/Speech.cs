@@ -1,50 +1,73 @@
 ﻿using System.IO;
+using System.Speech.AudioFormat;
 using System.Speech.Synthesis;
-using System.Linq;
-using System.Text;
 
 namespace Speech
 {
     public class Speech
     {
-        private static readonly SpeechSynthesizer s_speechSynthesizer = new SpeechSynthesizer();
+        public static readonly SpeechSynthesizer SpeechSynthesizer = new SpeechSynthesizer();
 
-        public static byte[] SpeakSsml(string ssml, string defaultVoiceName)
+        public const int SPEECH_SAMPLE_RATE = 22050;
+        public const int SPEECH_BITS_PER_SAMPLE = 16;
+        public const int SPEECH_CHANNELS = 1;
+
+        public static byte[] SpeakSsml(string ssml, string defaultVoiceName, SpeechSynthesizer speechSynthesizer = null)
         {
-            lock (s_speechSynthesizer)
+            // ReSharper disable once InconsistentlySynchronizedField
+            using (var memoryStream = new MemoryStream())
             {
-                using (var memoryStream = new MemoryStream())
-                {
-                    if (!string.IsNullOrEmpty(defaultVoiceName))
-                    {
-                        s_speechSynthesizer.SelectVoice(defaultVoiceName);
-                    }
+                SpeakSsml(ssml, defaultVoiceName, memoryStream, speechSynthesizer);
 
-                    s_speechSynthesizer.SetOutputToWaveStream(memoryStream);
-
-                    s_speechSynthesizer.SpeakSsml(ssml);
-
-                    return memoryStream.ToArray();
-                }
+                return memoryStream.ToArray();
             }
         }
 
-        public static byte[] SpeakText(string text, string voiceName = null)
+        public static void SpeakSsml(string ssml, string defaultVoiceName, MemoryStream memoryStream, SpeechSynthesizer speechSynthesizer = null)
         {
-            lock (s_speechSynthesizer)
+            speechSynthesizer = speechSynthesizer ?? SpeechSynthesizer;
+            lock (speechSynthesizer)
             {
-                using (var memoryStream = new MemoryStream())
+                if (!string.IsNullOrEmpty(defaultVoiceName))
                 {
-                    s_speechSynthesizer.SetOutputToWaveStream(memoryStream);
-                    if (!string.IsNullOrEmpty(voiceName))
-                    {
-                        s_speechSynthesizer.SelectVoice(voiceName);
-                    }
-
-                    s_speechSynthesizer.Speak(text);
-
-                    return memoryStream.ToArray();
+                    speechSynthesizer.SelectVoice(defaultVoiceName);
                 }
+
+                SpeechSynthesizer.SetOutputToAudioStream(memoryStream, new SpeechAudioFormatInfo(EncodingFormat.Pcm, SPEECH_SAMPLE_RATE, SPEECH_BITS_PER_SAMPLE, SPEECH_CHANNELS, SPEECH_SAMPLE_RATE * SPEECH_CHANNELS * SPEECH_BITS_PER_SAMPLE / 8, 2, null));
+
+                //speechSynthesizer.SetOutputToWaveStream(memoryStream);
+
+                speechSynthesizer.SpeakSsml(ssml);
+            }
+        }
+
+        public static byte[] SpeakText(string text, string voiceName = null, SpeechSynthesizer speechSynthesizer = null)
+        {
+            // ReSharper disable once InconsistentlySynchronizedField
+            speechSynthesizer = speechSynthesizer ?? SpeechSynthesizer;
+            using (var memoryStream = new MemoryStream())
+            {
+                SpeakText(text, voiceName, memoryStream, speechSynthesizer);
+
+                return memoryStream.ToArray();
+            }
+        }
+
+        public static void SpeakText(string text, string defaultVoiceName, MemoryStream memoryStream, SpeechSynthesizer speechSynthesizer = null)
+        {
+            speechSynthesizer = speechSynthesizer ?? SpeechSynthesizer;
+            lock (speechSynthesizer)
+            {
+                if (!string.IsNullOrEmpty(defaultVoiceName))
+                {
+                    speechSynthesizer.SelectVoice(defaultVoiceName);
+                }
+
+                SpeechSynthesizer.SetOutputToAudioStream(memoryStream, new SpeechAudioFormatInfo(EncodingFormat.Pcm, SPEECH_SAMPLE_RATE, SPEECH_BITS_PER_SAMPLE, SPEECH_CHANNELS, SPEECH_SAMPLE_RATE * SPEECH_CHANNELS * SPEECH_BITS_PER_SAMPLE / 8, 2, null));
+
+                //speechSynthesizer.SetOutputToWaveStream(memoryStream);
+
+                speechSynthesizer.Speak(text);
             }
         }
     }

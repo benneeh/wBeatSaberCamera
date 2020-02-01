@@ -387,6 +387,10 @@
       <Project>{b62800a6-2820-415a-963a-da07b59c04a0}</Project>
       <Name>SpeechHost.WebApi</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Speech\Speech.csproj">
+      <Project>{18509893-8453-4E45-86F1-7363E4905F9D}</Project>
+      <Name>Speech</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

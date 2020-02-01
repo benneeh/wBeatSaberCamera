@@ -12,6 +12,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Speech.AudioFormat;
 using System.Speech.Synthesis;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -62,7 +63,7 @@ namespace wBeatSaberCamera.Service
             try
             {
                 var response = await _hubProxy.Invoke<byte[]>(
-                    "Speak", 
+                    "Speak",
                     new SpeechRequest()
                     {
                         Ssml = ssml,
@@ -231,7 +232,6 @@ namespace wBeatSaberCamera.Service
         private readonly SpeechHostClientCache _speechHostClientCache = new SpeechHostClientCache();
         private static ReadOnlyCollection<ChatterVoice> _voices;
         private static readonly Random s_random = new Random();
-        private static readonly SpeechSynthesizer s_speechSynthesizer = new SpeechSynthesizer();
 
         private static ReadOnlyCollection<ChatterVoice> Voices
         {
@@ -280,7 +280,6 @@ namespace wBeatSaberCamera.Service
                     else
                     {
                         var voiceForLanguage = chatter.GetVoiceForLanguage(language);
-
                         await _speechHostClientCache.FillStreamWithSpeech(voiceForLanguage.VoiceName, GetSsmlFromText(text, voiceForLanguage.VoiceName, chatter.SpeechPitch, chatter.SpeechRate), memoryStream);
                     }
 
@@ -358,6 +357,7 @@ namespace wBeatSaberCamera.Service
 
                 if (chatter == null)
                 {
+                    await Task.Delay(wavDuration);
                     return;
                 }
 
@@ -408,10 +408,13 @@ namespace wBeatSaberCamera.Service
         {
             float max = 0;
             TimeSpan wavDuration;
-            using (var reader = new WaveFileReader(memoryStream))
+            //using var reader = new RawSourceWaveStream(memoryStream, new WaveFormat(16000, 16, 1));
+            using (var reader = new RawSourceWaveStream(memoryStream, new WaveFormat(Speech.Speech.SPEECH_SAMPLE_RATE, Speech.Speech.SPEECH_BITS_PER_SAMPLE, Speech.Speech.SPEECH_CHANNELS)))
             {
                 var sampleProvider = reader.ToSampleProvider();
-
+                //Console.WriteLine("BitsPerSample:" + sampleProvider.WaveFormat.BitsPerSample);
+                //Console.WriteLine("SampleRate:" + sampleProvider.WaveFormat.SampleRate);
+                //Console.WriteLine("Encoding:" + sampleProvider.WaveFormat.Encoding);
                 wavDuration = reader.TotalTime;
                 // find the max peak
                 float[] buffer = new float[sampleProvider.WaveFormat.SampleRate];
@@ -471,31 +474,21 @@ namespace wBeatSaberCamera.Service
 
         public void WriteSpeechToStream(Chatter chatter, CultureInfo language, string text, MemoryStream ms)
         {
-            lock (s_speechSynthesizer)
-            {
-                s_speechSynthesizer.SetOutputToWaveStream(ms);
+            var voiceForLanguage = chatter.GetVoiceForLanguage(language);
+            var ssml = GetSsmlFromText(text, voiceForLanguage.VoiceName, chatter.SpeechPitch, chatter.SpeechRate);
 
-                var voiceForLanguage = chatter.GetVoiceForLanguage(language);
-                var ssml = GetSsmlFromText(text, voiceForLanguage.VoiceName, chatter.SpeechPitch, chatter.SpeechRate);
-
-                s_speechSynthesizer.SpeakSsml(ssml);
-            }
+            Speech.Speech.SpeakSsml(ssml, null, ms);
         }
 
         public void WriteSpeechToStream(string voiceName, string text, MemoryStream ms, int speechPitch = 0, int speechRate = 0)
         {
-            lock (s_speechSynthesizer)
-            {
-                s_speechSynthesizer.SetOutputToWaveStream(ms);
+            var ssml = GetSsmlFromText(text, voiceName, speechPitch, speechRate);
 
-                var ssml = GetSsmlFromText(text, voiceName, speechPitch, speechRate);
-
-                s_speechSynthesizer.SpeakSsml(ssml);
-            }
+            Speech.Speech.SpeakSsml(ssml, null, ms);
         }
 
         private static readonly Regex s_urlRegex = new Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", RegexOptions.Compiled);
-        private static readonly Regex s_ohReplacementRegex = new Regex("^(([a-zA-Z]{2,2})|([a-zA-ZöÖäÄüÜ)]+[aAeEiIoOuUöyYÖäÄüÜhH]{1,}[a-zA-Z]+))$", RegexOptions.Compiled);
+        private static readonly Regex s_ohReplacementRegex = new Regex("^(([a-zA-Z]{2,2})|([a-zA-ZöÖäÄüÜ)]{1,1}[aAeEiIoOuUöyYÖäÄüÜhH]{1,}[a-zA-Z]{1,1}))$", RegexOptions.Compiled);
 
         private static string GetSsmlFromText(string text, string voiceName, int speechPitch = 0, int speechRate = 0)
         {
@@ -506,7 +499,7 @@ namespace wBeatSaberCamera.Service
             {
                 if (s_ohReplacementRegex.Match(word).Success)
                 {
-                    woahBuilder.Append($"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;0}%\" rate=\"{RandomProvider.Random.Next(50)}%\">{new XText(word)}</prosody>");
+                    woahBuilder.Append($"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;+0}%\" rate=\"{RandomProvider.Random.Next(-100, 50):+#;-#;+0}%\">{new XText(word)}</prosody>");
                 }
                 else
                 {
@@ -518,12 +511,14 @@ namespace wBeatSaberCamera.Service
             var ssml = $@"
 <speak version=""1.0"" xmlns=""https://www.w3.org/2001/10/synthesis"" xml:lang=""en-US"">
     <voice name=""{voiceName}"">
-        <prosody pitch=""{speechPitch:+#;-#;0}%"" rate=""{speechRate}%"">
+        <prosody pitch=""{speechPitch:+#;-#;+0}%"" rate=""{speechRate:+#;-#;+0}%"">
             {woahText}
         </prosody>
     </voice>
 </speak>";
 
+            //
+            //</prosody>
             //var ohTemplate = "<prosody pitch=\"+50%\" rate=\"1%\">{0}</prosody>"; // <prosody rate="10%" contour="(0%,+20Hz) (50%,+420Hz) (100%, +10Hz)">oh</prosody>
 
             return ssml;
@@ -545,9 +540,9 @@ namespace wBeatSaberCamera.Service
         {
             try
             {
-                lock (s_speechSynthesizer)
+                lock (Speech.Speech.SpeechSynthesizer)
                 {
-                    s_speechSynthesizer.SelectVoice(voiceName);
+                    Speech.Speech.SpeechSynthesizer.SelectVoice(voiceName);
                 }
 
                 return true;
