@@ -5,6 +5,7 @@
     <TargetFramework>net472</TargetFramework>
     <ApplicationIcon />
     <StartupObject />
+    <Platforms>x64;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
