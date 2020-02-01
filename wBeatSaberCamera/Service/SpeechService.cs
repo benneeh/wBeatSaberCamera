@@ -497,7 +497,7 @@ namespace wBeatSaberCamera.Service
             var woahBuilder = new StringBuilder();
             foreach (var word in words)
             {
-                if (RandomProvider.Random.Next(10) > 5 || s_ohReplacementRegex.Match(word).Success)
+                if (RandomProvider.Random.Next(10) > 8 || s_ohReplacementRegex.Match(word).Success)
                 {
                     woahBuilder.Append($"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;+0}%\" rate=\"{RandomProvider.Random.Next(-100, 50):+#;-#;+0}%\">{new XText(word)}</prosody>");
                 }
