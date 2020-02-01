@@ -9,11 +9,13 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <RoutedUICommand x:Key="RemoveChatterCommand" />
-        <RoutedUICommand x:Key="SpeakCommand" />
+        <RoutedUICommand x:Key="SpeakSpecificUserCommand" />
+        <RoutedUICommand x:Key="SpeakSpecificVoiceCommand" />
     </UserControl.Resources>
     <UserControl.CommandBindings>
         <CommandBinding Command="{StaticResource RemoveChatterCommand}" CanExecute="RemoveChatterCommand_OnCanExecute" Executed="RemoveChatterCommand_OnExecuted" />
-        <CommandBinding Command="{StaticResource SpeakCommand}" Executed="SpeakCommand_OnExecuted" />
+        <CommandBinding Command="{StaticResource SpeakSpecificUserCommand}" Executed="SpeakSpecificUserCommand_OnExecuted" />
+        <CommandBinding Command="{StaticResource SpeakSpecificVoiceCommand}" Executed="SpeakSpecificVoiceCommand_OnExecuted" />
     </UserControl.CommandBindings>
     <Grid DataContext="{StaticResource MainViewModel}">
         <Grid.RowDefinitions>
@@ -28,8 +30,8 @@
         </Grid.ColumnDefinitions>
         <CheckBox Content="Enable TTS for chatters" IsChecked="{Binding ChatViewModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged}" />
         <TextBox Name="TbText" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" VerticalAlignment="Stretch" />
-        <Button Content="Read" Grid.Row="2" Command="{StaticResource SpeakCommand}" />
-        <Button Grid.Row="2" Grid.Column="1" CommandParameter="{Binding SelectedChatter.Name}" Command="{StaticResource SpeakCommand}" >
+        <Button Content="Read" Grid.Row="2" Command="{StaticResource SpeakSpecificUserCommand}" />
+        <Button Grid.Row="2" Grid.Column="1" CommandParameter="{Binding SelectedChatter.Name}" Command="{StaticResource SpeakSpecificUserCommand}" >
             <Button.Content>
                 <TextBlock>
                     <Run Text="Read as" />
@@ -95,16 +97,18 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="2" Text="Voices"/>
-                    <ItemsControl Grid.Column="1" ItemsSource="{Binding VoiceName}">
+                    <ItemsControl Grid.Column="1" ItemsSource="{Binding LocalizedVoices}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBox Text="{Binding Key.DisplayName, Mode=OneWay}" IsReadOnly="True" />
                                     <TextBox Grid.Column="1" Text="{Binding Value, Mode=OneWay}" IsReadOnly="True" />
+                                    <Button Content="Read" Grid.Column="1" CommandParameter="{Binding Value}" Command="{StaticResource SpeakSpecificVoiceCommand}" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

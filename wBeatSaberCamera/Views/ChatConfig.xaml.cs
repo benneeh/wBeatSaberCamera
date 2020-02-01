@@ -42,9 +42,14 @@ namespace wBeatSaberCamera.Views
             }
         }
 
-        private void SpeakCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+        private void SpeakSpecificUserCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             MainViewModel.ChatViewModel.Speak(e.Parameter as string, TbText.Text);
+        }
+
+        private async void SpeakSpecificVoiceCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            await MainViewModel.ChatViewModel.SpeechService.Speak(e.Parameter as string, TbText.Text, true);
         }
     }
 }

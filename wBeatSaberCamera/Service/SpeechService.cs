@@ -253,7 +253,7 @@ namespace wBeatSaberCamera.Service
         {
             using (var memoryStream = new MemoryStream(audioData))
             {
-                await Speak(chatter, memoryStream);
+                await PlaySound(memoryStream, chatter);
             }
         }
 
@@ -275,7 +275,7 @@ namespace wBeatSaberCamera.Service
                         await _speechHostClientCache.FillStreamWithSpeech(GetSsmlFromText(chatter, language, text), memoryStream);
                     }
 
-                    await Speak(chatter, memoryStream);
+                    await PlaySound(memoryStream, chatter);
                 }
             }
             catch (Exception ex)
@@ -284,7 +284,31 @@ namespace wBeatSaberCamera.Service
             }
         }
 
-        private async Task Speak(Chatter chatter, MemoryStream memoryStream)
+        public async Task Speak(string voiceName, string text, bool useLocalSpeak)
+        {
+            try
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    if (useLocalSpeak)
+                    {
+                        WriteSpeechToStream(voiceName, text, memoryStream);
+                    }
+                    else
+                    {
+                        await _speechHostClientCache.FillStreamWithSpeech(GetSsmlFromText(text, voiceName), memoryStream);
+                    }
+
+                    await PlaySound(memoryStream);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Error while text text '{text}': " + ex);
+            }
+        }
+
+        private async Task PlaySound(MemoryStream memoryStream, Chatter chatter = null)
         {
             if (memoryStream.Length == 0)
             {
@@ -314,7 +338,7 @@ namespace wBeatSaberCamera.Service
                 memoryStream.Position = 0;
                 var soundEffect = SoundEffect.FromStream(memoryStream).CreateInstance();
                 var audioEmitter = new AudioEmitter();
-                if (_vrPositioningService.IsVrEnabled)
+                if (_vrPositioningService.IsVrEnabled && chatter != null)
                 {
                     var hmdPositioning = _vrPositioningService.GetHmdPositioning();
                     audioEmitter.Position = Vector3.Transform(chatter.Position, -hmdPositioning.Rotation);
@@ -322,6 +346,11 @@ namespace wBeatSaberCamera.Service
 
                 soundEffect.Apply3D(_audioListener, audioEmitter);
                 soundEffect.Play();
+
+                if (chatter == null)
+                {
+                    return;
+                }
 
                 double sineTime = chatter.TrembleBegin;
                 var stopWatch = Stopwatch.StartNew();
@@ -443,6 +472,18 @@ namespace wBeatSaberCamera.Service
             }
         }
 
+        public void WriteSpeechToStream(string voiceName, string text, MemoryStream ms, int speechPitch = 0, int speechRate = 0)
+        {
+            lock (s_speechSynthesizer)
+            {
+                s_speechSynthesizer.SetOutputToWaveStream(ms);
+
+                var ssml = GetSsmlFromText(text, voiceName, speechPitch, speechRate);
+
+                s_speechSynthesizer.SpeakSsml(ssml);
+            }
+        }
+
         private static readonly Regex s_urlRegex = new Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", RegexOptions.Compiled);
         private static readonly Regex s_ohReplacementRegex = new Regex("^(([a-zA-Z]{2,2})|([a-zA-ZöÖäÄüÜ)]+[aAeEiIoOuUöyYÖäÄüÜhH]{1,}[a-zA-Z]+))$", RegexOptions.Compiled);
 
@@ -450,10 +491,10 @@ namespace wBeatSaberCamera.Service
         {
             var voiceForLanguage = chatter.GetVoiceForLanguage(cultureInfo);
 
-            return SsmlFromText(text, voiceForLanguage, chatter.SpeechPitch, chatter.SpeechRate);
+            return GetSsmlFromText(text, voiceForLanguage, chatter.SpeechPitch, chatter.SpeechRate);
         }
 
-        private static string SsmlFromText(string text, string voiceName, int speechPitch, int speechRate)
+        private static string GetSsmlFromText(string text, string voiceName, int speechPitch = 0, int speechRate = 0)
         {
             text = s_urlRegex.Replace(text, "URL");
             var words = text.Split(new[] { ' ' }, StringSplitOptions.None);

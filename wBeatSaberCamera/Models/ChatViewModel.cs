@@ -95,7 +95,7 @@ namespace wBeatSaberCamera.Models
         private bool _isSendMessagesEnabled;
         private bool _isReadingStreamerMessagesEnabled;
         private bool _isSpeechEmojiEnabled;
-        private SpeechService SpeechService => _lazySpeechService.Value;
+        public SpeechService SpeechService => _lazySpeechService.Value;
         private readonly Lazy<SpeechService> _lazySpeechService;
         private Dictionary<string, Chatter> _chatterDictionary;
         private bool _isSpeechToTextEnabled;
