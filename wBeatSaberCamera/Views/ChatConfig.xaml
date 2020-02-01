@@ -97,7 +97,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="2" Text="Voices"/>
-                    <ItemsControl Grid.Column="1" ItemsSource="{Binding LocalizedVoices}">
+                    <ItemsControl Grid.Column="1" ItemsSource="{Binding LocalizedChatterVoices}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -107,8 +107,8 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBox Text="{Binding Key.DisplayName, Mode=OneWay}" IsReadOnly="True" />
-                                    <TextBox Grid.Column="1" Text="{Binding Value, Mode=OneWay}" IsReadOnly="True" />
-                                    <Button Content="Read" Grid.Column="2" CommandParameter="{Binding Value}" Command="{StaticResource SpeakSpecificVoiceCommand}" />
+                                    <TextBox Grid.Column="1" Text="{Binding Value.VoiceName, Mode=OneWay}" IsReadOnly="True" />
+                                    <Button Content="Read" Grid.Column="2" CommandParameter="{Binding Value.VoiceName}" Command="{StaticResource SpeakSpecificVoiceCommand}" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

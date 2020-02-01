@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Speech.Synthesis;
 using System.Threading;
 using System.Windows;
+using Newtonsoft.Json;
 using wBeatSaberCamera.Service;
 using wBeatSaberCamera.Utils;
 
@@ -17,13 +18,43 @@ namespace wBeatSaberCamera.Models
         public static Random Random => s_random.Value;
     }
 
+    [DataContract]
     public class ChatterVoice
     {
+        private string _voiceName;
+
         public readonly bool IsValid;
 
-        public string VoiceName => Voice.VoiceInfo.Name;
+        [DataMember]
+        public string VoiceName
+        {
+            get => _voiceName ?? (_voiceName = Voice?.VoiceInfo.Name);
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    Voice = SpeechService.GetVoiceByName(value);
+                }
+                else
+                {
+                    Voice = null;
+                }
+                _voiceName = value;
+            }
+        }
 
-        public readonly InstalledVoice Voice;
+        public InstalledVoice Voice
+        {
+            get;
+            private set;
+        }
+
+        [JsonConstructor]
+        public ChatterVoice(string voiceName)
+        {
+            Voice = SpeechService.GetVoiceByName(voiceName);
+            IsValid = SpeechService.IsVoiceValid(this);
+        }
 
         public ChatterVoice(InstalledVoice voice)
         {
@@ -35,6 +66,17 @@ namespace wBeatSaberCamera.Models
     [DataContract]
     public class Chatter : DirtyBase
     {
+        private string _name;
+        private double _trembleFactor;
+        private double _trembleSpeed;
+        private double _trembleBegin;
+        private double _pitch;
+        private Vector3 _position;
+        private int _speechRate;
+        private int _speechPitch;
+        private ObservableDictionary<CultureInfo, ChatterVoice> _localizedChatterVoices;
+        private DateTime _lastSpeakTime;
+
         [DataMember]
         public string Name
         {
@@ -160,33 +202,22 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
-        public ObservableDictionary<CultureInfo, string> LocalizedVoices
+        public ObservableDictionary<CultureInfo, ChatterVoice> LocalizedChatterVoices
         {
-            get => _localizedVoices;
+            get => _localizedChatterVoices;
             set
             {
-                if (value == _localizedVoices)
+                if (value == _localizedChatterVoices)
                 {
                     return;
                 }
 
-                UnsubscribeDirtyCollection(_localizedVoices);
-                _localizedVoices = value;
-                SubscribeDirtyCollection(_localizedVoices);
+                UnsubscribeDirtyCollection(_localizedChatterVoices);
+                _localizedChatterVoices = value;
+                SubscribeDirtyCollection(_localizedChatterVoices);
                 OnPropertyChanged();
             }
         }
-
-        private string _name;
-        private double _trembleFactor;
-        private double _trembleSpeed;
-        private double _trembleBegin;
-        private double _pitch;
-        private Vector3 _position;
-        private int _speechRate;
-        private int _speechPitch;
-        private ObservableDictionary<CultureInfo, string> _localizedVoices;
-        private DateTime _lastSpeakTime;
 
         [DataMember]
         public DateTime LastSpeakTime
@@ -204,22 +235,22 @@ namespace wBeatSaberCamera.Models
 
         public Chatter()
         {
-            _localizedVoices = new ObservableDictionary<CultureInfo, string>();
+            _localizedChatterVoices = new ObservableDictionary<CultureInfo, ChatterVoice>();
             _speechRate = RandomProvider.Random.Next(-40, 40);
             _speechPitch = RandomProvider.Random.Next(-50, 50);
         }
 
-        public string GetVoiceForLanguage(CultureInfo cultureInfo)
+        public ChatterVoice GetVoiceForLanguage(CultureInfo cultureInfo)
         {
-            if (!LocalizedVoices.ContainsKey(cultureInfo))
+            if (!LocalizedChatterVoices.ContainsKey(cultureInfo) || !LocalizedChatterVoices[cultureInfo].IsValid)
             {
                 bool success = false;
                 int tries = 10;
                 while (!success && tries-- > 0)
                 {
-                    Application.Current.Dispatcher?.Invoke(() => LocalizedVoices[cultureInfo] = SpeechService.GetRandomVoice(cultureInfo).Name);
+                    Application.Current.Dispatcher?.Invoke(() => LocalizedChatterVoices[cultureInfo] = new ChatterVoice(SpeechService.GetRandomVoice(cultureInfo).Name));
 
-                    success = SpeechService.IsVoiceValid(LocalizedVoices[cultureInfo]);
+                    success = SpeechService.IsVoiceValid(LocalizedChatterVoices[cultureInfo]);
                 }
 
                 if (tries == 0)
@@ -228,7 +259,7 @@ namespace wBeatSaberCamera.Models
                 }
             }
 
-            return LocalizedVoices[cultureInfo];
+            return LocalizedChatterVoices[cultureInfo];
         }
     }
 }

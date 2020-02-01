@@ -281,7 +281,7 @@ namespace wBeatSaberCamera.Service
                     {
                         var voiceForLanguage = chatter.GetVoiceForLanguage(language);
 
-                        await _speechHostClientCache.FillStreamWithSpeech(voiceForLanguage, GetSsmlFromText(text, voiceForLanguage, chatter.SpeechPitch, chatter.SpeechRate), memoryStream);
+                        await _speechHostClientCache.FillStreamWithSpeech(voiceForLanguage.VoiceName, GetSsmlFromText(text, voiceForLanguage.VoiceName, chatter.SpeechPitch, chatter.SpeechRate), memoryStream);
                     }
 
                     await PlaySound(memoryStream, chatter);
@@ -476,7 +476,7 @@ namespace wBeatSaberCamera.Service
                 s_speechSynthesizer.SetOutputToWaveStream(ms);
 
                 var voiceForLanguage = chatter.GetVoiceForLanguage(language);
-                var ssml = GetSsmlFromText(text, voiceForLanguage, chatter.SpeechPitch, chatter.SpeechRate);
+                var ssml = GetSsmlFromText(text, voiceForLanguage.VoiceName, chatter.SpeechPitch, chatter.SpeechRate);
 
                 s_speechSynthesizer.SpeakSsml(ssml);
             }
@@ -533,7 +533,7 @@ namespace wBeatSaberCamera.Service
 
         public static bool IsVoiceValid(ChatterVoice voice)
         {
-            if (!voice.Voice.Enabled)
+            if (voice.Voice == null || !voice.Voice.Enabled)
             {
                 return false;
             }
@@ -580,15 +580,19 @@ namespace wBeatSaberCamera.Service
         }
 
         [PublicAPI]
-        private VoiceInfo GetVoiceByName(string name)
+        [CanBeNull]
+        public static InstalledVoice GetVoiceByName(string name)
         {
-            return Voices.FirstOrDefault(x => x.VoiceName == name)?.Voice.VoiceInfo ?? new SpeechSynthesizer().Voice;
+            // ReSharper disable once InconsistentlySynchronizedField
+            return Voices.FirstOrDefault(x => x.VoiceName == name)?.Voice;
         }
 
         [PublicAPI]
-        private VoiceInfo GetVoiceById(string id)
+        [CanBeNull]
+        private InstalledVoice GetVoiceById(string id)
         {
-            return Voices.FirstOrDefault(x => x.Voice.VoiceInfo.Id == id)?.Voice.VoiceInfo ?? new SpeechSynthesizer().Voice;
+            // ReSharper disable once InconsistentlySynchronizedField
+            return Voices.FirstOrDefault(x => x.Voice.VoiceInfo.Id == id)?.Voice;
         }
 
         #endregion get voice
