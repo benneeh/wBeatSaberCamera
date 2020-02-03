@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:wBeatSaberCamera.Views"
              xmlns:utils="clr-namespace:wBeatSaberCamera.Utils"
+             xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -41,11 +42,18 @@
         </Button>
         <GroupBox Header="Chatters" Grid.Column="1" Grid.RowSpan="2">
             <Grid>
+                <Grid.Resources>
+                    <CollectionViewSource x:Key="SortedChatters" Source="{Binding ChatViewModel.Chatters}" >
+                        <CollectionViewSource.SortDescriptions>
+                            <componentModel:SortDescription PropertyName="LastSpeakTime" Direction="Descending"/>
+                        </CollectionViewSource.SortDescriptions>
+                    </CollectionViewSource>
+                </Grid.Resources>
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <ListView ItemsSource="{Binding ChatViewModel.Chatters}" SelectedItem="{Binding SelectedChatter, Mode=TwoWay}" HorizontalContentAlignment="Stretch">
+                <ListView ItemsSource="{Binding Source={StaticResource SortedChatters}}" SelectedItem="{Binding SelectedChatter, Mode=TwoWay}" HorizontalContentAlignment="Stretch">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Grid>
