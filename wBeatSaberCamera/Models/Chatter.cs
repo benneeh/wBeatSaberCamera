@@ -236,7 +236,7 @@ namespace wBeatSaberCamera.Models
         public Chatter()
         {
             _localizedChatterVoices = new ObservableDictionary<CultureInfo, ChatterVoice>();
-            _speechRate = RandomProvider.Random.Next(-40, 40);
+            _speechRate = RandomProvider.Random.Next(-80, 40);
             _speechPitch = RandomProvider.Random.Next(-50, 50);
         }
 
