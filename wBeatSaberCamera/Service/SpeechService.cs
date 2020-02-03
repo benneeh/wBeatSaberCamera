@@ -178,7 +178,7 @@ namespace wBeatSaberCamera.Service
                 {
                     _clientCreator = Task.Run(async () =>
                     {
-                        var newClient = new SpeechHostSignalRClient(FreeRandomTcpPort());
+                        var newClient = new SpeechHostSignalRClient(GetFreeRandomTcpPort());
                         if (await newClient.Initialize())
                         {
                             SpeechHostClients.Add(newClient);
@@ -195,7 +195,7 @@ namespace wBeatSaberCamera.Service
             }
         }
 
-        private int FreeRandomTcpPort()
+        private int GetFreeRandomTcpPort()
         {
             var tcpListener = new TcpListener(IPAddress.Loopback, 0);
             tcpListener.Start();
