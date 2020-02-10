@@ -35,63 +35,9 @@ namespace wBeatSaberCamera.DataType
         private float _firstPersonPosOffsetX;
         private float _firstPersonPosOffsetY;
         private float _firstPersonPosOffsetZ;
-
-        /// <summary>
-        /// X position offset of first person camera
-        /// </summary>
-        [DataMember(Name = "firstPersonPosOffsetX")]
-        public float FirstPersonPosOffsetX
-        {
-            get => _firstPersonPosOffsetX;
-            set
-            {
-                if (value.Equals(_firstPersonPosOffsetX))
-                {
-                    return;
-                }
-
-                _firstPersonPosOffsetX = value;
-                OnPropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Y position offset of first person camera
-        /// </summary>
-        [DataMember(Name = "firstPersonPosOffsetY")]
-        public float FirstPersonPosOffsetY
-        {
-            get => _firstPersonPosOffsetY;
-            set
-            {
-                if (value.Equals(_firstPersonPosOffsetY))
-                {
-                    return;
-                }
-
-                _firstPersonPosOffsetY = value;
-                OnPropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Z position offset of first person camera
-        /// </summary>
-        [DataMember(Name = "firstPersonPosOffsetZ")]
-        public float FirstPersonPosOffsetZ
-        {
-            get => _firstPersonPosOffsetZ;
-            set
-            {
-                if (value.Equals(_firstPersonPosOffsetZ))
-                {
-                    return;
-                }
-
-                _firstPersonPosOffsetZ = value;
-                OnPropertyChanged();
-            }
-        }
+        private float _firstPersonRotOffsetX;
+        private float _firstPersonRotOffsetY;
+        private float _firstPersonRotOffsetZ;
 
         /// <summary>
         /// Horizontal field of view of the camera
@@ -388,6 +334,120 @@ namespace wBeatSaberCamera.DataType
                 }
 
                 _rotZ = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// X position offset of first person camera
+        /// </summary>
+        [DataMember(Name = "firstPersonPosOffsetX")]
+        public float FirstPersonPosOffsetX
+        {
+            get => _firstPersonPosOffsetX;
+            set
+            {
+                if (value.Equals(_firstPersonPosOffsetX))
+                {
+                    return;
+                }
+
+                _firstPersonPosOffsetX = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Y position offset of first person camera
+        /// </summary>
+        [DataMember(Name = "firstPersonPosOffsetY")]
+        public float FirstPersonPosOffsetY
+        {
+            get => _firstPersonPosOffsetY;
+            set
+            {
+                if (value.Equals(_firstPersonPosOffsetY))
+                {
+                    return;
+                }
+
+                _firstPersonPosOffsetY = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Z position offset of first person camera
+        /// </summary>
+        [DataMember(Name = "firstPersonPosOffsetZ")]
+        public float FirstPersonPosOffsetZ
+        {
+            get => _firstPersonPosOffsetZ;
+            set
+            {
+                if (value.Equals(_firstPersonPosOffsetZ))
+                {
+                    return;
+                }
+
+                _firstPersonPosOffsetZ = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// X rotation offset of first person camera
+        /// </summary>
+        [DataMember(Name = "firstPersonRotOffsetX")]
+        public float FirstPersonRotOffsetX
+        {
+            get => _firstPersonRotOffsetX;
+            set
+            {
+                if (value.Equals(_firstPersonRotOffsetX))
+                {
+                    return;
+                }
+
+                _firstPersonRotOffsetX = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Y rotation offset of first person camera
+        /// </summary>
+        [DataMember(Name = "firstPersonRotOffsetY")]
+        public float FirstPersonRotOffsetY
+        {
+            get => _firstPersonRotOffsetY;
+            set
+            {
+                if (value.Equals(_firstPersonRotOffsetY))
+                {
+                    return;
+                }
+
+                _firstPersonRotOffsetY = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Z rotation offset of first person camera
+        /// </summary>
+        [DataMember(Name = "firstPersonRotOffsetZ")]
+        public float FirstPersonRotOffsetZ
+        {
+            get => _firstPersonRotOffsetZ;
+            set
+            {
+                if (value.Equals(_firstPersonRotOffsetZ))
+                {
+                    return;
+                }
+
+                _firstPersonRotOffsetZ = value;
                 OnPropertyChanged();
             }
         }
