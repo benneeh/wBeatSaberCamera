@@ -38,6 +38,7 @@ namespace wBeatSaberCamera.DataType
         private float _firstPersonRotOffsetX;
         private float _firstPersonRotOffsetY;
         private float _firstPersonRotOffsetZ;
+        private bool _forceFirstPersonUpright;
 
         /// <summary>
         /// Horizontal field of view of the camera
@@ -543,6 +544,25 @@ namespace wBeatSaberCamera.DataType
                 }
 
                 _makeWallsTransparent = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Lock rotation of first person camera on Z axis to keep the camera upright
+        /// </summary>
+        [DataMember(Name = "forceFirstPersonUpRight")]
+        public bool ForceFirstPersonUpright
+        {
+            get => _forceFirstPersonUpright;
+            set
+            {
+                if (value == _forceFirstPersonUpright)
+                {
+                    return;
+                }
+
+                _forceFirstPersonUpright = value;
                 OnPropertyChanged();
             }
         }

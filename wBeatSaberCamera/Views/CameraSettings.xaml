@@ -113,7 +113,7 @@
                         <DataTemplate>
                             <Grid>
                                 <utils:DirtyBackground Margin="-6 -2" />
-                                
+
                                 <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
                                 <Label Content="{Binding Name}" />
                             </Grid>
@@ -251,76 +251,79 @@
                                 <GroupBox.Header>
                                     <CheckBox Content="first person" Grid.Column="1" IsChecked="{Binding IsFirstPersonView, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
                                 </GroupBox.Header>
-                                <Grid IsEnabled="{Binding IsFirstPersonView}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition />
-                                        <ColumnDefinition />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerfpvl"/>
-                                                <ColumnDefinition Width="Auto" MinWidth="60" SharedSizeGroup="leftinnerfpvrb"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="X:" />
-                                            <TextBox Grid.Column="1" Text="{Binding FirstPersonPosOffsetX, UpdateSourceTrigger=PropertyChanged}" />
-                                            <Slider Grid.Column="2" Value="{Binding FirstPersonPosOffsetX, UpdateSourceTrigger=PropertyChanged}" Minimum="-10.00" Maximum="10.00"/>
-                                        </Grid>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerfpvl"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="leftinnerfpvrb"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="Y:" />
-                                            <TextBox Grid.Column="1" Text="{Binding FirstPersonPosOffsetY, UpdateSourceTrigger=PropertyChanged}" />
-                                            <Slider Grid.Column="2" Value="{Binding FirstPersonPosOffsetY, UpdateSourceTrigger=PropertyChanged}" Minimum="-10.00" Maximum="10.00"/>
-                                        </Grid>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerfpvl"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="leftinnerfpvrb"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="Z:" />
-                                            <TextBox Grid.Column="1" Text="{Binding FirstPersonPosOffsetZ, UpdateSourceTrigger=PropertyChanged}" />
-                                            <Slider Grid.Column="2" Value="{Binding FirstPersonPosOffsetZ, UpdateSourceTrigger=PropertyChanged}" Minimum="-10.00" Maximum="10.00"/>
-                                        </Grid>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerr"/>
-                                                <ColumnDefinition Width="60"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="rot X:" />
-                                            <TextBox Grid.Column="1" Text="{Binding FirstPersonRotOffsetX, UpdateSourceTrigger=PropertyChanged}" />
-                                            <Slider Grid.Column="2" Value="{Binding FirstPersonRotOffsetX, UpdateSourceTrigger=PropertyChanged}" Minimum="-180.00" Maximum="180.00"/>
-                                        </Grid>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerr"/>
-                                                <ColumnDefinition Width="60"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="rot Y:" />
-                                            <TextBox Grid.Column="1" Text="{Binding FirstPersonRotOffsetY, UpdateSourceTrigger=PropertyChanged}" />
-                                            <Slider Grid.Column="2" Value="{Binding FirstPersonRotOffsetY, UpdateSourceTrigger=PropertyChanged}" Minimum="-180.00" Maximum="180.00"/>
-                                        </Grid>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerr"/>
-                                                <ColumnDefinition Width="60"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="rot Z:" />
-                                            <TextBox Grid.Column="1" Text="{Binding FirstPersonRotOffsetZ, UpdateSourceTrigger=PropertyChanged}" />
-                                            <Slider Grid.Column="2" Value="{Binding FirstPersonRotOffsetZ, UpdateSourceTrigger=PropertyChanged}" Minimum="-180.00" Maximum="180.00"/>
-                                        </Grid>
-                                    </StackPanel>
-                                </Grid>
+                                <StackPanel IsEnabled="{Binding IsFirstPersonView}">
+                                    <CheckBox Content="Force first person camera to stay upright" HorizontalAlignment="Left" IsChecked="{Binding ForceFirstPersonUpright, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerfpvl"/>
+                                                    <ColumnDefinition Width="Auto" MinWidth="60" SharedSizeGroup="leftinnerfpvrb"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="X:" />
+                                                <TextBox Grid.Column="1" Text="{Binding FirstPersonPosOffsetX, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding FirstPersonPosOffsetX, UpdateSourceTrigger=PropertyChanged}" Minimum="-10.00" Maximum="10.00"/>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerfpvl"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="leftinnerfpvrb"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Y:" />
+                                                <TextBox Grid.Column="1" Text="{Binding FirstPersonPosOffsetY, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding FirstPersonPosOffsetY, UpdateSourceTrigger=PropertyChanged}" Minimum="-10.00" Maximum="10.00"/>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerfpvl"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="leftinnerfpvrb"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Z:" />
+                                                <TextBox Grid.Column="1" Text="{Binding FirstPersonPosOffsetZ, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding FirstPersonPosOffsetZ, UpdateSourceTrigger=PropertyChanged}" Minimum="-10.00" Maximum="10.00"/>
+                                            </Grid>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerr"/>
+                                                    <ColumnDefinition Width="60"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="rot X:" />
+                                                <TextBox Grid.Column="1" Text="{Binding FirstPersonRotOffsetX, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding FirstPersonRotOffsetX, UpdateSourceTrigger=PropertyChanged}" Minimum="-180.00" Maximum="180.00"/>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerr"/>
+                                                    <ColumnDefinition Width="60"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="rot Y:" />
+                                                <TextBox Grid.Column="1" Text="{Binding FirstPersonRotOffsetY, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding FirstPersonRotOffsetY, UpdateSourceTrigger=PropertyChanged}" Minimum="-180.00" Maximum="180.00"/>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerr"/>
+                                                    <ColumnDefinition Width="60"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="rot Z:" />
+                                                <TextBox Grid.Column="1" Text="{Binding FirstPersonRotOffsetZ, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding FirstPersonRotOffsetZ, UpdateSourceTrigger=PropertyChanged}" Minimum="-180.00" Maximum="180.00"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
                             </GroupBox>
 
                             <GroupBox Header="Position / rotation">
