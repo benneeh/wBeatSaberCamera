@@ -21,6 +21,9 @@
             <Style TargetType="TextBox">
                 <Setter Property="VerticalAlignment" Value="Center" />
             </Style>
+            <Style TargetType="Slider">
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
             <Style TargetType="Label">
                 <Setter Property="HorizontalAlignment" Value="Right" />
             </Style>
@@ -320,6 +323,94 @@
                                                 <Label Content="rot Z:" />
                                                 <TextBox Grid.Column="1" Text="{Binding FirstPersonRotOffsetZ, UpdateSourceTrigger=PropertyChanged}" />
                                                 <Slider Grid.Column="2" Value="{Binding FirstPersonRotOffsetZ, UpdateSourceTrigger=PropertyChanged}" Minimum="-180.00" Maximum="180.00"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox >
+                                <GroupBox.Header>
+                                    <CheckBox Content="360° cam" Grid.Column="1" IsChecked="{Binding IsThreeSixtyDegreeCam, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
+                                </GroupBox.Header>
+                                <StackPanel IsEnabled="{Binding IsThreeSixtyDegreeCam}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto" SharedSizeGroup="left"/>
+                                            <ColumnDefinition Width="auto" SharedSizeGroup="leftbox"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="360 smoothing:" />
+                                        <TextBox Grid.Column="1" Text="{Binding ThreeSixtySmoothing, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Slider Grid.Column="2" Value="{Binding ThreeSixtySmoothing, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="100"/>
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerfpvl"/>
+                                                    <ColumnDefinition Width="Auto" MinWidth="60" SharedSizeGroup="leftinnerfpvrb"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="X:" />
+                                                <TextBox Grid.Column="1" Text="{Binding ThreeSixtyCamPosOffsetX, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding ThreeSixtyCamPosOffsetX, UpdateSourceTrigger=PropertyChanged}" Minimum="-10.00" Maximum="10.00"/>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerfpvl"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="leftinnerfpvrb"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Y:" />
+                                                <TextBox Grid.Column="1" Text="{Binding ThreeSixtyCamPosOffsetY, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding ThreeSixtyCamPosOffsetY, UpdateSourceTrigger=PropertyChanged}" Minimum="-10.00" Maximum="10.00"/>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerfpvl"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="leftinnerfpvrb"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Z:" />
+                                                <TextBox Grid.Column="1" Text="{Binding ThreeSixtyCamPosOffsetZ, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding ThreeSixtyCamPosOffsetZ, UpdateSourceTrigger=PropertyChanged}" Minimum="-10.00" Maximum="10.00"/>
+                                            </Grid>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerr"/>
+                                                    <ColumnDefinition Width="60"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="rot X:" />
+                                                <TextBox Grid.Column="1" Text="{Binding ThreeSixtyCamRotOffsetX, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding ThreeSixtyCamRotOffsetX, UpdateSourceTrigger=PropertyChanged}" Minimum="-180.00" Maximum="180.00"/>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerr"/>
+                                                    <ColumnDefinition Width="60"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="rot Y:" />
+                                                <TextBox Grid.Column="1" Text="{Binding ThreeSixtyCamRotOffsetY, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding ThreeSixtyCamRotOffsetY, UpdateSourceTrigger=PropertyChanged}" Minimum="-180.00" Maximum="180.00"/>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" SharedSizeGroup="leftinnerr"/>
+                                                    <ColumnDefinition Width="60"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="rot Z:" />
+                                                <TextBox Grid.Column="1" Text="{Binding ThreeSixtyCamRotOffsetZ, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Slider Grid.Column="2" Value="{Binding ThreeSixtyCamRotOffsetZ, UpdateSourceTrigger=PropertyChanged}" Minimum="-180.00" Maximum="180.00"/>
                                             </Grid>
                                         </StackPanel>
                                     </Grid>

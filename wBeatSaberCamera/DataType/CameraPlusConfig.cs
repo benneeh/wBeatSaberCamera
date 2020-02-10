@@ -39,6 +39,14 @@ namespace wBeatSaberCamera.DataType
         private float _firstPersonRotOffsetY;
         private float _firstPersonRotOffsetZ;
         private bool _forceFirstPersonUpright;
+        private float _threeSixtySmoothing = 2;
+        private float _threeSixtyCamRotOffsetZ;
+        private float _threeSixtyCamRotOffsetX = 10;
+        private float _threeSixtyCamRotOffsetY;
+        private float _threeSixtyCamPosOffsetX;
+        private float _threeSixtyCamPosOffsetY = 2.2f;
+        private float _threeSixtyCamPosOffsetZ = -2f;
+        private bool _isThreeSixtyDegreeCam;
 
         /// <summary>
         /// Horizontal field of view of the camera
@@ -136,6 +144,25 @@ namespace wBeatSaberCamera.DataType
         }
 
         /// <summary>
+        /// How smoothly the 360 cam snaps to lane changes(SMALLER NUMBER = SMOOTHER)
+        /// </summary>
+        [DataMember(Name = "cam360Smoothness")]
+        public float ThreeSixtySmoothing
+        {
+            get => _threeSixtySmoothing;
+            set
+            {
+                if (value.Equals(_threeSixtySmoothing))
+                {
+                    return;
+                }
+
+                _threeSixtySmoothing = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
         /// Whether third person camera is enabled
         /// </summary>
         [DataMember(Name = "thirdPerson")]
@@ -186,6 +213,26 @@ namespace wBeatSaberCamera.DataType
                 }
 
                 _showThirdPersonCamera = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+        /// <summary>
+        /// Whether the 360 camera is used
+        /// </summary>
+        [DataMember(Name = "use360Camera")]
+        public bool IsThreeSixtyDegreeCam
+        {
+            get => _isThreeSixtyDegreeCam;
+            set
+            {
+                if (value == _isThreeSixtyDegreeCam)
+                {
+                    return;
+                }
+
+                _isThreeSixtyDegreeCam = value;
                 OnPropertyChanged();
             }
         }
@@ -414,6 +461,120 @@ namespace wBeatSaberCamera.DataType
                 }
 
                 _firstPersonRotOffsetZ = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Z position offset of first person camera
+        /// </summary>
+        [DataMember(Name = "cam360ForwardOffset")]
+        public float ThreeSixtyCamPosOffsetZ
+        {
+            get => _threeSixtyCamPosOffsetZ;
+            set
+            {
+                if (value.Equals(_threeSixtyCamPosOffsetZ))
+                {
+                    return;
+                }
+
+                _threeSixtyCamPosOffsetZ = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// X rotation offset of first person camera
+        /// </summary>
+        [DataMember(Name = "cam360XTilt")]
+        public float ThreeSixtyCamRotOffsetX
+        {
+            get => _threeSixtyCamRotOffsetX;
+            set
+            {
+                if (value.Equals(_threeSixtyCamRotOffsetX))
+                {
+                    return;
+                }
+
+                _threeSixtyCamRotOffsetX = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Z rotation offset of first person camera
+        /// </summary>
+        [DataMember(Name = "cam360ZTilt")]
+        public float ThreeSixtyCamRotOffsetZ
+        {
+            get => _threeSixtyCamRotOffsetZ;
+            set
+            {
+                if (value.Equals(_threeSixtyCamRotOffsetZ))
+                {
+                    return;
+                }
+
+                _threeSixtyCamRotOffsetZ = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Y rotation offset of first person camera
+        /// </summary>
+        [DataMember(Name = "cam360YTilt")]
+        public float ThreeSixtyCamRotOffsetY
+        {
+            get => _threeSixtyCamRotOffsetY;
+            set
+            {
+                if (value.Equals(_threeSixtyCamRotOffsetY))
+                {
+                    return;
+                }
+
+                _threeSixtyCamRotOffsetY = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Y position offset of first person camera
+        /// </summary>
+        [DataMember(Name = "cam360UpOffset")]
+        public float ThreeSixtyCamPosOffsetY
+        {
+            get => _threeSixtyCamPosOffsetY;
+            set
+            {
+                if (value.Equals(_threeSixtyCamPosOffsetY))
+                {
+                    return;
+                }
+
+                _threeSixtyCamPosOffsetY = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// X position offset of first person camera
+        /// </summary>
+        [DataMember(Name = "cam360RightOffset")]
+        public float ThreeSixtyCamPosOffsetX
+        {
+            get => _threeSixtyCamPosOffsetX;
+            set
+            {
+                if (value.Equals(_threeSixtyCamPosOffsetX))
+                {
+                    return;
+                }
+
+                _threeSixtyCamPosOffsetX = value;
                 OnPropertyChanged();
             }
         }
