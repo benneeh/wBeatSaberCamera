@@ -1,14 +1,15 @@
 ﻿<Application x:Class="wBeatSaberCamera.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:wBeatSaberCamera"
              xmlns:models="clr-namespace:wBeatSaberCamera.Models"
              xmlns:converter="clr-namespace:wBeatSaberCamera.Converter"
-             xmlns:wBeatSaberCamera="clr-namespace:wBeatSaberCamera"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <models:MainViewModel x:Key="MainViewModel" />
-        <BooleanToVisibilityConverter x:Key="BoolTrueIsVisibleConverter"/>
+        <converter:BooleanToVisibilityConverter x:Key="BoolTrueIsVisibleConverter" True="Visible" False="Collapsed"/>
+        <converter:BooleanToVisibilityConverter x:Key="BoolFalseIsVisibleConverter" True="Collapsed" False="Visible"/>
+        <converter:BooleanOrConverter x:Key="BooleanOrConverter" />
         <converter:BooleanToInvertedBooleanConverter x:Key="BooleanToInvertedBooleanConverter" />
         <Style TargetType="TextBox">
             <Setter Property="VerticalAlignment" Value="Center" />

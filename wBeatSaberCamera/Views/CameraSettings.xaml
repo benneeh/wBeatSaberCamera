@@ -3,10 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:wBeatSaberCamera.Views"
-             xmlns:wBeatSaberCamera="clr-namespace:wBeatSaberCamera"
              xmlns:converter="clr-namespace:wBeatSaberCamera.Converter"
              xmlns:utils="clr-namespace:wBeatSaberCamera.Utils"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -250,11 +249,11 @@
                                 <CheckBox Grid.Column="1" IsChecked="{Binding MakeWallsTransparent, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
                             </Grid>
 
-                            <GroupBox >
+                            <GroupBox>
                                 <GroupBox.Header>
                                     <CheckBox Content="first person" Grid.Column="1" IsChecked="{Binding IsFirstPersonView, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
                                 </GroupBox.Header>
-                                <StackPanel IsEnabled="{Binding IsFirstPersonView}">
+                                <StackPanel Visibility="{Binding IsFirstPersonView, Converter={StaticResource BoolTrueIsVisibleConverter}}">
                                     <CheckBox Content="Force first person camera to stay upright" HorizontalAlignment="Left" IsChecked="{Binding ForceFirstPersonUpright, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -328,12 +327,11 @@
                                     </Grid>
                                 </StackPanel>
                             </GroupBox>
-
-                            <GroupBox >
+                            <GroupBox>
                                 <GroupBox.Header>
                                     <CheckBox Content="360° cam" Grid.Column="1" IsChecked="{Binding IsThreeSixtyDegreeCam, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
                                 </GroupBox.Header>
-                                <StackPanel IsEnabled="{Binding IsThreeSixtyDegreeCam}">
+                                <StackPanel Visibility="{Binding IsThreeSixtyDegreeCam, Converter={StaticResource BoolTrueIsVisibleConverter}}">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="auto" SharedSizeGroup="left"/>
@@ -416,8 +414,16 @@
                                     </Grid>
                                 </StackPanel>
                             </GroupBox>
-
                             <GroupBox Header="Position / rotation">
+                                <GroupBox.Visibility>
+                                    <MultiBinding>
+                                        <MultiBinding.Converter>
+                                            <converter:ChainedAggregateEndConverter AggregateConverter="{StaticResource BooleanOrConverter}" EndConverter="{StaticResource BoolFalseIsVisibleConverter}" AggrgateType="{x:Type system:Boolean}" />
+                                        </MultiBinding.Converter>
+                                        <Binding Path="IsFirstPersonView" />
+                                        <Binding Path="IsThreeSixtyDegreeCam" />
+                                    </MultiBinding>
+                                </GroupBox.Visibility>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition />

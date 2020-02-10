@@ -232,7 +232,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converter\BooleanConverter.cs" />
     <Compile Include="Converter\BooleanOrConverter.cs" />
+    <Compile Include="Converter\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converter\ChainedAggregateEndConverter.cs" />
     <Compile Include="Converter\MultiBindingToArrayConverter.cs" />
     <Compile Include="Converter\ChainedMultiConverter.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
