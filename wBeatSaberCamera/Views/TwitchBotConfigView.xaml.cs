@@ -131,7 +131,7 @@ namespace wBeatSaberCamera.Views
                         if (chatCommand.ArgumentsAsString.IsNullOrEmpty())
                         {
                             await twitchBot.SendMessage(chatCommand.ChatMessage.Channel, "This bot currently has following camera profiles:");
-                            foreach (var profile in MainViewModel.CameraConfigModel.Profiles.Where(x => x.IsChoosableByViewers))
+                            foreach (var profile in MainViewModel.CameraConfigModel.Profiles.Where(x => x.IsChoosableByViewers && x.Aliases.Count > 0))
                             {
                                 await twitchBot.SendMessage(chatCommand.ChatMessage.Channel, $"'{string.Join("' / '", profile.Aliases.Select(x => x.Alias))}': {profile.Name}");
                             }
