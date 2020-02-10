@@ -170,41 +170,6 @@ namespace wBeatSaberCamera.DataType
             }
         }
 
-        [DataMember(Name = "fitToCanvas")]
-        public bool FitToCanvas
-        {
-            get => _fitToCanvas;
-            set
-            {
-                if (value == _fitToCanvas)
-                {
-                    return;
-                }
-
-                _fitToCanvas = value;
-                OnPropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// no documentation, but probably makes walls show as transparent in the external camera
-        /// </summary>
-        [DataMember(Name = "transparentWalls")]
-        public bool MakeWallsTransparent
-        {
-            get => _makeWallsTransparent;
-            set
-            {
-                if (value == _makeWallsTransparent)
-                {
-                    return;
-                }
-
-                _makeWallsTransparent = value;
-                OnPropertyChanged();
-            }
-        }
-
         /// <summary>
         /// Whether or not the third person camera is visible
         /// </summary>
@@ -543,6 +508,41 @@ namespace wBeatSaberCamera.DataType
                 }
 
                 _layer = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember(Name = "fitToCanvas")]
+        public bool FitToCanvas
+        {
+            get => _fitToCanvas;
+            set
+            {
+                if (value == _fitToCanvas)
+                {
+                    return;
+                }
+
+                _fitToCanvas = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// no documentation, but probably makes walls show as transparent in the external camera
+        /// </summary>
+        [DataMember(Name = "transparentWalls")]
+        public bool MakeWallsTransparent
+        {
+            get => _makeWallsTransparent;
+            set
+            {
+                if (value == _makeWallsTransparent)
+                {
+                    return;
+                }
+
+                _makeWallsTransparent = value;
                 OnPropertyChanged();
             }
         }
