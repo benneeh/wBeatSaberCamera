@@ -12,7 +12,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Speech.AudioFormat;
 using System.Speech.Synthesis;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -264,6 +263,20 @@ namespace wBeatSaberCamera.Service
             }
         }
 
+        public async Task Speak(string voiceName, string text, bool useLocalSpeak)
+        {
+            var language = GetLanguageFromText(text);
+            var chatter = new Chatter()
+            {
+                LocalizedChatterVoices = new ObservableDictionary<CultureInfo, ChatterVoice>()
+                {
+                    {language, GetChatterVoiceByName(voiceName)}
+                }
+            };
+
+            await Speak(chatter, text, useLocalSpeak);
+        }
+
         public async Task Speak(Chatter chatter, string text, bool useLocalSpeak)
         {
             chatter.LastSpeakTime = DateTime.UtcNow;
@@ -280,7 +293,7 @@ namespace wBeatSaberCamera.Service
                     else
                     {
                         var voiceForLanguage = chatter.GetVoiceForLanguage(language);
-                        await _speechHostClientCache.FillStreamWithSpeech(voiceForLanguage.VoiceName, GetSsmlFromText(text, voiceForLanguage.VoiceName, chatter.SpeechPitch, chatter.SpeechRate), memoryStream);
+                        await _speechHostClientCache.FillStreamWithSpeech(voiceForLanguage.VoiceName, GetSsmlFromText(chatter, text, voiceForLanguage.VoiceName), memoryStream);
                     }
 
                     await PlaySound(memoryStream, chatter);
@@ -292,7 +305,7 @@ namespace wBeatSaberCamera.Service
             }
         }
 
-        public async Task Speak(string voiceName, string text, bool useLocalSpeak)
+        public async Task SpeakSsml(string voiceName, string ssml, bool useLocalSpeak)
         {
             try
             {
@@ -300,11 +313,11 @@ namespace wBeatSaberCamera.Service
                 {
                     if (useLocalSpeak)
                     {
-                        WriteSpeechToStream(voiceName, text, memoryStream);
+                        Speech.Speech.SpeakSsml(ssml, null, memoryStream);
                     }
                     else
                     {
-                        await _speechHostClientCache.FillStreamWithSpeech(voiceName, GetSsmlFromText(text, voiceName), memoryStream);
+                        await _speechHostClientCache.FillStreamWithSpeech(voiceName, ssml, memoryStream);
                     }
 
                     await PlaySound(memoryStream);
@@ -312,7 +325,7 @@ namespace wBeatSaberCamera.Service
             }
             catch (Exception ex)
             {
-                Log.Error($"Error while text text '{text}': " + ex);
+                Log.Error($"Error while text text '{ssml}': " + ex);
             }
         }
 
@@ -475,14 +488,7 @@ namespace wBeatSaberCamera.Service
         public void WriteSpeechToStream(Chatter chatter, CultureInfo language, string text, MemoryStream ms)
         {
             var voiceForLanguage = chatter.GetVoiceForLanguage(language);
-            var ssml = GetSsmlFromText(text, voiceForLanguage.VoiceName, chatter.SpeechPitch, chatter.SpeechRate);
-
-            Speech.Speech.SpeakSsml(ssml, null, ms);
-        }
-
-        public void WriteSpeechToStream(string voiceName, string text, MemoryStream ms, int speechPitch = 0, int speechRate = 0)
-        {
-            var ssml = GetSsmlFromText(text, voiceName, speechPitch, speechRate);
+            var ssml = GetSsmlFromText(chatter, text, voiceForLanguage.VoiceName);
 
             Speech.Speech.SpeakSsml(ssml, null, ms);
         }
@@ -490,8 +496,9 @@ namespace wBeatSaberCamera.Service
         private static readonly Regex s_urlRegex = new Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", RegexOptions.Compiled);
         private static readonly Regex s_ohReplacementRegex = new Regex("^(([a-zA-Z]{2,2})|([a-zA-ZöÖäÄüÜ)]{1,1}[aAeEiIoOuUöyYÖäÄüÜhH]{1,}[a-zA-Z]{1,1}))$", RegexOptions.Compiled);
 
-        private static string GetSsmlFromText(string text, string voiceName, int speechPitch = 0, int speechRate = 0)
+        private static string GetSsmlFromText(Chatter chatter, string text, string voiceName)
         {
+            Console.WriteLine($"{voiceName}: {chatter.SpeechPitch}{chatter.SpeechRate}");
             text = s_urlRegex.Replace(text, "URL");
             var words = text.Split(new[] { ' ' }, StringSplitOptions.None);
             var woahBuilder = new StringBuilder();
@@ -499,7 +506,7 @@ namespace wBeatSaberCamera.Service
             {
                 if (RandomProvider.Random.Next(10) > 8 || s_ohReplacementRegex.Match(word).Success)
                 {
-                    woahBuilder.Append($"<prosody pitch=\"{RandomProvider.Random.Next(-50, 50):+#;-#;+0}%\" rate=\"{RandomProvider.Random.Next(-100, 50):+#;-#;+0}%\">{new XText(word)}</prosody>");
+                    woahBuilder.Append($"<prosody pitch=\"{RandomProvider.Random.Next(-100, 100):+#;-#;+0}%\" rate=\"{RandomProvider.Random.Next(-100, 50):+#;-#;+0}%\">{new XText(word)}</prosody>");
                 }
                 else
                 {
@@ -511,7 +518,7 @@ namespace wBeatSaberCamera.Service
             var ssml = $@"
 <speak version=""1.0"" xmlns=""https://www.w3.org/2001/10/synthesis"" xml:lang=""en-US"">
     <voice name=""{voiceName}"">
-        <prosody pitch=""{speechPitch:+#;-#;+0}%"" rate=""{speechRate:+#;-#;+0}%"">
+        <prosody pitch=""{chatter.SpeechPitch:+#;-#;+0}%"" rate=""{chatter.SpeechRate:+#;-#;+0}%"">
             {woahText}
         </prosody>
     </voice>
@@ -578,8 +585,14 @@ namespace wBeatSaberCamera.Service
         [CanBeNull]
         public static InstalledVoice GetVoiceByName(string name)
         {
-            // ReSharper disable once InconsistentlySynchronizedField
-            return Voices.FirstOrDefault(x => x.VoiceName == name)?.Voice;
+            return GetChatterVoiceByName(name)?.Voice;
+        }
+
+        [PublicAPI]
+        [CanBeNull]
+        public static ChatterVoice GetChatterVoiceByName(string name)
+        {
+            return Voices.FirstOrDefault(x => x.VoiceName == name);
         }
 
         [PublicAPI]

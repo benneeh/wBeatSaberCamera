@@ -76,5 +76,10 @@ namespace wBeatSaberCamera.Views
         {
             await MainViewModel.ChatViewModel.SpeechService.Speak(e.Parameter as string, TbText.Text, true);
         }
+
+        private async void SpeakSpecificUserSsmlCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            await MainViewModel.ChatViewModel.SpeechService.SpeakSsml(e.Parameter as string, TbText.Text, true);
+        }
     }
 }

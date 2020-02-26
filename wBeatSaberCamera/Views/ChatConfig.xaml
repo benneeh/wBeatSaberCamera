@@ -11,11 +11,13 @@
     <UserControl.Resources>
         <RoutedUICommand x:Key="RemoveChatterCommand" />
         <RoutedUICommand x:Key="SpeakSpecificUserCommand" />
+        <RoutedUICommand x:Key="SpeakSpecificUserSsmlCommand" />
         <RoutedUICommand x:Key="SpeakSpecificVoiceCommand" />
     </UserControl.Resources>
     <UserControl.CommandBindings>
         <CommandBinding Command="{StaticResource RemoveChatterCommand}" CanExecute="RemoveChatterCommand_OnCanExecute" Executed="RemoveChatterCommand_OnExecuted" />
         <CommandBinding Command="{StaticResource SpeakSpecificUserCommand}" Executed="SpeakSpecificUserCommand_OnExecuted" />
+        <CommandBinding Command="{StaticResource SpeakSpecificUserSsmlCommand}" Executed="SpeakSpecificUserSsmlCommand_OnExecuted" />
         <CommandBinding Command="{StaticResource SpeakSpecificVoiceCommand}" Executed="SpeakSpecificVoiceCommand_OnExecuted" />
     </UserControl.CommandBindings>
     <Grid DataContext="{StaticResource MainViewModel}">
@@ -31,7 +33,10 @@
         </Grid.ColumnDefinitions>
         <CheckBox Content="Enable TTS for chatters" IsChecked="{Binding ChatViewModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged}" />
         <TextBox Name="TbText" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" VerticalAlignment="Stretch" />
-        <Button Content="Read" Grid.Row="2" Command="{StaticResource SpeakSpecificUserCommand}" />
+        <StackPanel Grid.Row="2">
+            <Button Content="Read" Grid.Row="2" Command="{StaticResource SpeakSpecificUserCommand}" />
+            <Button Content="Read as SSML" Grid.Row="2" Command="{StaticResource SpeakSpecificUserSsmlCommand}" />
+        </StackPanel>
         <Button Grid.Row="2" Grid.Column="1" CommandParameter="{Binding SelectedChatter.Name}" Command="{StaticResource SpeakSpecificUserCommand}" >
             <Button.Content>
                 <TextBlock>
