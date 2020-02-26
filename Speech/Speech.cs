@@ -34,7 +34,6 @@ namespace Speech
                 }
 
                 SpeechSynthesizer.SetOutputToAudioStream(memoryStream, new SpeechAudioFormatInfo(EncodingFormat.Pcm, SPEECH_SAMPLE_RATE, SPEECH_BITS_PER_SAMPLE, SPEECH_CHANNELS, SPEECH_SAMPLE_RATE * SPEECH_CHANNELS * SPEECH_BITS_PER_SAMPLE / 8, 2, null));
-
                 //speechSynthesizer.SetOutputToWaveStream(memoryStream);
 
                 speechSynthesizer.SpeakSsml(ssml);
