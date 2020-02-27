@@ -192,6 +192,7 @@
                     <TextBox Text="{Binding LastSpeakTime, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="8" />
                     <!--TODO: date time binding-->
                 </Grid>
+                <CheckBox Content="IsWeirdo" IsChecked="{Binding IsWeirdo}" />
             </StackPanel>
         </Expander>
     </Grid>

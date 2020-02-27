@@ -76,6 +76,21 @@ namespace wBeatSaberCamera.Models
         private int _speechPitch;
         private ObservableDictionary<CultureInfo, ChatterVoice> _localizedChatterVoices;
         private DateTime _lastSpeakTime;
+        private bool _isWeirdo;
+
+        [DataMember]
+        public bool IsWeirdo
+        {
+            get => _isWeirdo;
+            set
+            {
+                if (value == _isWeirdo)
+                    return;
+
+                _isWeirdo = value;
+                OnPropertyChanged();
+            }
+        }
 
         [DataMember]
         public string Name
@@ -238,6 +253,7 @@ namespace wBeatSaberCamera.Models
             _localizedChatterVoices = new ObservableDictionary<CultureInfo, ChatterVoice>();
             _speechRate = RandomProvider.Random.Next(-80, 100);
             _speechPitch = RandomProvider.Random.Next(-50, 50);
+            _isWeirdo = RandomProvider.Random.Next(100) == 0;
         }
 
         public ChatterVoice GetVoiceForLanguage(CultureInfo cultureInfo)
