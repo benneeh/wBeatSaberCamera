@@ -188,6 +188,15 @@
                         <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="7" Text="VoiceRange"/>
+                    <TextBox Text="{Binding VoiceRange}" Grid.Column="1" Grid.Row="7" />
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ewsa" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
                     <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="8" Text="LastSpeakTime"/>
                     <TextBox Text="{Binding LastSpeakTime, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Grid.Row="8" />
                     <!--TODO: date time binding-->

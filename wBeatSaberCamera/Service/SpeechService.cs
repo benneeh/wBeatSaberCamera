@@ -506,7 +506,15 @@ namespace wBeatSaberCamera.Service
             {
                 if (chatter.IsWeirdo || RandomProvider.Random.Next(10) > 8 || s_ohReplacementRegex.Match(word).Success)
                 {
-                    woahBuilder.Append($"<prosody pitch=\"{RandomProvider.Random.Next(-100, 100):+#;-#;+0}%\" rate=\"{RandomProvider.Random.Next(-100, 50):+#;-#;+0}%\">{new XText(word)}</prosody>");
+                    switch (RandomProvider.Random.Next(4))
+                    {
+                        case 0:
+                            woahBuilder.Append($"<prosody duration=\"10s\" range=\"200\">{new XText(word)}</prosody>");
+                            break;
+                        default:
+                            woahBuilder.Append($"<prosody pitch=\"{RandomProvider.Random.Next(-100, 100):+#;-#;+0}%\" rate=\"{RandomProvider.Random.Next(-100, 50):+#;-#;+0}%\">{new XText(word)}</prosody>");
+                            break;
+                    }
                 }
                 else
                 {
@@ -518,7 +526,7 @@ namespace wBeatSaberCamera.Service
             var ssml = $@"
 <speak version=""1.0"" xmlns=""https://www.w3.org/2001/10/synthesis"" xml:lang=""en-US"">
     <voice name=""{voiceName}"">
-        <prosody pitch=""{chatter.SpeechPitch:+#;-#;+0}%"" rate=""{chatter.SpeechRate:+#;-#;+0}%"">
+        <prosody pitch=""{chatter.SpeechPitch:+#;-#;+0}%"" rate=""{chatter.SpeechRate:+#;-#;+0}%"" range=""{chatter.VoiceRange}"">
             {woahText}
         </prosody>
     </voice>
