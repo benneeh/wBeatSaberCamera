@@ -338,12 +338,13 @@ namespace wBeatSaberCamera.Twitch
                     }
                 }
             };
+            _twitchClient.OnIncorrectLogin += (s, e) => _chatViewModel.Speak(null, "Oof, you probably have to update your OAuth token, login failed");
+
 
             _twitchClient.OnNewSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, OnNewSubscriber);
             _twitchClient.OnReSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, OnReSubscriber);
             _twitchClient.OnGiftedSubscription += (s, e) => RegisterEventHandlerSafe(s, e, OnGiftedSubscription);
             _twitchClient.OnAnonGiftedSubscription += (s, e) => RegisterEventHandlerSafe(s, e, OnAnonGiftedSubscription);
-
             _twitchClient.OnBeingHosted += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnBeingHosted);
             _twitchClient.OnRaidNotification += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnRaidNotification);
             _twitchClient.OnMessageReceived += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnMessageReceived);
