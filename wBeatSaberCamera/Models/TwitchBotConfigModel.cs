@@ -24,12 +24,14 @@ namespace wBeatSaberCamera.Models
         private string _subscriberAnnouncementTemplate = "'{User.Name}' has subscribed!";
         private string _welcomeChattersTemplate = "Hi {User.Name}!";
         private string _giftedSubscriptionAnnouncementTemplate = "{Gifter.Name} hast gifted {Gifted.Name} a {Gifted.SubscriptionPlan} subscription! Thank you!";
+        private string _bitsReceivedAnnouncementTemplate = "{User.Name}, thank you for the bits!";
         private bool _isFollowerAnnouncementsEnabled;
         private bool _isRaidAnnouncementsEnabled;
         private bool _isHostAnnouncementsEnabled;
         private bool _isSubscriberAnnouncementsEnabled;
         private bool _isWelcomeChattersEnabled;
         private bool _isGiftedSubscriptionAnnouncementsEnabled;
+        private bool _isBitsAnnouncementsEnabled;
 
         public ObservableCollection<TwitchChatCommand> Commands
         {
@@ -277,6 +279,34 @@ namespace wBeatSaberCamera.Models
                 }
 
                 _commandIdentifiers = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember]
+        public bool IsBitsAnnouncementsEnabled
+        {
+            get => _isBitsAnnouncementsEnabled;
+            set
+            {
+                if (value == _isBitsAnnouncementsEnabled)
+                    return;
+
+                _isBitsAnnouncementsEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [DataMember]
+        public string BitsReceivedAnnouncementTemplate
+        {
+            get => _bitsReceivedAnnouncementTemplate;
+            set
+            {
+                if (value == _bitsReceivedAnnouncementTemplate)
+                    return;
+
+                _bitsReceivedAnnouncementTemplate = value;
                 OnPropertyChanged();
             }
         }

@@ -87,6 +87,11 @@
                 IsChecked="{Binding IsWelcomeChattersEnabled, UpdateSourceTrigger=PropertyChanged}"
                 TextTemplate="{Binding WelcomeChattersTemplate, UpdateSourceTrigger=PropertyChanged}"
                 Macros="{Binding TwitchBot.WelcomeChattersKeys, Source={StaticResource MainViewModel}}" />
+            <controls:AnnounceControl
+                AnnounceContent="Announce bits"
+                IsChecked="{Binding IsBitsAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}"
+                TextTemplate="{Binding BitsReceivedAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}"
+                Macros="{Binding TwitchBot.OnBitsReceivedParameters, Source={StaticResource MainViewModel}}" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />

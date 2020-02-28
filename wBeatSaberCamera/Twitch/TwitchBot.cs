@@ -81,12 +81,22 @@ namespace wBeatSaberCamera.Twitch
             _chatViewModel = chatViewModel;
             _configModel = configModel;
 
-
             OnFollowParameters = new PublicPropertyAccessorCache<OnFollowArgs>();
             OnFollowParameters["User.Username"] = _ => _.Username;
             OnFollowParameters["User.Name"] = _ => _.DisplayName;
             OnFollowParameters["User.Id"] = _ => _.UserId;
             OnFollowParameters["Channel.Id"] = _ => _.FollowedChannelId;
+
+            OnBitsReceivedParameters = new PublicPropertyAccessorCache<OnBitsReceivedArgs>();
+            OnBitsReceivedParameters["Channel.Id"] = _ => _.ChannelName;
+            OnBitsReceivedParameters["Channel.Name"] = _ => _.ChannelId;
+            OnBitsReceivedParameters["Bits.Count"] = _ => _.BitsUsed;
+            OnBitsReceivedParameters["Bits.TotalCount"] = _ => _.TotalBitsUsed;
+            OnBitsReceivedParameters["Context"] = _ => _.Context;
+            OnBitsReceivedParameters["Time"] = _ => _.Time;
+            OnBitsReceivedParameters["Message"] = _ => _.ChatMessage;
+            OnBitsReceivedParameters["User.Id"] = _ => _.UserId;
+            OnBitsReceivedParameters["User.Name"] = _ => _.Username;
 
             UserParameters = new PublicPropertyAccessorCache<User>();
             UserParameters["User.Id"] = _ => _.Id;
@@ -205,6 +215,9 @@ namespace wBeatSaberCamera.Twitch
         public PublicPropertyAccessorCache<OnFollowArgs> OnFollowParameters { get; }
 
         [PublicAPI]
+        public PublicPropertyAccessorCache<OnBitsReceivedArgs> OnBitsReceivedParameters { get; }
+        
+        [PublicAPI]
         public PublicPropertyAccessorCache<OnRaidNotificationArgs> OnRaidNotificationParameters { get; }
 
         [PublicAPI]
@@ -282,9 +295,10 @@ namespace wBeatSaberCamera.Twitch
                 _twitchPubSub = new TwitchPubSub();
                 _twitchPubSub.OnPubSubServiceConnected += _twitchPubSub_OnPubSubServiceConnected;
                 _twitchPubSub.ListenToFollows(channel.Id);
-                //_twitchPubSub.ListenToBitsEvents(channel.Id);
+                _twitchPubSub.ListenToBitsEvents(channel.Id);
                 //_twitchPubSub.ListenToSubscriptions(channel.Id);
                 _twitchPubSub.OnFollow += (s, e) => RegisterEventHandlerSafe(s, e, _twitchPubSub_OnFollow);
+                _twitchPubSub.OnBitsReceived += (s, e) => RegisterEventHandlerSafe(s, e, _twitchPubSub_OnBitsReceived);
                 _twitchPubSub.OnLog += (s, e) => Console.WriteLine("\n\nPubSub: " + e.Data);
                 _twitchPubSub.Connect();
             }
@@ -352,6 +366,18 @@ namespace wBeatSaberCamera.Twitch
             _twitchClient.OnMessageReceived += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnMessageReceived);
             _twitchClient.Connect();
             IsConnecting = true;
+        }
+
+        private async void _twitchPubSub_OnBitsReceived(object s, OnBitsReceivedArgs e)
+        {
+            var channel = await GetChannelById(e.ChannelId);
+
+            await HandleMessageThing(
+                channel,
+                _configModel.IsBitsAnnouncementsEnabled,
+                GetRandomLineFromString(_configModel.BitsReceivedAnnouncementTemplate),
+                EnumerableFromMessageThing(e, OnBitsReceivedParameters)
+                    .Union(EnumerableFromMessageThing(channel, ChannelParameters)));
         }
 
         private async void _twitchPubSub_OnFollow(object s, OnFollowArgs e)
