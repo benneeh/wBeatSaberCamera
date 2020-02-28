@@ -89,6 +89,9 @@
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>coolBenneh.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="IvanAkcheurov.Commons, Version=0.2.1.30, Culture=neutral, PublicKeyToken=a61413de1d13f8fc, processorArchitecture=MSIL">
       <HintPath>..\packages\NTextCat.0.2.1.30\lib\net40\IvanAkcheurov.Commons.dll</HintPath>
@@ -394,6 +397,7 @@
       <Link>UnityEngine.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="coolBenneh.ico" />
     <EmbeddedResource Include="Ressource\LanguageProfile.xml" />
   </ItemGroup>
   <ItemGroup>
