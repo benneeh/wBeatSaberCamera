@@ -44,6 +44,8 @@ namespace wBeatSaberCamera.Controls
             set => TheBox.SetValue(CheckBox.ContentProperty, value);
         }
 
+        public static readonly DependencyProperty AnnounceContentProperty = DependencyProperty.Register(nameof(AnnounceContent), typeof(object), typeof(AnnounceControl), new PropertyMetadata(null));
+
         public AnnounceControl()
         {
             InitializeComponent();
