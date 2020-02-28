@@ -34,8 +34,8 @@
         <CheckBox Content="Enable TTS for chatters" IsChecked="{Binding ChatViewModel.IsTextToSpeechEnabled, UpdateSourceTrigger=PropertyChanged}" />
         <TextBox Name="TbText" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" VerticalAlignment="Stretch" />
         <StackPanel Grid.Row="2">
-            <Button Content="Read" Grid.Row="2" Command="{StaticResource SpeakSpecificUserCommand}" />
-            <Button Content="Read as SSML" Grid.Row="2" Command="{StaticResource SpeakSpecificUserSsmlCommand}" />
+            <Button Content="Read" Command="{StaticResource SpeakSpecificUserCommand}" />
+            <Button Content="Read as SSML" Command="{StaticResource SpeakSpecificUserSsmlCommand}" />
         </StackPanel>
         <Button Grid.Row="2" Grid.Column="1" CommandParameter="{Binding SelectedChatter.Name}" Command="{StaticResource SpeakSpecificUserCommand}" >
             <Button.Content>

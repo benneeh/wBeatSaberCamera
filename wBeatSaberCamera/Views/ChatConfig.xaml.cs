@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -23,7 +22,7 @@ namespace wBeatSaberCamera.Views
             {
                 if (chatCommand.ArgumentsAsString.IsNullOrEmpty())
                 {
-                    bool wasChatterRemoved = false;
+                    bool wasChatterRemoved;
                     lock (MainViewModel.ChatViewModel.Chatters)
                     {
                         wasChatterRemoved = MainViewModel.ChatViewModel.RemoveChatter(chatCommand.ChatMessage.Username);

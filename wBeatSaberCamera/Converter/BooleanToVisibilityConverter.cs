@@ -4,8 +4,5 @@ namespace wBeatSaberCamera.Converter
 {
     public sealed class BooleanToVisibilityConverter : BooleanConverter<Visibility>
     {
-        public BooleanToVisibilityConverter()
-        {
-        }
     }
 }
