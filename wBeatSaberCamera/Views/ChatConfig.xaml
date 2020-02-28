@@ -7,7 +7,7 @@
              xmlns:utils="clr-namespace:wBeatSaberCamera.Utils"
              xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{Binding ChatViewModel, Source={StaticResource MainViewModel}}">
     <UserControl.Resources>
         <RoutedUICommand x:Key="RemoveChatterCommand" />
         <RoutedUICommand x:Key="SpeakSpecificUserCommand" />
