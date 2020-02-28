@@ -242,7 +242,7 @@ namespace wBeatSaberCamera.Twitch
 
             _configModel.PropertyChanged += (s, e) => RegisterEventHandlerSafe(s, e, ConfigModelPropertyChanged);
             _twitchClient = new TwitchClient(logger: new TwitchBotLogger<TwitchClient>());
-            _twitchClient.Initialize(new ConnectionCredentials(_configModel.OAuthAccessToken.UserName, $"oauth:{_configModel.OAuthAccessToken.AccessToken}"), _configModel.Channel);
+            _twitchClient.Initialize(new ConnectionCredentials(_configModel.OAuthAccessToken.UserName,_configModel.OAuthAccessToken.AccessTokenWithPrefix), _configModel.Channel);
             _twitchClient.OnWhisperReceived += (s, e) =>
             {
                 // TBD

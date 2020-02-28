@@ -35,6 +35,8 @@ namespace wBeatSaberCamera.Models
             }
         }
 
+        public string AccessTokenWithPrefix => $"oauth:{AccessToken}";
+
         [DataMember]
         public string TokenType
         {
