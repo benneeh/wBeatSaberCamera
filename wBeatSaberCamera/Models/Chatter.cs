@@ -269,7 +269,7 @@ namespace wBeatSaberCamera.Models
             _speechRate = RandomProvider.Random.Next(-80, 100);
             _speechPitch = RandomProvider.Random.Next(-50, 50);
             _isWeirdo = RandomProvider.Random.Next(100) == 0;
-            _voiceRange = RandomProvider.Random.Next(200);
+            _voiceRange = RandomProvider.Random.Next(1, 200);
         }
 
         public ChatterVoice GetVoiceForLanguage(CultureInfo cultureInfo)
