@@ -3,10 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:wBeatSaberCamera.Views"
-             xmlns:models="clr-namespace:wBeatSaberCamera.Models"
              xmlns:utils="clr-namespace:wBeatSaberCamera.Utils"
-             xmlns:controls="clr-namespace:wBeatSaberCamera.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{Binding TwitchBotConfigModel, Source={StaticResource MainViewModel}}">
     <UserControl.Resources>
@@ -57,41 +54,195 @@
                 <TextBlock VerticalAlignment="Center" Text="Join channel" />
                 <TextBox Grid.Column="2" Margin="2" Padding="0" Text="{Binding Channel}" />
             </Grid>
-            <controls:AnnounceControl
-                AnnounceContent="Announce new follows"
-                IsChecked="{Binding IsFollowerAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}"
-                TextTemplate="{Binding FollowerAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}"
-                Macros="{Binding TwitchBot.FollowKeys, Source={StaticResource MainViewModel}}" />
-            <controls:AnnounceControl
-                AnnounceContent="Announce subscribers"
-                IsChecked="{Binding IsSubscriberAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}"
-                TextTemplate="{Binding SubscriberAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}"
-                Macros="{Binding TwitchBot.SubscribeKeys, Source={StaticResource MainViewModel}}" />
-            <controls:AnnounceControl
-                AnnounceContent="Announce gifted subscriptions"
-                IsChecked="{Binding IsGiftedSubscriptionAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}"
-                TextTemplate="{Binding GiftedSubscriptionAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}"
-                Macros="{Binding TwitchBot.GiftedSubscriptionKeys, Source={StaticResource MainViewModel}}" />
-            <controls:AnnounceControl
-                AnnounceContent="Announce Hosts"
-                IsChecked="{Binding IsHostAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}"
-                TextTemplate="{Binding HostAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}"
-                Macros="{Binding TwitchBot.HostKeys, Source={StaticResource MainViewModel}}" />
-            <controls:AnnounceControl
-                AnnounceContent="Announce raids"
-                IsChecked="{Binding IsRaidAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}"
-                TextTemplate="{Binding RaidAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}"
-                Macros="{Binding TwitchBot.RaidKeys, Source={StaticResource MainViewModel}}" />
-            <controls:AnnounceControl
-                AnnounceContent="Welcome new chatters"
-                IsChecked="{Binding IsWelcomeChattersEnabled, UpdateSourceTrigger=PropertyChanged}"
-                TextTemplate="{Binding WelcomeChattersTemplate, UpdateSourceTrigger=PropertyChanged}"
-                Macros="{Binding TwitchBot.WelcomeChattersKeys, Source={StaticResource MainViewModel}}" />
-            <controls:AnnounceControl
-                AnnounceContent="Announce bits"
-                IsChecked="{Binding IsBitsAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}"
-                TextTemplate="{Binding BitsReceivedAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}"
-                Macros="{Binding TwitchBot.OnBitsReceivedParameters, Source={StaticResource MainViewModel}}" />
+                <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Announce new follows" IsChecked="{Binding IsFollowerAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" AcceptsReturn="True" Padding="0" Text="{Binding FollowerAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.FollowKeys, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
+                <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Announce subscribers" IsChecked="{Binding IsSubscriberAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" AcceptsReturn="True" Padding="0" Text="{Binding SubscriberAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.SubscribeKeys, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
+                <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Announce gifted subscriptions" IsChecked="{Binding IsGiftedSubscriptionAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" AcceptsReturn="True" Padding="0" Text="{Binding GiftedSubscriptionAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.GiftedSubscriptionKeys, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
+                <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Announce Hosts" IsChecked="{Binding IsHostAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" AcceptsReturn="True" Padding="0" Text="{Binding HostAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.HostKeys, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
+                <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Announce raids" IsChecked="{Binding IsRaidAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" AcceptsReturn="True" Padding="0" Text="{Binding RaidAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.RaidKeys, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
+                <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Welcome new chatters" IsChecked="{Binding IsWelcomeChattersEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" AcceptsReturn="True" Padding="0" Text="{Binding WelcomeChattersTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.WelcomeChattersKeys, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
+                <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />
+                    <ColumnDefinition Width="auto" MinWidth="5"/>
+                    <ColumnDefinition Width="auto" MinWidth="90" SharedSizeGroup="confRightCol" />
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" />
+                <CheckBox Content="Announce bits" IsChecked="{Binding IsBitsAnnouncementsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Column="2" Margin="2" AcceptsReturn="True" Padding="0" Text="{Binding BitsReceivedAnnouncementTemplate, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander Header="Macros" Grid.Column="3" ExpandDirection="Down">
+                    <Popup PlacementTarget="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                           PopupAnimation="Slide"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Expander}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding TwitchBot.OnBitsReceivedParameters, Source={StaticResource MainViewModel}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Popup>
+                </Expander>
+            </Grid>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" MinWidth="60" SharedSizeGroup="confLeftCol" />

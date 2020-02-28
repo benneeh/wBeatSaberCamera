@@ -254,9 +254,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Controls\AnnounceControl.xaml.cs">
-      <DependentUpon>AnnounceControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Converter\BooleanConverter.cs" />
     <Compile Include="Converter\BooleanOrConverter.cs" />
     <Compile Include="Converter\BooleanToVisibilityConverter.cs" />
@@ -310,10 +307,6 @@
     <Compile Include="Views\CameraSettings.xaml.cs">
       <DependentUpon>CameraSettings.xaml</DependentUpon>
     </Compile>
-    <Page Include="Controls\AnnounceControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
