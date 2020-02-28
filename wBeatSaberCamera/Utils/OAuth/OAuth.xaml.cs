@@ -66,6 +66,9 @@ namespace wBeatSaberCamera.Utils.OAuth
                 "chat:edit",
                 "whispers:read",
                 "whispers:edit",
+                //"channel:moderate", // to read moderation activity
+                //"bits:read", // to read bits
+                //"channel:read:redemptions", // to read channel points
                 //"channel:read:subscriptions",
                 //"user:read:broadcast",
                 //"channel_check_subscription",

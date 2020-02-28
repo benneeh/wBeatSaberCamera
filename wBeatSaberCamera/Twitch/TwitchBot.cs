@@ -6,12 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using TwitchLib.Api;
 using TwitchLib.Api.Helix.Models.Users;
-using TwitchLib.Api.Services;
-using TwitchLib.Api.Services.Events.FollowerService;
 using TwitchLib.Api.V5.Models.Channels;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
+using TwitchLib.PubSub;
+using TwitchLib.PubSub.Events;
 using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Models;
 using wBeatSaberCamera.Utils;
@@ -60,9 +60,9 @@ namespace wBeatSaberCamera.Twitch
         }
 
         private TwitchClient _twitchClient;
+        private TwitchPubSub _twitchPubSub;
         private bool _isConnecting;
         private bool _isJoined;
-        private FollowerService _followerService;
 
         public IEnumerable<string> HostKeys => OnBeingHostedParameters.Union(ChannelParameters).Select(x => $"{{{x}}}");
 
@@ -74,16 +74,19 @@ namespace wBeatSaberCamera.Twitch
 
         public IEnumerable<string> WelcomeChattersKeys => WelcomeChattersParameters.Union(ChannelParameters).Select(x => $"{{{x}}}");
 
-        public IEnumerable<string> FollowKeys => FollowParameters.Union(UserParameters).Union(ChannelParameters).Select(x => $"{{{x}}}");
+        public IEnumerable<string> FollowKeys => OnFollowParameters.Select(x => $"{{{x}}}"); //OnFollowParameters.Union(UserParameters).Union(ChannelParameters).Select(x => $"{{{x}}}");
 
         public TwitchBot(ChatViewModel chatViewModel, TwitchBotConfigModel configModel)
         {
             _chatViewModel = chatViewModel;
             _configModel = configModel;
 
-            // ReSharper disable UseObjectOrCollectionInitializer
-            FollowParameters = new PublicPropertyAccessorCache<Follow>();
-            FollowParameters["FollowedAt"] = _ => _.FollowedAt;
+
+            OnFollowParameters = new PublicPropertyAccessorCache<OnFollowArgs>();
+            OnFollowParameters["User.Username"] = _ => _.Username;
+            OnFollowParameters["User.Name"] = _ => _.DisplayName;
+            OnFollowParameters["User.Id"] = _ => _.UserId;
+            OnFollowParameters["Channel.Id"] = _ => _.FollowedChannelId;
 
             UserParameters = new PublicPropertyAccessorCache<User>();
             UserParameters["User.Id"] = _ => _.Id;
@@ -199,7 +202,7 @@ namespace wBeatSaberCamera.Twitch
         public PublicPropertyAccessorCache<User> UserParameters { get; }
 
         [PublicAPI]
-        public PublicPropertyAccessorCache<Follow> FollowParameters { get; }
+        public PublicPropertyAccessorCache<OnFollowArgs> OnFollowParameters { get; }
 
         [PublicAPI]
         public PublicPropertyAccessorCache<OnRaidNotificationArgs> OnRaidNotificationParameters { get; }
@@ -222,7 +225,6 @@ namespace wBeatSaberCamera.Twitch
         [PublicAPI]
         public PublicPropertyAccessorCache<ChatMessage> WelcomeChattersParameters { get; }
 
-        private DateTime _followServiceInitializationDate;
         private readonly Dictionary<string, Channel> _channelIdToChannelCache = new Dictionary<string, Channel>();
         private readonly Dictionary<string, Channel> _channelNameToChannelCache = new Dictionary<string, Channel>();
         private TwitchAPI _twitchApi;
@@ -273,18 +275,18 @@ namespace wBeatSaberCamera.Twitch
                 _twitchApi.Settings.AccessToken = _configModel.OAuthAccessToken.AccessToken;
             }
 
-            var channel = await GetChannelByName(_configModel.Channel);
-
-            if (_followerService == null)
+            if (_twitchPubSub == null)
             {
-                _followerService = new FollowerService(_twitchApi);
-                _followerService.OnNewFollowersDetected += (s, e) => RegisterEventHandlerSafe(s, e, FollowerService_OnNewFollowersDetected);
-                _followerService.SetChannelsById(new List<string>()
-                {
-                    channel.Id
-                });
-                _followServiceInitializationDate = DateTime.UtcNow;
-                _followerService.Start();
+                var channel = await GetChannelByName(_configModel.Channel);
+
+                _twitchPubSub = new TwitchPubSub();
+                _twitchPubSub.OnPubSubServiceConnected += _twitchPubSub_OnPubSubServiceConnected;
+                _twitchPubSub.ListenToFollows(channel.Id);
+                //_twitchPubSub.ListenToBitsEvents(channel.Id);
+                //_twitchPubSub.ListenToSubscriptions(channel.Id);
+                _twitchPubSub.OnFollow += (s, e) => RegisterEventHandlerSafe(s, e, _twitchPubSub_OnFollow);
+                _twitchPubSub.OnLog += (s, e) => Console.WriteLine("\n\nPubSub: " + e.Data);
+                _twitchPubSub.Connect();
             }
 
             _configModel.CommandIdentifiers.CollectionChanged += (s, e) =>
@@ -338,8 +340,8 @@ namespace wBeatSaberCamera.Twitch
                     }
                 }
             };
-            _twitchClient.OnIncorrectLogin += (s, e) => _chatViewModel.Speak(null, "Oof, you probably have to update your OAuth token, login failed");
 
+            _twitchClient.OnIncorrectLogin += (s, e) => _chatViewModel.Speak(null, "Oof, you probably have to update your OAuth token, login failed");
 
             _twitchClient.OnNewSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, OnNewSubscriber);
             _twitchClient.OnReSubscriber += (s, e) => RegisterEventHandlerSafe(s, e, OnReSubscriber);
@@ -350,6 +352,23 @@ namespace wBeatSaberCamera.Twitch
             _twitchClient.OnMessageReceived += (s, e) => RegisterEventHandlerSafe(s, e, _twitchClient_OnMessageReceived);
             _twitchClient.Connect();
             IsConnecting = true;
+        }
+
+        private async void _twitchPubSub_OnFollow(object s, OnFollowArgs e)
+        {
+            var channel = await GetChannelById(e.FollowedChannelId);
+
+            await HandleMessageThing(
+                channel,
+                _configModel.IsFollowerAnnouncementsEnabled,
+                GetRandomLineFromString(_configModel.FollowerAnnouncementTemplate),
+                EnumerableFromMessageThing(e, OnFollowParameters)
+                    .Union(EnumerableFromMessageThing(channel, ChannelParameters)));
+        }
+
+        private void _twitchPubSub_OnPubSubServiceConnected(object sender, EventArgs e)
+        {
+            _twitchPubSub.SendTopics(_configModel.OAuthAccessToken.AccessTokenWithPrefix);
         }
 
         private async void _twitchClient_OnMessageReceived(object s, OnMessageReceivedArgs e)
@@ -431,36 +450,12 @@ namespace wBeatSaberCamera.Twitch
             await Task.WhenAll(_twitchClient.JoinedChannels.Select(channel => Task.Run(() => SendMessage(channel.Channel, $"'{_configModel.OAuthAccessToken.UserName}' stopping", true))));
 
             _twitchClient.Disconnect();
-            IsConnecting = false;
             _twitchClient = null;
-        }
 
-        private async void FollowerService_OnNewFollowersDetected(object sender, OnNewFollowersDetectedArgs e)
-        {
-            var channel = await GetChannelById(e.Channel);
-            foreach (var newFollower in e.NewFollowers)
-            {
-                if (_followServiceInitializationDate > newFollower.FollowedAt)
-                {
-                    continue;
-                }
+            _twitchPubSub.Disconnect();
+            _twitchPubSub = null;
 
-                var twitchUsers = await _twitchApi.Helix.Users.GetUsersAsync(new List<string> { newFollower.FromUserId });
-                var twitchUser = twitchUsers.Users.FirstOrDefault();
-                if (twitchUser == null)
-                {
-                    Log.Warn($"Found a new follower: '{newFollower.FromUserId}' but twitch API didn't return a user for it");
-                    continue;
-                }
-
-                await HandleMessageThing(
-                    channel,
-                    _configModel.IsFollowerAnnouncementsEnabled,
-                    GetRandomLineFromString(_configModel.FollowerAnnouncementTemplate),
-                    EnumerableFromMessageThing(newFollower, FollowParameters)
-                        .Union(EnumerableFromMessageThing(channel, ChannelParameters))
-                        .Union(EnumerableFromMessageThing(twitchUser, UserParameters)));
-            }
+            IsConnecting = false;
         }
 
         private string GetRandomLineFromString(string multiLineString)
