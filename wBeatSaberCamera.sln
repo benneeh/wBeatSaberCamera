@@ -5,12 +5,6 @@ VisualStudioVersion = 16.0.29025.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wBeatSaberCamera", "wBeatSaberCamera\wBeatSaberCamera.csproj", "{5D4FCABA-5554-4277-98DC-8F02709E3E96}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwitchLib.Client", "External\TwitchLib.Client\TwitchLib.Client\TwitchLib.Client.csproj", "{65FD0185-AA32-4C79-99B3-ACFCE70BA99E}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwitchLib.Client.Enums", "External\TwitchLib.Client\TwitchLib.Client.Enums\TwitchLib.Client.Enums.csproj", "{D07118D2-053B-4E35-B387-CD870C744415}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TwitchLib.Client.Models", "External\TwitchLib.Client\TwitchLib.Client.Models\TwitchLib.Client.Models.csproj", "{0349EFA3-6B97-4419-BCD5-5848B74EEF73}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechHost.WebApi", "SpeechHost.WebApi\SpeechHost.WebApi.csproj", "{B62800A6-2820-415A-963A-DA07B59C04A0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Speech", "Speech\Speech.csproj", "{18509893-8453-4E45-86F1-7363E4905F9D}"
@@ -30,30 +24,6 @@ Global
 		{5D4FCABA-5554-4277-98DC-8F02709E3E96}.Release|x64.ActiveCfg = Release|x86
 		{5D4FCABA-5554-4277-98DC-8F02709E3E96}.Release|x86.ActiveCfg = Release|x86
 		{5D4FCABA-5554-4277-98DC-8F02709E3E96}.Release|x86.Build.0 = Release|x86
-		{65FD0185-AA32-4C79-99B3-ACFCE70BA99E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{65FD0185-AA32-4C79-99B3-ACFCE70BA99E}.Debug|x64.Build.0 = Debug|Any CPU
-		{65FD0185-AA32-4C79-99B3-ACFCE70BA99E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{65FD0185-AA32-4C79-99B3-ACFCE70BA99E}.Debug|x86.Build.0 = Debug|Any CPU
-		{65FD0185-AA32-4C79-99B3-ACFCE70BA99E}.Release|x64.ActiveCfg = Release|Any CPU
-		{65FD0185-AA32-4C79-99B3-ACFCE70BA99E}.Release|x64.Build.0 = Release|Any CPU
-		{65FD0185-AA32-4C79-99B3-ACFCE70BA99E}.Release|x86.ActiveCfg = Release|Any CPU
-		{65FD0185-AA32-4C79-99B3-ACFCE70BA99E}.Release|x86.Build.0 = Release|Any CPU
-		{D07118D2-053B-4E35-B387-CD870C744415}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{D07118D2-053B-4E35-B387-CD870C744415}.Debug|x64.Build.0 = Debug|Any CPU
-		{D07118D2-053B-4E35-B387-CD870C744415}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{D07118D2-053B-4E35-B387-CD870C744415}.Debug|x86.Build.0 = Debug|Any CPU
-		{D07118D2-053B-4E35-B387-CD870C744415}.Release|x64.ActiveCfg = Release|Any CPU
-		{D07118D2-053B-4E35-B387-CD870C744415}.Release|x64.Build.0 = Release|Any CPU
-		{D07118D2-053B-4E35-B387-CD870C744415}.Release|x86.ActiveCfg = Release|Any CPU
-		{D07118D2-053B-4E35-B387-CD870C744415}.Release|x86.Build.0 = Release|Any CPU
-		{0349EFA3-6B97-4419-BCD5-5848B74EEF73}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{0349EFA3-6B97-4419-BCD5-5848B74EEF73}.Debug|x64.Build.0 = Debug|Any CPU
-		{0349EFA3-6B97-4419-BCD5-5848B74EEF73}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{0349EFA3-6B97-4419-BCD5-5848B74EEF73}.Debug|x86.Build.0 = Debug|Any CPU
-		{0349EFA3-6B97-4419-BCD5-5848B74EEF73}.Release|x64.ActiveCfg = Release|Any CPU
-		{0349EFA3-6B97-4419-BCD5-5848B74EEF73}.Release|x64.Build.0 = Release|Any CPU
-		{0349EFA3-6B97-4419-BCD5-5848B74EEF73}.Release|x86.ActiveCfg = Release|Any CPU
-		{0349EFA3-6B97-4419-BCD5-5848B74EEF73}.Release|x86.Build.0 = Release|Any CPU
 		{B62800A6-2820-415A-963A-DA07B59C04A0}.Debug|x64.ActiveCfg = Debug|x64
 		{B62800A6-2820-415A-963A-DA07B59C04A0}.Debug|x64.Build.0 = Debug|x64
 		{B62800A6-2820-415A-963A-DA07B59C04A0}.Debug|x86.ActiveCfg = Debug|x86
@@ -75,7 +45,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8
 		SolutionGuid = {974B2337-CB6E-43AF-A3A6-07770EB290AA}
+		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8
 	EndGlobalSection
 EndGlobal

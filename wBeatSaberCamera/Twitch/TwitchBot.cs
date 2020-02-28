@@ -319,6 +319,8 @@ namespace wBeatSaberCamera.Twitch
                 OnPropertyChanged(nameof(IsConnected));
                 IsConnecting = false;
 
+                _twitchClient.JoinChannel(_configModel.Channel);
+
                 await SendMessage(_configModel.Channel, "bot started", true);
             };
 

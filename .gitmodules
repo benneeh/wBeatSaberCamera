@@ -1,4 +1,0 @@
-[submodule "External/TwitchLib.Client"]
-	path = External/TwitchLib.Client
-	url = https://github.com/TwitchLib/TwitchLib.Client.git
-	branch = dev
