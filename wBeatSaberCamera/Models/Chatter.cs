@@ -1,13 +1,22 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Speech.Synthesis;
+using System.Text;
 using System.Threading;
 using System.Windows;
+using Ionic.Zlib;
 using Newtonsoft.Json;
+using ProtoBuf;
+using wBeatSaberCamera.Annotations;
 using wBeatSaberCamera.Service;
 using wBeatSaberCamera.Utils;
+using CompressionLevel = System.IO.Compression.CompressionLevel;
+using GZipStream = System.IO.Compression.GZipStream;
 
 namespace wBeatSaberCamera.Models
 {
@@ -19,13 +28,20 @@ namespace wBeatSaberCamera.Models
     }
 
     [DataContract]
+    [ProtoContract]
     public class ChatterVoice
     {
         private string _voiceName;
+        private InstalledVoice _voice;
 
-        public readonly bool IsValid;
+        public bool IsValid
+        {
+            get;
+            private set;
+        }
 
         [DataMember]
+        [ProtoMember(1)]
         public string VoiceName
         {
             get => _voiceName ?? (_voiceName = Voice?.VoiceInfo.Name);
@@ -45,42 +61,50 @@ namespace wBeatSaberCamera.Models
 
         public InstalledVoice Voice
         {
-            get;
-            private set;
+            get => _voice;
+            private set
+            {
+                _voice = value;
+
+                IsValid = SpeechService.IsVoiceValid(this);
+            }
         }
 
-        [JsonConstructor]
+        public ChatterVoice()
+        {
+        }
+
         public ChatterVoice(string voiceName)
         {
             Voice = SpeechService.GetVoiceByName(voiceName);
-            IsValid = SpeechService.IsVoiceValid(this);
         }
 
         public ChatterVoice(InstalledVoice voice)
         {
             Voice = voice;
-            IsValid = SpeechService.IsVoiceValid(this);
         }
     }
 
     [DataContract]
+    [ProtoContract]
     public class Chatter : DirtyBase
     {
         private string _name;
-        private double _trembleFactor;
-        private double _trembleSpeed;
-        private double _trembleBegin;
-        private double _pitch;
+        private float _trembleFactor;
+        private float _trembleSpeed;
+        private float _trembleBegin;
+        private float _pitch;
         private Vector3 _position;
-        private int _speechRate;
-        private int _speechPitch;
+        private short _speechRate;
+        private sbyte _speechPitch;
         private ObservableDictionary<CultureInfo, ChatterVoice> _localizedChatterVoices;
         private DateTime _lastSpeakTime;
         private bool _isWeirdo;
-        private int _voiceRange;
+        private byte _voiceRange;
 
         [DataMember]
-        public int VoiceRange
+        [ProtoMember(1)]
+        public byte VoiceRange
         {
             get => _voiceRange;
             set
@@ -94,6 +118,7 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
+        [ProtoMember(2)]
         public bool IsWeirdo
         {
             get => _isWeirdo;
@@ -108,6 +133,7 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
+        [ProtoMember(3)]
         public string Name
         {
             get => _name;
@@ -121,6 +147,37 @@ namespace wBeatSaberCamera.Models
                 _name = value;
                 OnPropertyChanged();
             }
+        }
+
+        [ProtoContract]
+        private class ProtoVector3
+        {
+            [ProtoMember(1)]
+            public float X;
+            /// <summary>Gets or sets the y-component of the vector.</summary>
+            [ProtoMember(2)]
+            public float Y;
+            /// <summary>Gets or sets the z-component of the vector.</summary>
+            [ProtoMember(3)]
+            public float Z;
+        }
+
+        [ProtoMember(4)]
+        [UsedImplicitly]
+        private ProtoVector3 ProtoPosition
+        {
+            get => new ProtoVector3()
+            {
+                X = Position.X,
+                Y = Position.Y,
+                Z = Position.Z,
+            };
+            set => Position = new Vector3()
+            {
+                X = value.X,
+                Y = value.Y,
+                Z = value.Z,
+            };
         }
 
         [DataMember]
@@ -140,7 +197,8 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
-        public double Pitch
+        [ProtoMember(5)]
+        public float Pitch
         {
             get => _pitch;
             set
@@ -156,7 +214,8 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
-        public int SpeechPitch
+        [ProtoMember(6)]
+        public sbyte SpeechPitch
         {
             get => _speechPitch;
             set
@@ -170,7 +229,8 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
-        public int SpeechRate
+        [ProtoMember(7)]
+        public short SpeechRate
         {
             get => _speechRate;
             set
@@ -184,7 +244,8 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
-        public double TrembleBegin
+        [ProtoMember(8)]
+        public float TrembleBegin
         {
             get => _trembleBegin;
             set
@@ -200,7 +261,8 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
-        public double TrembleSpeed
+        [ProtoMember(9)]
+        public float TrembleSpeed
         {
             get => _trembleSpeed;
             set
@@ -216,7 +278,8 @@ namespace wBeatSaberCamera.Models
         }
 
         [DataMember]
-        public double TrembleFactor
+        [ProtoMember(10)]
+        public float TrembleFactor
         {
             get => _trembleFactor;
             set
@@ -229,6 +292,14 @@ namespace wBeatSaberCamera.Models
                 _trembleFactor = value;
                 OnPropertyChanged();
             }
+        }
+
+        [ProtoMember(11)]
+        [UsedImplicitly]
+        private Dictionary<string, ChatterVoice> ProtoLocalizedChatterVoices
+        {
+            get => LocalizedChatterVoices.ToDictionary(x => x.Key.Name, x => x.Value);
+            set => LocalizedChatterVoices = new ObservableDictionary<CultureInfo, ChatterVoice>(value.ToDictionary(x => CultureInfo.GetCultureInfo(x.Key), x => x.Value));
         }
 
         [DataMember]
@@ -266,10 +337,10 @@ namespace wBeatSaberCamera.Models
         public Chatter()
         {
             _localizedChatterVoices = new ObservableDictionary<CultureInfo, ChatterVoice>();
-            _speechRate = RandomProvider.Random.Next(-80, 100);
-            _speechPitch = RandomProvider.Random.Next(-50, 50);
+            _speechRate = (sbyte)RandomProvider.Random.Next(-80, 100);
+            _speechPitch = (sbyte)RandomProvider.Random.Next(-50, 50);
             _isWeirdo = RandomProvider.Random.Next(100) == 0;
-            _voiceRange = RandomProvider.Random.Next(1, 200);
+            _voiceRange = (byte)RandomProvider.Random.Next(1, 200);
         }
 
         public ChatterVoice GetVoiceForLanguage(CultureInfo cultureInfo)
@@ -292,6 +363,31 @@ namespace wBeatSaberCamera.Models
             }
 
             return LocalizedChatterVoices[cultureInfo];
+        }
+
+        public string GetCode()
+        {
+            using (var ms = new MemoryStream())
+            using (var zipStream = new ZlibStream(ms, CompressionMode.Compress, Ionic.Zlib.CompressionLevel.BestCompression, true))
+            {
+                Serializer.Serialize(zipStream, this);
+                zipStream.Close();
+                return Convert.ToBase64String(ms.ToArray());
+            }
+        }
+
+        public static Chatter FromCode(string code)
+        {
+            using (var ms = new MemoryStream())
+            {
+                var bytes = Convert.FromBase64String(code);
+                ms.Write(bytes, 0, bytes.Length);
+                ms.Position = 0;
+                using (var zipStream = new ZlibStream(ms, CompressionMode.Decompress, Ionic.Zlib.CompressionLevel.BestCompression, false))
+                {
+                    return Serializer.Deserialize<Chatter>(zipStream);
+                }
+            }
         }
     }
 }

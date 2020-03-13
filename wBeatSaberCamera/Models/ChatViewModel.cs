@@ -267,23 +267,19 @@ namespace wBeatSaberCamera.Models
                 chatter.Position = /*Vector3.Right * 2;*/ (Vector3.Lerp(Vector3.Left, Vector3.Right, (float)s_random.NextDouble())
                                                            + Vector3.Lerp(Vector3.Up, Vector3.Down, (float)s_random.NextDouble())
                                                            + Vector3.Lerp(Vector3.Forward, Vector3.Backward, (float)s_random.NextDouble()));
-                chatter.Pitch = (s_random.NextDouble() * 2 - 1.0) * MaxPitchFactor;
-                chatter.TrembleBegin = s_random.NextDouble() * Math.PI * 2;
-                chatter.TrembleSpeed = s_random.NextDouble();
+                chatter.Pitch = (float)((s_random.NextDouble() * 2 - 1.0) * MaxPitchFactor);
+                chatter.TrembleBegin = (float)(s_random.NextDouble() * Math.PI * 2);
+                chatter.TrembleSpeed = (float)s_random.NextDouble();
                 var factorMultMax = .3;
                 if (chatter.TrembleSpeed < .02)
                 {
                     factorMultMax = 2;
                 }
 
-                chatter.TrembleFactor = s_random.NextDouble() * factorMultMax;
+                chatter.TrembleFactor = (float)(s_random.NextDouble() * factorMultMax);
                 if (user != null)
                 {
-                    lock (Chatters)
-                    {
-                        _chatterDictionary.Add(user, chatter);
-                        Chatters.Add(chatter);
-                    }
+                    AddChatter(chatter);
                 }
 
                 //Console.WriteLine($"TS: {chatter.TrembleSpeed}, TF: {chatter.TrembleFactor}");
@@ -346,6 +342,15 @@ namespace wBeatSaberCamera.Models
             }
 
             return false;
+        }
+
+        public void AddChatter(Chatter chatter)
+        {
+            lock (Chatters)
+            {
+                _chatterDictionary.Add(chatter.Name, chatter);
+                Chatters.Add(chatter);
+            }
         }
     }
 }

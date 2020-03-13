@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.Remoting.Messaging;
 using System.Speech.Recognition;
 using System.Threading.Tasks;
 using System.Windows;
@@ -9,6 +10,7 @@ using System.Windows.Controls;
 using Newtonsoft.Json;
 using wBeatSaberCamera.Models;
 using wBeatSaberCamera.Models.FrankerFaceZModels;
+using wBeatSaberCamera.Service;
 using wBeatSaberCamera.Twitch;
 using wBeatSaberCamera.Utils;
 using wBeatSaberCamera.Utils.OAuth;
@@ -66,6 +68,45 @@ namespace wBeatSaberCamera.Views
                 MainViewModel.SpeechToEmojiModule.Start();
             }
 
+            MainViewModel.TwitchBotConfigModel.Commands.Add(
+                new TwitchChatCommand(
+                    "code",
+                    "Gives you a code which you can use to revert to with the 'recover' command",
+                    async (twitchBot, command) =>
+                    {
+                        var chatter = MainViewModel.ChatViewModel.GetChatterFromUsername(command.ChatMessage.Username);
+                        if (chatter == null)
+                        {
+                            await twitchBot.SendMessage(command.ChatMessage.Channel, "Sorry, who are you? peepoWTF");
+                            return;
+                        }
+
+                        await twitchBot.SendMessage(command.ChatMessage.Channel, "Your code: " + chatter.GetCode());
+                    }));
+
+            MainViewModel.TwitchBotConfigModel.Commands.Add(
+                new TwitchChatCommand(
+                    "recover",
+                    "Recovers your lost voice, use the code you got from the 'code' command as parameter",
+                    async (twitchBot, command) =>
+                    {
+                        var chatter = Chatter.FromCode(command.ArgumentsAsString);
+                        if (chatter.Name != command.ChatMessage.Username)
+                        {
+                            await twitchBot.SendMessage(command.ChatMessage.Channel, "Sorry, that voice was never yours!");
+                            return;
+                        }
+
+                        var existingChatter = MainViewModel.ChatViewModel.GetChatterFromUsername(chatter.Name);
+                        if (existingChatter != null)
+                        {
+                            MainViewModel.ChatViewModel.RemoveChatter(chatter.Name);
+                        }
+
+                        MainViewModel.ChatViewModel.AddChatter(chatter);
+
+                        await twitchBot.SendMessage(command.ChatMessage.Channel, ":+1:");
+                    }));
 
             //MainViewModel.TwitchBotConfigModel.Commands.Add(
             //    new TwitchChatCommand(
