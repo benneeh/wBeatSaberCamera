@@ -87,7 +87,7 @@ namespace wBeatSaberCamera.Views
             MainViewModel.TwitchBotConfigModel.Commands.Add(
                 new TwitchChatCommand(
                     new[] { "clapcount", "cc" },
-                    "Increases clap count and shows current clap count",
+                    "Shows current clap count",
                     async (twitchBot, command) =>
                     {
                         //if (command.ChatMessage.IsModerator || command.ChatMessage.)
