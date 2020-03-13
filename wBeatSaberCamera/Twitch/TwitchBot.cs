@@ -340,20 +340,20 @@ namespace wBeatSaberCamera.Twitch
                 await SendMessage(_configModel.Channel, "bot started", true);
             };
 
-            _twitchClient.OnChatCommandReceived += async (s, e) =>
+            _twitchClient.OnChatCommandReceived += (s, e) => RegisterEventHandlerSafe(s, e, async (s2, e2) =>
             {
                 foreach (var command in _configModel.Commands)
                 {
                     foreach (var commandAlias in command.Commands)
                     {
-                        if (commandAlias == e.Command.CommandText.ToLower())
+                        if (commandAlias == e2.Command.CommandText.ToLower())
                         {
-                            await command.Execute(this, e.Command);
+                            await command.Execute(this, e2.Command);
                             return;
                         }
                     }
                 }
-            };
+            });
 
             _twitchClient.OnIncorrectLogin += (s, e) => _chatViewModel.Speak(null, "Oof, you probably have to update your OAuth token, login failed");
 
