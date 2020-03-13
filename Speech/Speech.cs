@@ -4,7 +4,7 @@ using System.Speech.Synthesis;
 
 namespace Speech
 {
-    public class Speech
+    public static class Speech
     {
         public static readonly SpeechSynthesizer SpeechSynthesizer = new SpeechSynthesizer();
 
