@@ -27,6 +27,7 @@ namespace wBeatSaberCamera.Views
         private CameraConfigModel CameraConfigModel => MainViewModel.CameraConfigModel;
         private readonly Dictionary<string, Task<string[]>> _emoteCache = new Dictionary<string, Task<string[]>>();
         private static readonly HttpClient s_httpClient = new HttpClient();
+        private int _clapCount = 0;
 
         public TwitchBotConfigView()
         {
@@ -70,6 +71,16 @@ namespace wBeatSaberCamera.Views
 
             MainViewModel.TwitchBotConfigModel.Commands.Add(
                 new TwitchChatCommand(
+                    "clap",
+                    "Increases clap count and shows current clap count",
+                    async (twitchBot, command) =>
+                    {
+                        //if (command.ChatMessage.IsModerator || command.ChatMessage.)
+                        await twitchBot.SendMessage(command.ChatMessage.Channel, "Clap count: " + ++_clapCount);
+                    }));
+
+            MainViewModel.TwitchBotConfigModel.Commands.Add(
+                new TwitchChatCommand(
                     "code",
                     "Gives you a code which you can use to revert to with the 'recover' command",
                     async (twitchBot, command) =>
@@ -107,6 +118,7 @@ namespace wBeatSaberCamera.Views
 
                         await twitchBot.SendMessage(command.ChatMessage.Channel, ":+1:");
                     }));
+
 
             //MainViewModel.TwitchBotConfigModel.Commands.Add(
             //    new TwitchChatCommand(
