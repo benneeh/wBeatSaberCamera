@@ -498,13 +498,13 @@ namespace wBeatSaberCamera.Service
 
         private static string GetSsmlFromText(Chatter chatter, string text, string voiceName)
         {
-            Console.WriteLine($"{voiceName}: {chatter.SpeechPitch}{chatter.SpeechRate}");
+            Console.WriteLine($"{voiceName}: p{chatter.SpeechPitch} r{chatter.SpeechRate}");
             text = s_urlRegex.Replace(text, "URL");
             var words = text.Split(new[] { ' ' }, StringSplitOptions.None);
             var woahBuilder = new StringBuilder();
             foreach (var word in words)
             {
-                if (chatter.IsWeirdo || RandomProvider.Random.Next(10) > 8 || s_ohReplacementRegex.Match(word).Success)
+                if (chatter.IsWeirdo || RandomProvider.Random.Next(100) > 95 || s_ohReplacementRegex.Match(word).Success)
                 {
                     switch (RandomProvider.Random.Next(4))
                     {
